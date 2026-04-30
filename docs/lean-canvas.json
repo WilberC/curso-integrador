@@ -1,0 +1,85 @@
+{
+  "problem": {
+    "title": "SOCIOS CLAVE",
+    "items": [
+      "Proveedores de equipos de cómputo",
+      "Proveedores de productos perecibles",
+      "Organizaciones de donación de alimentos",
+      "Consultoras en logística y almacén",
+      "ASas"
+    ]
+  },
+  "solution": {
+    "title": "ACTIVIDADES CLAVE",
+    "items": [
+      "Registro de productos perecibles",
+      "Actualización de stock e inventario",
+      "Consulta y monitoreo de vencimientos",
+      "Baja y registro de mermas",
+      "Generación de alertas y reportes"
+    ]
+  },
+  "uvp": {
+    "title": "PROPUESTA DE VALOR",
+    "items": [
+      "Control automatizado de vencimientos",
+      "Reducción de mermas y pérdidas",
+      "Alertas tempranas configurables",
+      "Información en tiempo real",
+      "Enfoque en sostenibilidad"
+    ]
+  },
+  "unfair_advantage": {
+    "title": "RELACIONES CON CLIENTES",
+    "items": [
+      "Soporte técnico remoto vía Microsoft Teams y Zoom",
+      "Asistencia inmediata mediante chat de soporte",
+      "Sesiones de resolución de dudas por videollamada"
+    ]
+  },
+  "customer_segments": {
+    "title": "SEGMENTOS DE CLIENTES",
+    "items": [
+      "Personal operativo y reponedores",
+      "Supervisores y jefes de área",
+      "Personal de almacén e inventario"
+    ]
+  },
+  "key_metrics": {
+    "title": "RECURSOS CLAVE",
+    "items": [
+      "Hardware: Laptop / PC",
+      "Software: Java, NetBeans",
+      "Desarrolladores del sistema",
+      "Personal operativo capacitado",
+      "Red interna de la tienda"
+    ]
+  },
+  "channels": {
+    "title": "CANALES",
+    "items": [
+      "Manuales de usuario interactivos",
+      "Guías de consulta rápida",
+      "Repositorio digital de tutoriales y documentación"
+    ]
+  },
+  "cost_structure": {
+    "title": "ESTRUCTURA DE COSTOS",
+    "items": [
+      "Laptop / PC: Core i5, 8 GB RAM, 512 GB SSD",
+      "Horas de desarrollo del sistema",
+      "Capacitación del personal",
+      "Servicios: Luz, Internet",
+      "Mantenimiento y soporte técnico"
+    ]
+  },
+  "revenue_streams": {
+    "title": "FLUJOS DE INGRESOS",
+    "items": [
+      "Reducción de mermas económicas",
+      "Mejora de márgenes operativos",
+      "Cumplimiento normativo sanitario",
+      "Escalabilidad a otras sedes nacionales"
+    ]
+  }
+}
