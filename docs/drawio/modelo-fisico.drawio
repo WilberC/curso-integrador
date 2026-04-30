@@ -1,0 +1,300 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- TÍTULO -->
+    <mxCell id="t1" value="&lt;b&gt;Modelo Físico&lt;/b&gt;&lt;br&gt;&lt;i&gt;Sistema de Inventario de Productos Perecibles (SQL Server)&lt;/i&gt;"
+      style="text;html=1;align=center;fontSize=14;fillColor=#1E3A5F;strokeColor=#1E3A5F;fontColor=#FFFFFF;rounded=1;arcSize=5;"
+      vertex="1" parent="1">
+      <mxGeometry x="1130" y="12" width="530" height="56" as="geometry"/>
+    </mxCell>
+
+    <!-- ===== ENTIDADES ===== -->
+
+    <!-- USUARIO (x=20, y=30, w=380, h=238) -->
+    <mxCell id="e_usu" value="USUARIO"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="20" y="30" width="380" height="238" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_usu_pk" value="&lt;u&gt;* id_usuario : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_usu">
+      <mxGeometry x="0" y="30" width="380" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_usu_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_usu">
+      <mxGeometry x="0" y="52" width="380" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_usu_atr" value="nombre : VARCHAR(100) NOT NULL&lt;br&gt;apellido : VARCHAR(100) NOT NULL&lt;br&gt;email : VARCHAR(150) NOT NULL UNIQUE&lt;br&gt;contrasena : VARCHAR(255) NOT NULL&lt;br&gt;rol : VARCHAR(20) NOT NULL&lt;br&gt;activo : BIT NOT NULL DEFAULT 1&lt;br&gt;fecha_creacion : DATETIME NOT NULL"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_usu">
+      <mxGeometry x="0" y="60" width="380" height="178" as="geometry"/>
+    </mxCell>
+
+    <!-- CONFIGURACION_ALERTA (x=20, y=310, w=380, h=155) -->
+    <mxCell id="e_cfg" value="CONFIGURACION_ALERTA"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="20" y="310" width="380" height="155" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cfg_pk" value="&lt;u&gt;* id_config : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_cfg">
+      <mxGeometry x="0" y="30" width="380" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cfg_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_cfg">
+      <mxGeometry x="0" y="52" width="380" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cfg_atr" value="dias_alerta_amarilla : INT NOT NULL DEFAULT 7&lt;br&gt;dias_alerta_roja : INT NOT NULL DEFAULT 2&lt;br&gt;activo : BIT NOT NULL DEFAULT 1&lt;br&gt;&lt;i&gt;id_usuario_config : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_cfg">
+      <mxGeometry x="0" y="60" width="380" height="95" as="geometry"/>
+    </mxCell>
+
+    <!-- CATEGORIA (x=460, y=30, w=320, h=112) -->
+    <mxCell id="e_cat" value="CATEGORIA"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="460" y="30" width="320" height="112" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cat_pk" value="&lt;u&gt;* id_categoria : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_cat">
+      <mxGeometry x="0" y="30" width="320" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cat_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_cat">
+      <mxGeometry x="0" y="52" width="320" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cat_atr" value="nombre : VARCHAR(80) NOT NULL UNIQUE&lt;br&gt;descripcion : VARCHAR(255)"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_cat">
+      <mxGeometry x="0" y="60" width="320" height="52" as="geometry"/>
+    </mxCell>
+
+    <!-- PRODUCTO_PERECIBLE (x=840, y=30, w=360, h=155) -->
+    <mxCell id="e_prd" value="PRODUCTO_PERECIBLE"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="840" y="30" width="360" height="155" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_prd_pk" value="&lt;u&gt;* id_producto : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_prd">
+      <mxGeometry x="0" y="30" width="360" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_prd_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_prd">
+      <mxGeometry x="0" y="52" width="360" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_prd_atr" value="nombre : VARCHAR(150) NOT NULL&lt;br&gt;descripcion : VARCHAR(255)&lt;br&gt;unidad_medida : VARCHAR(30) NOT NULL&lt;br&gt;&lt;i&gt;id_categoria : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_prd">
+      <mxGeometry x="0" y="60" width="360" height="95" as="geometry"/>
+    </mxCell>
+
+    <!-- LOTE (x=1260, y=30, w=390, h=278) -->
+    <mxCell id="e_lot" value="LOTE"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="1260" y="30" width="390" height="278" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_lot_pk" value="&lt;u&gt;* id_lote : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_lot">
+      <mxGeometry x="0" y="30" width="390" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_lot_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_lot">
+      <mxGeometry x="0" y="52" width="390" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_lot_atr" value="numero_lote : VARCHAR(50) NOT NULL&lt;br&gt;cantidad_inicial : DECIMAL(10,2) NOT NULL&lt;br&gt;cantidad_actual : DECIMAL(10,2) NOT NULL&lt;br&gt;fecha_ingreso : DATE NOT NULL&lt;br&gt;fecha_vencimiento : DATE NOT NULL&lt;br&gt;ubicacion : VARCHAR(100)&lt;br&gt;estado : VARCHAR(20) NOT NULL DEFAULT &apos;DISPONIBLE&apos;&lt;br&gt;&lt;i&gt;id_producto : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;id_usuario_reg : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_lot">
+      <mxGeometry x="0" y="60" width="390" height="218" as="geometry"/>
+    </mxCell>
+
+    <!-- MOVIMIENTO_INVENTARIO (x=840, y=320, w=380, h=218) -->
+    <mxCell id="e_mov" value="MOVIMIENTO_INVENTARIO"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="840" y="320" width="380" height="218" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mov_pk" value="&lt;u&gt;* id_movimiento : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_mov">
+      <mxGeometry x="0" y="30" width="380" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mov_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_mov">
+      <mxGeometry x="0" y="52" width="380" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mov_atr" value="tipo : VARCHAR(20) NOT NULL&lt;br&gt;cantidad : DECIMAL(10,2) NOT NULL&lt;br&gt;fecha_movimiento : DATETIME NOT NULL&lt;br&gt;motivo : VARCHAR(255)&lt;br&gt;&lt;i&gt;id_lote : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;id_usuario : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_mov">
+      <mxGeometry x="0" y="60" width="380" height="158" as="geometry"/>
+    </mxCell>
+
+    <!-- MERMA (x=1260, y=360, w=390, h=218) -->
+    <mxCell id="e_mrm" value="MERMA"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="1260" y="360" width="390" height="218" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mrm_pk" value="&lt;u&gt;* id_merma : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_mrm">
+      <mxGeometry x="0" y="30" width="390" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mrm_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_mrm">
+      <mxGeometry x="0" y="52" width="390" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mrm_atr" value="cantidad : DECIMAL(10,2) NOT NULL&lt;br&gt;fecha_registro : DATETIME NOT NULL&lt;br&gt;motivo : VARCHAR(255)&lt;br&gt;&lt;i&gt;id_lote : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;id_movimiento : INT  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;id_usuario : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_mrm">
+      <mxGeometry x="0" y="60" width="390" height="158" as="geometry"/>
+    </mxCell>
+
+    <!-- ALERTA (x=840, y=590, w=380, h=218) -->
+    <mxCell id="e_ale" value="ALERTA"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="840" y="590" width="380" height="218" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ale_pk" value="&lt;u&gt;* id_alerta : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_ale">
+      <mxGeometry x="0" y="30" width="380" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ale_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_ale">
+      <mxGeometry x="0" y="52" width="380" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ale_atr" value="tipo_alerta : VARCHAR(20) NOT NULL&lt;br&gt;dias_para_vencer : INT NOT NULL&lt;br&gt;fecha_generacion : DATETIME NOT NULL&lt;br&gt;estado : VARCHAR(20) NOT NULL DEFAULT &apos;PENDIENTE&apos;&lt;br&gt;&lt;i&gt;id_lote : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;id_usuario_atiende : INT  &amp;laquo;FK&amp;raquo;&lt;/i&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_ale">
+      <mxGeometry x="0" y="60" width="380" height="158" as="geometry"/>
+    </mxCell>
+
+    <!-- REPORTE (x=1260, y=630, w=390, h=198) -->
+    <mxCell id="e_rep" value="REPORTE"
+      style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;"
+      vertex="1" parent="1">
+      <mxGeometry x="1260" y="630" width="390" height="198" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_rep_pk" value="&lt;u&gt;* id_reporte : INT IDENTITY(1,1)  &amp;laquo;PK&amp;raquo;&lt;/u&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;"
+      vertex="1" parent="e_rep">
+      <mxGeometry x="0" y="30" width="390" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_rep_sep" value=""
+      style="line;strokeColor=#2E86AB;fillColor=none;"
+      vertex="1" parent="e_rep">
+      <mxGeometry x="0" y="52" width="390" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_rep_atr" value="tipo : VARCHAR(30) NOT NULL&lt;br&gt;fecha_generacion : DATETIME NOT NULL&lt;br&gt;fecha_inicio : DATE NOT NULL&lt;br&gt;fecha_fin : DATE NOT NULL&lt;br&gt;&lt;i&gt;id_usuario : INT NOT NULL  &amp;laquo;FK&amp;raquo;&lt;/i&gt;"
+      style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;"
+      vertex="1" parent="e_rep">
+      <mxGeometry x="0" y="60" width="390" height="138" as="geometry"/>
+    </mxCell>
+
+    <!-- ===== RELACIONES ===== -->
+
+    <!-- categoria ||--o{ producto : FK_Producto_Categoria -->
+    <mxCell id="r1" value="FK_Producto_Categoria"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_cat" target="e_prd" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- producto ||--o{ lote : FK_Lote_Producto -->
+    <mxCell id="r2" value="FK_Lote_Producto"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_prd" target="e_lot" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- usuario ||--o{ lote : FK_Lote_Usuario -->
+    <mxCell id="r3" value="FK_Lote_Usuario"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_usu" target="e_lot" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- lote ||--o{ movimiento : FK_Movimiento_Lote -->
+    <mxCell id="r4" value="FK_Movimiento_Lote"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_lot" target="e_mov" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- lote ||--o{ merma : FK_Merma_Lote -->
+    <mxCell id="r5" value="FK_Merma_Lote"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_lot" target="e_mrm" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- lote ||--o{ alerta : FK_Alerta_Lote -->
+    <mxCell id="r6" value="FK_Alerta_Lote"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_lot" target="e_ale" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- movimiento |o--o{ merma : FK_Merma_Movimiento -->
+    <mxCell id="r7" value="FK_Merma_Movimiento"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_mov" target="e_mrm" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- usuario ||--o{ movimiento : FK_Movimiento_Usuario -->
+    <mxCell id="r8" value="FK_Movimiento_Usuario"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_usu" target="e_mov" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- usuario ||--o{ merma : FK_Merma_Usuario -->
+    <mxCell id="r9" value="FK_Merma_Usuario"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_usu" target="e_mrm" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- usuario |o--o{ alerta : FK_Alerta_Usuario -->
+    <mxCell id="r10" value="FK_Alerta_Usuario"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_usu" target="e_ale" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- usuario ||--o{ reporte : FK_Reporte_Usuario -->
+    <mxCell id="r11" value="FK_Reporte_Usuario"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
+      edge="1" source="e_usu" target="e_rep" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- usuario ||--o| config : FK_Config_Usuario -->
+    <mxCell id="r12" value="FK_Config_Usuario"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;fontSize=10;"
+      edge="1" source="e_usu" target="e_cfg" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
