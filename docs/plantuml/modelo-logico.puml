@@ -1,0 +1,124 @@
+@startuml modelo-logico
+!theme plain
+title Sistema de Control de Productos Perecibles — Plaza Vea\nModelo Lógico
+
+hide circle
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #EEF4FB
+  BorderColor     #2E86AB
+  FontSize        11
+}
+skinparam arrow {
+  Color           #2E86AB
+}
+
+entity "USUARIO" as usuario {
+  * id_usuario    : ENTERO     <<PK>>
+  --
+  nombre          : TEXTO
+  apellido        : TEXTO
+  email           : TEXTO
+  contrasena      : TEXTO
+  rol             : {OPERARIO, SUPERVISOR}
+  activo          : BOOLEANO
+  fecha_creacion  : FECHA
+}
+
+entity "CATEGORIA" as categoria {
+  * id_categoria  : ENTERO     <<PK>>
+  --
+  nombre          : TEXTO
+  descripcion     : TEXTO
+}
+
+entity "PRODUCTO_PERECIBLE" as producto {
+  * id_producto   : ENTERO     <<PK>>
+  --
+  nombre          : TEXTO
+  descripcion     : TEXTO
+  unidad_medida   : TEXTO
+  # id_categoria  : ENTERO     <<FK>>
+}
+
+entity "LOTE" as lote {
+  * id_lote           : ENTERO     <<PK>>
+  --
+  numero_lote         : TEXTO
+  cantidad_inicial    : DECIMAL
+  cantidad_actual     : DECIMAL
+  fecha_ingreso       : FECHA
+  fecha_vencimiento   : FECHA
+  ubicacion           : TEXTO
+  estado              : {DISPONIBLE, PROXIMO_VENCER, VENCIDO, RETIRADO}
+  # id_producto        : ENTERO     <<FK>>
+  # id_usuario_reg     : ENTERO     <<FK>>
+}
+
+entity "MOVIMIENTO_INVENTARIO" as movimiento {
+  * id_movimiento     : ENTERO     <<PK>>
+  --
+  tipo                : {INGRESO, RETIRO, AJUSTE, REMATE, DONACION}
+  cantidad            : DECIMAL
+  fecha_movimiento    : FECHA_HORA
+  motivo              : TEXTO
+  # id_lote           : ENTERO     <<FK>>
+  # id_usuario        : ENTERO     <<FK>>
+}
+
+entity "MERMA" as merma {
+  * id_merma          : ENTERO     <<PK>>
+  --
+  cantidad            : DECIMAL
+  fecha_registro      : FECHA_HORA
+  motivo              : TEXTO
+  # id_lote           : ENTERO     <<FK>>
+  # id_movimiento     : ENTERO     <<FK>>
+  # id_usuario        : ENTERO     <<FK>>
+}
+
+entity "ALERTA" as alerta {
+  * id_alerta         : ENTERO     <<PK>>
+  --
+  tipo_alerta         : {PROXIMO_VENCER, VENCIDO}
+  dias_para_vencer    : ENTERO
+  fecha_generacion    : FECHA_HORA
+  estado              : {PENDIENTE, ATENDIDA, IGNORADA}
+  # id_lote           : ENTERO     <<FK>>
+  # id_usuario_atiende: ENTERO     <<FK>>
+}
+
+entity "REPORTE" as reporte {
+  * id_reporte        : ENTERO     <<PK>>
+  --
+  tipo                : {STOCK, VENCIDOS, PROXIMOS_VENCER, MERMAS}
+  fecha_generacion    : FECHA_HORA
+  fecha_inicio        : FECHA
+  fecha_fin           : FECHA
+  # id_usuario        : ENTERO     <<FK>>
+}
+
+entity "CONFIGURACION_ALERTA" as config {
+  * id_config               : ENTERO  <<PK>>
+  --
+  dias_alerta_amarilla      : ENTERO
+  dias_alerta_roja          : ENTERO
+  activo                    : BOOLEANO
+  # id_usuario_config       : ENTERO  <<FK>>
+}
+
+' --- relaciones ---
+categoria   ||--o{  producto   : "id_categoria"
+producto    ||--o{  lote       : "id_producto"
+usuario     ||--o{  lote       : "id_usuario_reg"
+lote        ||--o{  movimiento : "id_lote"
+lote        ||--o{  merma      : "id_lote"
+lote        ||--o{  alerta     : "id_lote"
+movimiento  |o--o{  merma      : "id_movimiento"
+usuario     ||--o{  movimiento : "id_usuario"
+usuario     ||--o{  merma      : "id_usuario"
+usuario     |o--o{  alerta     : "id_usuario_atiende"
+usuario     ||--o{  reporte    : "id_usuario"
+usuario     ||--o|  config     : "id_usuario_config"
+
+@enduml

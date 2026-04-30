@@ -1,0 +1,230 @@
+@startuml diagrama-clases
+!theme plain
+title Sistema de Control de Productos Perecibles — Plaza Vea\nDiagrama de Clases
+
+skinparam class {
+  BackgroundColor #EEF4FB
+  BorderColor     #2E86AB
+  FontSize        11
+  ArrowColor      #2E86AB
+}
+skinparam enum {
+  BackgroundColor #FFF8E1
+  BorderColor     #F0A500
+}
+skinparam linetype ortho
+
+' ==================== ENUMERACIONES ====================
+
+enum RolUsuario {
+  OPERARIO
+  SUPERVISOR
+}
+
+enum EstadoLote {
+  DISPONIBLE
+  PROXIMO_VENCER
+  VENCIDO
+  RETIRADO
+}
+
+enum TipoMovimiento {
+  INGRESO
+  RETIRO
+  AJUSTE
+  REMATE
+  DONACION
+}
+
+enum TipoAlerta {
+  PROXIMO_VENCER
+  VENCIDO
+}
+
+enum EstadoAlerta {
+  PENDIENTE
+  ATENDIDA
+  IGNORADA
+}
+
+enum TipoReporte {
+  STOCK
+  VENCIDOS
+  PROXIMOS_VENCER
+  MERMAS
+}
+
+' ==================== MODELO ====================
+
+class Usuario {
+  - idUsuario      : int
+  - nombre         : String
+  - apellido       : String
+  - email          : String
+  - contrasena     : String
+  - rol            : RolUsuario
+  - activo         : boolean
+  - fechaCreacion  : LocalDate
+  + autenticar(email: String, contrasena: String) : boolean
+  + getNombreCompleto() : String
+  + esSupervisor() : boolean
+}
+
+class Categoria {
+  - idCategoria   : int
+  - nombre        : String
+  - descripcion   : String
+  + getNombre()   : String
+}
+
+class ProductoPerecible {
+  - idProducto    : int
+  - nombre        : String
+  - descripcion   : String
+  - unidadMedida  : String
+  - categoria     : Categoria
+  + getCategoria()      : Categoria
+  + getNombre()         : String
+}
+
+class Lote {
+  - idLote             : int
+  - numeroLote         : String
+  - cantidadInicial    : double
+  - cantidadActual     : double
+  - fechaIngreso       : LocalDate
+  - fechaVencimiento   : LocalDate
+  - ubicacion          : String
+  - estado             : EstadoLote
+  - producto           : ProductoPerecible
+  - usuarioRegistro    : Usuario
+  + getDiasParaVencer()     : long
+  + estaProximoAVencer(diasUmbral: int) : boolean
+  + estaVencido()           : boolean
+  + actualizarEstado()      : void
+  + reducirCantidad(cantidad: double) : void
+}
+
+class MovimientoInventario {
+  - idMovimiento      : int
+  - tipo              : TipoMovimiento
+  - cantidad          : double
+  - fechaMovimiento   : LocalDateTime
+  - motivo            : String
+  - lote              : Lote
+  - usuario           : Usuario
+  + registrar() : void
+}
+
+class Merma {
+  - idMerma       : int
+  - cantidad      : double
+  - fechaRegistro : LocalDateTime
+  - motivo        : String
+  - lote          : Lote
+  - movimiento    : MovimientoInventario
+  - usuario       : Usuario
+  + registrar()   : void
+}
+
+class Alerta {
+  - idAlerta          : int
+  - tipoAlerta        : TipoAlerta
+  - diasParaVencer    : int
+  - fechaGeneracion   : LocalDateTime
+  - estado            : EstadoAlerta
+  - lote              : Lote
+  - usuarioAtiende    : Usuario
+  + atender(usuario: Usuario) : void
+  + ignorar()                 : void
+  + esCritica()               : boolean
+}
+
+class Reporte {
+  - idReporte         : int
+  - tipo              : TipoReporte
+  - fechaGeneracion   : LocalDateTime
+  - fechaInicio       : LocalDate
+  - fechaFin          : LocalDate
+  - usuario           : Usuario
+  + generar() : void
+  + exportar(ruta: String) : void
+}
+
+class ConfiguracionAlerta {
+  - idConfig              : int
+  - diasAlertaAmarilla    : int
+  - diasAlertaRoja        : int
+  - activo                : boolean
+  - usuarioConfig         : Usuario
+  + getDiasAmarilla()     : int
+  + getDiasRoja()         : int
+}
+
+' ==================== SERVICIOS ====================
+
+class InventarioServicio {
+  - loteDAO              : LoteDAO
+  - movimientoDAO        : MovimientoInventarioDAO
+  + registrarIngreso(lote: Lote, usuario: Usuario) : void
+  + registrarRetiro(idLote: int, cantidad: double, tipo: TipoMovimiento, usuario: Usuario) : void
+  + consultarStock() : List<Lote>
+  + buscarPorProducto(idProducto: int) : List<Lote>
+  + buscarProximosAVencer(dias: int) : List<Lote>
+}
+
+class AlertaServicio {
+  - alertaDAO       : AlertaDAO
+  - config          : ConfiguracionAlerta
+  + generarAlertas() : void
+  + obtenerPendientes() : List<Alerta>
+  + atenderAlerta(idAlerta: int, usuario: Usuario) : void
+}
+
+class ReporteServicio {
+  - reporteDAO      : ReporteDAO
+  + generarReporteStock(inicio: LocalDate, fin: LocalDate, usuario: Usuario) : Reporte
+  + generarReporteMermas(inicio: LocalDate, fin: LocalDate, usuario: Usuario) : Reporte
+  + generarReporteVencidos(inicio: LocalDate, fin: LocalDate, usuario: Usuario) : Reporte
+}
+
+class UsuarioServicio {
+  - usuarioDAO      : UsuarioDAO
+  + login(email: String, contrasena: String) : Usuario
+  + registrar(usuario: Usuario) : void
+  + cambiarEstado(idUsuario: int, activo: boolean) : void
+}
+
+' ==================== RELACIONES ====================
+
+' Enumeraciones
+Usuario           ..>  RolUsuario
+Lote              ..>  EstadoLote
+MovimientoInventario ..> TipoMovimiento
+Alerta            ..>  TipoAlerta
+Alerta            ..>  EstadoAlerta
+Reporte           ..>  TipoReporte
+
+' Composición / Asociación modelo
+Categoria         "1" <--o "0..*" ProductoPerecible  : categoria
+ProductoPerecible "1" <--o "0..*" Lote               : producto
+Usuario           "1" <--o "0..*" Lote               : usuarioRegistro
+Lote              "1" <--o "0..*" MovimientoInventario : lote
+Lote              "1" <--o "0..*" Merma              : lote
+Lote              "1" <--o "0..*" Alerta             : lote
+MovimientoInventario "0..1" <--o "0..*" Merma        : movimiento
+Usuario           "1" <--o "0..*" MovimientoInventario : usuario
+Usuario           "1" <--o "0..*" Merma              : usuario
+Usuario           "0..1" <--o "0..*" Alerta          : usuarioAtiende
+Usuario           "1" <--o "0..*" Reporte            : usuario
+Usuario           "1" <--o "1"    ConfiguracionAlerta : usuarioConfig
+
+' Dependencias servicios
+InventarioServicio ..> Lote
+InventarioServicio ..> MovimientoInventario
+AlertaServicio     ..> Alerta
+AlertaServicio     ..> ConfiguracionAlerta
+ReporteServicio    ..> Reporte
+UsuarioServicio    ..> Usuario
+
+@enduml

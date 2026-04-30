@@ -1,0 +1,45 @@
+@startuml modelo-conceptual
+!theme plain
+title Sistema de Control de Productos Perecibles — Plaza Vea\nModelo Conceptual
+
+skinparam linetype ortho ' Para que las lineas sean rectas
+
+skinparam entity {
+  BackgroundColor #EEF4FB
+  BorderColor     #2E86AB
+  FontSize        12
+}
+skinparam arrow {
+  Color           #2E86AB
+}
+skinparam title {
+  FontSize        13
+  FontStyle       bold
+}
+
+entity "Usuario"                  as usuario
+entity "Categoría"                as categoria
+entity "Producto Perecible"       as producto
+entity "Lote"                     as lote
+entity "Movimiento de Inventario" as movimiento
+entity "Merma"                    as merma
+entity "Alerta"                   as alerta
+entity "Reporte"                  as reporte
+entity "Configuración de Alertas" as config
+
+' --- relaciones ---
+categoria   ||--o{  producto   : "clasifica"
+producto    ||--o{  lote       : "agrupa en"
+
+lote        ||--o{  movimiento : "genera"
+lote        |o--o|  merma      : "origina"
+lote        ||--o{  alerta     : "dispara"
+
+usuario     ||--o{  lote       : "registra"
+usuario     ||--o{  movimiento : "realiza"
+usuario     ||--o{  merma      : "registra"
+usuario     ||--o{  alerta     : "atiende"
+usuario     ||--o{  reporte    : "genera"
+usuario     |o--||  config     : "configura"
+
+@enduml

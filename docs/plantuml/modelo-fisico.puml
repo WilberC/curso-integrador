@@ -1,0 +1,124 @@
+@startuml modelo-fisico
+!theme plain
+title Sistema de Control de Productos Perecibles — Plaza Vea\nModelo Físico (SQL Server)
+
+hide circle
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #EEF4FB
+  BorderColor     #2E86AB
+  FontSize        10
+}
+skinparam arrow {
+  Color           #2E86AB
+}
+
+entity "USUARIO" as usuario {
+  * id_usuario    : INT IDENTITY(1,1)  <<PK>>
+  --
+  nombre          : VARCHAR(100)       NOT NULL
+  apellido        : VARCHAR(100)       NOT NULL
+  email           : VARCHAR(150)       NOT NULL  UNIQUE
+  contrasena      : VARCHAR(255)       NOT NULL
+  rol             : VARCHAR(20)        NOT NULL   CHECK IN ('OPERARIO','SUPERVISOR')
+  activo          : BIT                NOT NULL   DEFAULT 1
+  fecha_creacion  : DATETIME           NOT NULL   DEFAULT GETDATE()
+}
+
+entity "CATEGORIA" as categoria {
+  * id_categoria  : INT IDENTITY(1,1)  <<PK>>
+  --
+  nombre          : VARCHAR(80)        NOT NULL  UNIQUE
+  descripcion     : VARCHAR(255)
+}
+
+entity "PRODUCTO_PERECIBLE" as producto {
+  * id_producto   : INT IDENTITY(1,1)  <<PK>>
+  --
+  nombre          : VARCHAR(150)       NOT NULL
+  descripcion     : VARCHAR(255)
+  unidad_medida   : VARCHAR(30)        NOT NULL
+  id_categoria    : INT                NOT NULL  <<FK>>
+}
+
+entity "LOTE" as lote {
+  * id_lote           : INT IDENTITY(1,1)  <<PK>>
+  --
+  numero_lote         : VARCHAR(50)        NOT NULL
+  cantidad_inicial    : DECIMAL(10,2)      NOT NULL
+  cantidad_actual     : DECIMAL(10,2)      NOT NULL
+  fecha_ingreso       : DATE               NOT NULL
+  fecha_vencimiento   : DATE               NOT NULL
+  ubicacion           : VARCHAR(100)
+  estado              : VARCHAR(20)        NOT NULL  DEFAULT 'DISPONIBLE'
+  id_producto         : INT                NOT NULL  <<FK>>
+  id_usuario_reg      : INT                NOT NULL  <<FK>>
+}
+
+entity "MOVIMIENTO_INVENTARIO" as movimiento {
+  * id_movimiento     : INT IDENTITY(1,1)  <<PK>>
+  --
+  tipo                : VARCHAR(20)        NOT NULL  CHECK IN ('INGRESO','RETIRO','AJUSTE','REMATE','DONACION')
+  cantidad            : DECIMAL(10,2)      NOT NULL
+  fecha_movimiento    : DATETIME           NOT NULL  DEFAULT GETDATE()
+  motivo              : VARCHAR(255)
+  id_lote             : INT                NOT NULL  <<FK>>
+  id_usuario          : INT                NOT NULL  <<FK>>
+}
+
+entity "MERMA" as merma {
+  * id_merma          : INT IDENTITY(1,1)  <<PK>>
+  --
+  cantidad            : DECIMAL(10,2)      NOT NULL
+  fecha_registro      : DATETIME           NOT NULL  DEFAULT GETDATE()
+  motivo              : VARCHAR(255)
+  id_lote             : INT                NOT NULL  <<FK>>
+  id_movimiento       : INT                          <<FK>>
+  id_usuario          : INT                NOT NULL  <<FK>>
+}
+
+entity "ALERTA" as alerta {
+  * id_alerta             : INT IDENTITY(1,1)  <<PK>>
+  --
+  tipo_alerta             : VARCHAR(20)        NOT NULL  CHECK IN ('PROXIMO_VENCER','VENCIDO')
+  dias_para_vencer        : INT                NOT NULL
+  fecha_generacion        : DATETIME           NOT NULL  DEFAULT GETDATE()
+  estado                  : VARCHAR(20)        NOT NULL  DEFAULT 'PENDIENTE'
+  id_lote                 : INT                NOT NULL  <<FK>>
+  id_usuario_atiende      : INT                          <<FK>>
+}
+
+entity "REPORTE" as reporte {
+  * id_reporte        : INT IDENTITY(1,1)  <<PK>>
+  --
+  tipo                : VARCHAR(30)        NOT NULL  CHECK IN ('STOCK','VENCIDOS','PROXIMOS_VENCER','MERMAS')
+  fecha_generacion    : DATETIME           NOT NULL  DEFAULT GETDATE()
+  fecha_inicio        : DATE               NOT NULL
+  fecha_fin           : DATE               NOT NULL
+  id_usuario          : INT                NOT NULL  <<FK>>
+}
+
+entity "CONFIGURACION_ALERTA" as config {
+  * id_config             : INT IDENTITY(1,1)  <<PK>>
+  --
+  dias_alerta_amarilla    : INT                NOT NULL  DEFAULT 7
+  dias_alerta_roja        : INT                NOT NULL  DEFAULT 2
+  activo                  : BIT                NOT NULL  DEFAULT 1
+  id_usuario_config       : INT                NOT NULL  <<FK>>
+}
+
+' --- relaciones ---
+categoria   ||--o{  producto   : "FK_Producto_Categoria"
+producto    ||--o{  lote       : "FK_Lote_Producto"
+usuario     ||--o{  lote       : "FK_Lote_Usuario"
+lote        ||--o{  movimiento : "FK_Movimiento_Lote"
+lote        ||--o{  merma      : "FK_Merma_Lote"
+lote        ||--o{  alerta     : "FK_Alerta_Lote"
+movimiento  |o--o{  merma      : "FK_Merma_Movimiento"
+usuario     ||--o{  movimiento : "FK_Movimiento_Usuario"
+usuario     ||--o{  merma      : "FK_Merma_Usuario"
+usuario     |o--o{  alerta     : "FK_Alerta_Usuario"
+usuario     ||--o{  reporte    : "FK_Reporte_Usuario"
+usuario     ||--o|  config     : "FK_Config_Usuario"
+
+@enduml
