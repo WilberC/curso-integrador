@@ -212,84 +212,84 @@
 
     <!-- ===== RELACIONES ===== -->
 
-    <!-- categoria ||--o{ producto : id_categoria -->
+    <!-- categoria ||..o{ producto : id_categoria -->
     <mxCell id="r1" value="id_categoria"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_cat" target="e_prd" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- producto ||--o{ lote : id_producto -->
+    <!-- producto ||..o{ lote : id_producto -->
     <mxCell id="r2" value="id_producto"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_prd" target="e_lot" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ lote : id_usuario_reg -->
+    <!-- usuario ||..o{ lote : id_usuario_reg -->
     <mxCell id="r3" value="id_usuario_reg"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_lot" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote ||--o{ movimiento : id_lote -->
+    <!-- lote ||..o{ movimiento : id_lote -->
     <mxCell id="r4" value="id_lote"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_lot" target="e_mov" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote ||--o{ merma : id_lote -->
+    <!-- lote ||..o{ merma : id_lote -->
     <mxCell id="r5" value="id_lote"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_lot" target="e_mrm" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote ||--o{ alerta : id_lote -->
+    <!-- lote ||..o{ alerta : id_lote -->
     <mxCell id="r6" value="id_lote"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_lot" target="e_ale" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- movimiento |o--o{ merma : id_movimiento -->
+    <!-- movimiento |o..o{ merma : id_movimiento -->
     <mxCell id="r7" value="id_movimiento"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_mov" target="e_mrm" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ movimiento : id_usuario -->
+    <!-- usuario ||..o{ movimiento : id_usuario -->
     <mxCell id="r8" value="id_usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_mov" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ merma : id_usuario -->
+    <!-- usuario ||..o{ merma : id_usuario -->
     <mxCell id="r9" value="id_usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_mrm" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario |o--o{ alerta : id_usuario_atiende -->
+    <!-- usuario |o..o{ alerta : id_usuario_atiende -->
     <mxCell id="r10" value="id_usuario_atiende"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_ale" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ reporte : id_usuario -->
+    <!-- usuario ||..o{ reporte : id_usuario -->
     <mxCell id="r11" value="id_usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_rep" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o| config : id_usuario_config -->
+    <!-- usuario ||..o| config : id_usuario_config -->
     <mxCell id="r12" value="id_usuario_config"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_cfg" parent="1">

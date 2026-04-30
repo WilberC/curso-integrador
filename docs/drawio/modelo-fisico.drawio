@@ -212,84 +212,84 @@
 
     <!-- ===== RELACIONES ===== -->
 
-    <!-- categoria ||--o{ producto : FK_Producto_Categoria -->
+    <!-- categoria ||..o{ producto : FK_Producto_Categoria -->
     <mxCell id="r1" value="FK_Producto_Categoria"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_cat" target="e_prd" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- producto ||--o{ lote : FK_Lote_Producto -->
+    <!-- producto ||..o{ lote : FK_Lote_Producto -->
     <mxCell id="r2" value="FK_Lote_Producto"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_prd" target="e_lot" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ lote : FK_Lote_Usuario -->
+    <!-- usuario ||..o{ lote : FK_Lote_Usuario -->
     <mxCell id="r3" value="FK_Lote_Usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_lot" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote ||--o{ movimiento : FK_Movimiento_Lote -->
+    <!-- lote ||..o{ movimiento : FK_Movimiento_Lote -->
     <mxCell id="r4" value="FK_Movimiento_Lote"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_lot" target="e_mov" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote ||--o{ merma : FK_Merma_Lote -->
+    <!-- lote ||..o{ merma : FK_Merma_Lote -->
     <mxCell id="r5" value="FK_Merma_Lote"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_lot" target="e_mrm" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote ||--o{ alerta : FK_Alerta_Lote -->
+    <!-- lote ||..o{ alerta : FK_Alerta_Lote -->
     <mxCell id="r6" value="FK_Alerta_Lote"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_lot" target="e_ale" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- movimiento |o--o{ merma : FK_Merma_Movimiento -->
+    <!-- movimiento |o..o{ merma : FK_Merma_Movimiento -->
     <mxCell id="r7" value="FK_Merma_Movimiento"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_mov" target="e_mrm" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ movimiento : FK_Movimiento_Usuario -->
+    <!-- usuario ||..o{ movimiento : FK_Movimiento_Usuario -->
     <mxCell id="r8" value="FK_Movimiento_Usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_mov" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ merma : FK_Merma_Usuario -->
+    <!-- usuario ||..o{ merma : FK_Merma_Usuario -->
     <mxCell id="r9" value="FK_Merma_Usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_mrm" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario |o--o{ alerta : FK_Alerta_Usuario -->
+    <!-- usuario |o..o{ alerta : FK_Alerta_Usuario -->
     <mxCell id="r10" value="FK_Alerta_Usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_ale" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ reporte : FK_Reporte_Usuario -->
+    <!-- usuario ||..o{ reporte : FK_Reporte_Usuario -->
     <mxCell id="r11" value="FK_Reporte_Usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_rep" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o| config : FK_Config_Usuario -->
+    <!-- usuario ||..o| config : FK_Config_Usuario -->
     <mxCell id="r12" value="FK_Config_Usuario"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;fontSize=10;"
       edge="1" source="e_usu" target="e_cfg" parent="1">

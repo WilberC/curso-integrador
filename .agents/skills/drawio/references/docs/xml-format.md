@@ -71,3 +71,16 @@ If a live backend does not support both `read_diagram_xml` and `patch_diagram_ce
 ```
 
 This applies to all cell types: plain `text` cells, `swimlane` headers, edge labels, etc. The skill's code generator sets `html=1` automatically; the issue arises only in hand-authored or externally created XML.
+
+#### "Not a diagram file" error — double hyphen inside XML comment
+
+**Symptom:** draw.io refuses to open the file with "error on line N: Double hyphen within comment".
+
+**Cause:** The XML spec forbids `--` anywhere inside a comment body (`<!-- ... -->`). Crow's foot ER notation (`||--o{`, `|o--o{`) is a common source when copied into comments.
+
+**Fix:** Replace `--` with `..` (or any non-hyphen separator) in the comment text. The `<!--` and `-->` delimiters themselves are fine; only the *content* between them must not contain `--`.
+
+```xml
+<!-- broken: categoria ||--o{ producto -->
+<!-- fixed:  categoria ||..o{ producto -->
+```

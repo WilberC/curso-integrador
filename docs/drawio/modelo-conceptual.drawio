@@ -68,77 +68,77 @@
 
     <!-- ===== RELACIONES ===== -->
 
-    <!-- categoría ||--o{ producto -->
+    <!-- categoría ||..o{ producto -->
     <mxCell id="e1" value="clasifica"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="cat" target="prod" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- producto ||--o{ lote -->
+    <!-- producto ||..o{ lote -->
     <mxCell id="e2" value="agrupa en"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="prod" target="lote" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote ||--o{ movimiento -->
+    <!-- lote ||..o{ movimiento -->
     <mxCell id="e3" value="genera"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="lote" target="movi" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote |o--o| merma -->
+    <!-- lote |o..o| merma -->
     <mxCell id="e4" value="origina"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToOne;endFill=0;fontSize=10;"
       edge="1" source="lote" target="merm" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- lote ||--o{ alerta -->
+    <!-- lote ||..o{ alerta -->
     <mxCell id="e5" value="dispara"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="lote" target="aler" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ lote -->
+    <!-- usuario ||..o{ lote -->
     <mxCell id="e6" value="registra"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="usua" target="lote" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ movimiento -->
+    <!-- usuario ||..o{ movimiento -->
     <mxCell id="e7" value="realiza"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="usua" target="movi" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ merma -->
+    <!-- usuario ||..o{ merma -->
     <mxCell id="e8" value="registra"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="usua" target="merm" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ alerta -->
+    <!-- usuario ||..o{ alerta -->
     <mxCell id="e9" value="atiende"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="usua" target="aler" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario ||--o{ reporte -->
+    <!-- usuario ||..o{ reporte -->
     <mxCell id="e10" value="genera"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;"
       edge="1" source="usua" target="repo" parent="1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- usuario |o--|| config (0..1 a 1) -->
+    <!-- usuario |o..|| config (0..1 a 1) -->
     <mxCell id="e11" value="configura"
       style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERmandOne;endFill=0;fontSize=10;"
       edge="1" source="usua" target="conf" parent="1">
