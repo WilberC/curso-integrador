@@ -51,3 +51,23 @@ Prefer this backend order:
 ### Live edit fallback
 
 If a live backend does not support both `read_diagram_xml` and `patch_diagram_cells`, do not attempt incremental live editing. Import to YAML sidecars first, then regenerate.
+
+### Common pitfalls when editing `.drawio` XML by hand
+
+#### `<br>` tags not rendering as line breaks on import
+
+**Symptom:** `<br>` in cell values shows as literal text instead of a line break.
+
+**Cause:** draw.io only parses HTML in a cell value when `html=1` is present in the cell's `style` attribute. Without it, the value is treated as plain text.
+
+**Fix:** Add `html=1;` to the `style` of every cell whose value contains HTML tags (`<br>`, `<b>`, `<i>`, `<font>`, etc.).
+
+```xml
+<!-- broken -->
+<mxCell value="OPERARIO&lt;br&gt;SUPERVISOR" style="text;align=left;spacingLeft=6;" .../>
+
+<!-- fixed -->
+<mxCell value="OPERARIO&lt;br&gt;SUPERVISOR" style="text;html=1;align=left;spacingLeft=6;" .../>
+```
+
+This applies to all cell types: plain `text` cells, `swimlane` headers, edge labels, etc. The skill's code generator sets `html=1` automatically; the issue arises only in hand-authored or externally created XML.
