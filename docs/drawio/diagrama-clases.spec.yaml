@@ -1,0 +1,281 @@
+meta:
+  profile: default
+  theme: tech-blue
+  source: edited
+  layout: hierarchical
+  title: Diagrama de Clases - Sistema de Inventario de Productos Perecibles
+  description: >
+    Three-layer UML class diagram: enumerations, domain model, and service layer.
+    Edited from raw mxGraphModel XML with visual grouping improvements.
+
+# ---- Visual improvements applied ----
+# 1. Added colored section background rectangles (IDs 500-502) rendered behind content
+# 2. Added section labels in the gaps between layers (IDs 503-505)
+# 3. Added title block (ID 506) and legend (IDs 507-508) on right side
+# 4. Darkened swimlane headers: fillColor changed from #EEF4FB to #D6EAF8 (classes)
+#    and from #E8F5E9 to #C8E6C9 (services) for better contrast
+# 5. Added fillColor=#EEF4FB / #E8F5E9 to method child cells for visual separation
+#    between attribute and method sections within each class box
+
+modules:
+  - id: enumeraciones
+    label: "«enumeraciones»"
+    color: "#FFF8E1"
+
+  - id: modelo
+    label: "«modelo de dominio»"
+    color: "#EEF4FB"
+
+  - id: servicios
+    label: "«capa de servicios»"
+    color: "#E8F5E9"
+
+# Enumerations
+enumerations:
+  - id: RolUsuario
+    values: [OPERARIO, SUPERVISOR]
+  - id: EstadoLote
+    values: [DISPONIBLE, PROXIMO_VENCER, VENCIDO, RETIRADO]
+  - id: TipoMovimiento
+    values: [INGRESO, RETIRO, AJUSTE, REMATE, DONACION]
+  - id: TipoAlerta
+    values: [PROXIMO_VENCER, VENCIDO]
+  - id: EstadoAlerta
+    values: [PENDIENTE, ATENDIDA, IGNORADA]
+  - id: TipoReporte
+    values: [STOCK, VENCIDOS, PROXIMOS_VENCER, MERMAS]
+
+# Domain classes
+classes:
+  - id: Usuario
+    attributes:
+      - "- idUsuario : int"
+      - "- nombre : String"
+      - "- apellido : String"
+      - "- email : String"
+      - "- contrasena : String"
+      - "- rol : RolUsuario"
+      - "- activo : boolean"
+      - "- fechaCreacion : LocalDate"
+    methods:
+      - "+ autenticar(email, contrasena) : boolean"
+      - "+ getNombreCompleto() : String"
+      - "+ esSupervisor() : boolean"
+
+  - id: Categoria
+    attributes:
+      - "- idCategoria : int"
+      - "- nombre : String"
+      - "- descripcion : String"
+    methods:
+      - "+ getNombre() : String"
+
+  - id: ProductoPerecible
+    attributes:
+      - "- idProducto : int"
+      - "- nombre : String"
+      - "- descripcion : String"
+      - "- unidadMedida : String"
+      - "- categoria : Categoria"
+    methods:
+      - "+ getCategoria() : Categoria"
+      - "+ getNombre() : String"
+
+  - id: Lote
+    attributes:
+      - "- idLote : int"
+      - "- numeroLote : String"
+      - "- cantidadInicial : double"
+      - "- cantidadActual : double"
+      - "- fechaIngreso : LocalDate"
+      - "- fechaVencimiento : LocalDate"
+      - "- ubicacion : String"
+      - "- estado : EstadoLote"
+      - "- producto : ProductoPerecible"
+      - "- usuarioRegistro : Usuario"
+    methods:
+      - "+ getDiasParaVencer() : long"
+      - "+ estaProximoAVencer(dias) : boolean"
+      - "+ estaVencido() : boolean"
+      - "+ actualizarEstado() : void"
+      - "+ reducirCantidad(cantidad) : void"
+
+  - id: MovimientoInventario
+    attributes:
+      - "- idMovimiento : int"
+      - "- tipo : TipoMovimiento"
+      - "- cantidad : double"
+      - "- fechaMovimiento : LocalDateTime"
+      - "- motivo : String"
+      - "- lote : Lote"
+      - "- usuario : Usuario"
+    methods:
+      - "+ registrar() : void"
+
+  - id: Merma
+    attributes:
+      - "- idMerma : int"
+      - "- cantidad : double"
+      - "- fechaRegistro : LocalDateTime"
+      - "- motivo : String"
+      - "- lote : Lote"
+      - "- movimiento : MovimientoInventario"
+      - "- usuario : Usuario"
+    methods:
+      - "+ registrar() : void"
+
+  - id: Alerta
+    attributes:
+      - "- idAlerta : int"
+      - "- tipoAlerta : TipoAlerta"
+      - "- diasParaVencer : int"
+      - "- fechaGeneracion : LocalDateTime"
+      - "- estado : EstadoAlerta"
+      - "- lote : Lote"
+      - "- usuarioAtiende : Usuario"
+    methods:
+      - "+ atender(usuario) : void"
+      - "+ ignorar() : void"
+      - "+ esCritica() : boolean"
+
+  - id: Reporte
+    attributes:
+      - "- idReporte : int"
+      - "- tipo : TipoReporte"
+      - "- fechaGeneracion : LocalDateTime"
+      - "- fechaInicio : LocalDate"
+      - "- fechaFin : LocalDate"
+      - "- usuario : Usuario"
+    methods:
+      - "+ generar() : void"
+      - "+ exportar(ruta) : void"
+
+  - id: ConfiguracionAlerta
+    attributes:
+      - "- idConfig : int"
+      - "- diasAlertaAmarilla : int"
+      - "- diasAlertaRoja : int"
+      - "- activo : boolean"
+      - "- usuarioConfig : Usuario"
+    methods:
+      - "+ getDiasAmarilla() : int"
+      - "+ getDiasRoja() : int"
+
+# Service layer
+services:
+  - id: InventarioServicio
+    attributes:
+      - "- loteDAO : LoteDAO"
+      - "- movimientoDAO : MovimientoInventarioDAO"
+    methods:
+      - "+ registrarIngreso(lote, usuario) : void"
+      - "+ registrarRetiro(idLote, cantidad, tipo, usuario) : void"
+      - "+ consultarStock() : List"
+      - "+ buscarPorProducto(idProducto) : List"
+      - "+ buscarProximosAVencer(dias) : List"
+
+  - id: AlertaServicio
+    attributes:
+      - "- alertaDAO : AlertaDAO"
+      - "- config : ConfiguracionAlerta"
+    methods:
+      - "+ generarAlertas() : void"
+      - "+ obtenerPendientes() : List"
+      - "+ atenderAlerta(idAlerta, usuario) : void"
+
+  - id: ReporteServicio
+    attributes:
+      - "- reporteDAO : ReporteDAO"
+    methods:
+      - "+ generarReporteStock(inicio, fin, usuario) : Reporte"
+      - "+ generarReporteMermas(inicio, fin, usuario) : Reporte"
+      - "+ generarReporteVencidos(inicio, fin, usuario) : Reporte"
+
+  - id: UsuarioServicio
+    attributes:
+      - "- usuarioDAO : UsuarioDAO"
+    methods:
+      - "+ login(email, contrasena) : Usuario"
+      - "+ registrar(usuario) : void"
+      - "+ cambiarEstado(idUsuario, activo) : void"
+
+# Associations (model)
+associations:
+  - from: ProductoPerecible
+    to: Categoria
+    label: categoria
+    multiplicity: { source: "0..*", target: "1" }
+  - from: Lote
+    to: ProductoPerecible
+    label: producto
+    multiplicity: { source: "0..*", target: "1" }
+  - from: Lote
+    to: Usuario
+    label: usuarioRegistro
+    multiplicity: { source: "0..*", target: "1" }
+  - from: MovimientoInventario
+    to: Lote
+    label: lote
+    multiplicity: { source: "0..*", target: "1" }
+  - from: Merma
+    to: Lote
+    label: lote
+    multiplicity: { source: "0..*", target: "1" }
+  - from: Alerta
+    to: Lote
+    label: lote
+    multiplicity: { source: "0..*", target: "1" }
+  - from: Merma
+    to: MovimientoInventario
+    label: movimiento
+    multiplicity: { source: "0..*", target: "0..1" }
+  - from: MovimientoInventario
+    to: Usuario
+    label: usuario
+    multiplicity: { source: "0..*", target: "1" }
+  - from: Merma
+    to: Usuario
+    label: usuario
+    multiplicity: { source: "0..*", target: "1" }
+  - from: Alerta
+    to: Usuario
+    label: usuarioAtiende
+    multiplicity: { source: "0..*", target: "0..1" }
+  - from: Reporte
+    to: Usuario
+    label: usuario
+    multiplicity: { source: "0..*", target: "1" }
+  - from: ConfiguracionAlerta
+    to: Usuario
+    label: usuarioConfig
+    multiplicity: { source: "1", target: "1" }
+
+# Enum dependencies (dashed)
+dependencies:
+  - from: Usuario
+    to: RolUsuario
+  - from: Lote
+    to: EstadoLote
+  - from: MovimientoInventario
+    to: TipoMovimiento
+  - from: Alerta
+    to: TipoAlerta
+  - from: Alerta
+    to: EstadoAlerta
+  - from: Reporte
+    to: TipoReporte
+
+# Service dependencies (dashed)
+service_dependencies:
+  - from: InventarioServicio
+    to: Lote
+  - from: InventarioServicio
+    to: MovimientoInventario
+  - from: AlertaServicio
+    to: Alerta
+  - from: AlertaServicio
+    to: ConfiguracionAlerta
+  - from: ReporteServicio
+    to: Reporte
+  - from: UsuarioServicio
+    to: Usuario
