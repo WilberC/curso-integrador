@@ -1,0 +1,236 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="K_l9KIlHorN1dHEo_oKk" name="Página-1">
+    <mxGraphModel dx="2134" dy="2033" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1700" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="t1" parent="1" style="text;html=1;align=center;fontSize=14;fillColor=#1E3A5F;strokeColor=#1E3A5F;fontColor=#FFFFFF;rounded=1;arcSize=5;" value="&lt;b&gt;Modelo Lógico&lt;/b&gt;&lt;br&gt;&lt;i&gt;Sistema de Inventario de Productos Perecibles&lt;/i&gt;" vertex="1">
+          <mxGeometry height="56" width="430" x="1420" y="-350" as="geometry" />
+        </mxCell>
+        <mxCell id="e_usu" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="USUARIO" vertex="1">
+          <mxGeometry height="218" width="300" x="1580" y="-190" as="geometry">
+            <mxRectangle height="30" width="100" x="55" y="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_usu_pk" parent="e_usu" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_usuario : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="300" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_usu_sep" parent="e_usu" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="300" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_usu_atr" parent="e_usu" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="nombre : TEXTO&lt;br&gt;apellido : TEXTO&lt;br&gt;email : TEXTO&lt;br&gt;contrasena : TEXTO&lt;br&gt;rol : {OPERARIO, SUPERVISOR}&lt;br&gt;activo : BOOLEANO&lt;br&gt;fecha_creacion : FECHA" vertex="1">
+          <mxGeometry height="158" width="300" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cfg" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="CONFIGURACION_ALERTA" vertex="1">
+          <mxGeometry height="154" width="300" x="1400" y="120" as="geometry">
+            <mxRectangle height="30" width="190" x="1470" y="-40" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_cfg_pk" parent="e_cfg" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_config : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="300" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cfg_sep" parent="e_cfg" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="300" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cfg_atr" parent="e_cfg" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="dias_alerta_amarilla : ENTERO&lt;br&gt;dias_alerta_roja : ENTERO&lt;br&gt;activo : BOOLEANO&lt;br&gt;&lt;i&gt;# id_usuario_config : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;" vertex="1">
+          <mxGeometry height="95" width="300" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cat" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="CATEGORIA" vertex="1">
+          <mxGeometry height="112" width="260" x="1140" y="830" as="geometry">
+            <mxRectangle height="30" width="110" x="745" y="-590" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_cat_pk" parent="e_cat" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_categoria : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="260" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cat_sep" parent="e_cat" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="260" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cat_atr" parent="e_cat" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="nombre : TEXTO&lt;br&gt;descripcion : TEXTO" vertex="1">
+          <mxGeometry height="52" width="260" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prd" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="PRODUCTO_PERECIBLE" vertex="1">
+          <mxGeometry height="155" width="290" x="920" y="580" as="geometry">
+            <mxRectangle height="30" width="180" x="710" y="-330" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_prd_pk" parent="e_prd" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_producto : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="290" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prd_sep" parent="e_prd" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="290" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prd_atr" parent="e_prd" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="nombre : TEXTO&lt;br&gt;descripcion : TEXTO&lt;br&gt;unidad_medida : TEXTO&lt;br&gt;&lt;i&gt;# id_categoria : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;" vertex="1">
+          <mxGeometry height="95" width="290" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lot" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="LOTE" vertex="1">
+          <mxGeometry height="258" width="310" x="960" y="260" as="geometry">
+            <mxRectangle height="30" width="70" x="700" y="-50" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_lot_pk" parent="e_lot" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_lote : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="310" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lot_sep" parent="e_lot" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="310" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lot_atr" parent="e_lot" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="numero_lote : TEXTO&lt;br&gt;cantidad_inicial : DECIMAL&lt;br&gt;cantidad_actual : DECIMAL&lt;br&gt;fecha_ingreso : FECHA&lt;br&gt;fecha_vencimiento : FECHA&lt;br&gt;ubicacion : TEXTO&lt;br&gt;estado : EstadoLote&lt;br&gt;&lt;i&gt;# id_producto : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;# id_usuario_reg : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;" vertex="1">
+          <mxGeometry height="198" width="310" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mov" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="MOVIMIENTO_INVENTARIO" vertex="1">
+          <mxGeometry height="198" width="390" x="1390" y="320" as="geometry">
+            <mxRectangle height="30" width="200" x="1310" y="530" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_mov_pk" parent="e_mov" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_movimiento : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="390" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mov_sep" parent="e_mov" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="390" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mov_atr" parent="e_mov" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="tipo : TipoMovimiento&lt;br&gt;cantidad : DECIMAL&lt;br&gt;fecha_movimiento : FECHA_HORA&lt;br&gt;motivo : TEXTO&lt;br&gt;&lt;i&gt;# id_lote : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;# id_usuario : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;" vertex="1">
+          <mxGeometry height="138" width="310" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mrm" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="MERMA" vertex="1">
+          <mxGeometry height="198" width="310" x="1430" y="610" as="geometry">
+            <mxRectangle height="30" width="100" x="1470" y="980" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_mrm_pk" parent="e_mrm" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_merma : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="310" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mrm_sep" parent="e_mrm" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="310" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mrm_atr" parent="e_mrm" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="cantidad : DECIMAL&lt;br&gt;fecha_registro : FECHA_HORA&lt;br&gt;motivo : TEXTO&lt;br&gt;&lt;i&gt;# id_lote : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;# id_movimiento : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;# id_usuario : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;" vertex="1">
+          <mxGeometry height="138" width="310" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ale" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="ALERTA" vertex="1">
+          <mxGeometry height="198" width="310" x="1020" y="-300" as="geometry">
+            <mxRectangle height="30" width="90" x="960" y="620" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_ale_pk" parent="e_ale" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_alerta : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="310" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ale_sep" parent="e_ale" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="310" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ale_atr" parent="e_ale" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="tipo_alerta : TipoAlerta&lt;br&gt;dias_para_vencer : ENTERO&lt;br&gt;fecha_generacion : FECHA_HORA&lt;br&gt;estado : EstadoAlerta&lt;br&gt;&lt;i&gt;# id_lote : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;&lt;br&gt;&lt;i&gt;# id_usuario_atiende : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;" vertex="1">
+          <mxGeometry height="138" width="310" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rep" parent="1" style="swimlane;html=1;fontStyle=1;align=center;startSize=30;fillColor=#D6EAF8;strokeColor=#2E86AB;" value="REPORTE" vertex="1">
+          <mxGeometry height="178" width="310" x="1040" y="10" as="geometry">
+            <mxRectangle height="30" width="100" x="1110" y="-60" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_rep_pk" parent="e_rep" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;fillColor=#EEF4FB;" value="&lt;u&gt;* id_reporte : ENTERO  &amp;laquo;PK&amp;raquo;&lt;/u&gt;" vertex="1">
+          <mxGeometry height="22" width="310" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rep_sep" parent="e_rep" style="line;strokeColor=#2E86AB;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="8" width="310" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rep_atr" parent="e_rep" style="text;html=1;align=left;spacingLeft=8;verticalAlign=top;" value="tipo : TipoReporte&lt;br&gt;fecha_generacion : FECHA_HORA&lt;br&gt;fecha_inicio : FECHA&lt;br&gt;fecha_fin : FECHA&lt;br&gt;&lt;i&gt;# id_usuario : ENTERO  &amp;laquo;FK&amp;raquo;&lt;/i&gt;" vertex="1">
+          <mxGeometry height="118" width="310" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" edge="1" parent="1" source="e_cat" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;" target="e_prd" value="id_categoria">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" edge="1" parent="1" source="e_prd_atr" style="html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;edgeStyle=elbowEdgeStyle;elbow=vertical;exitX=-0.004;exitY=0.337;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.354;entryDx=0;entryDy=0;entryPerimeter=0;" target="e_lot_atr" value="id_producto">
+          <mxGeometry relative="1" x="0.0185" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="880" y="540" />
+            </Array>
+            <mxPoint x="780" y="-210" as="sourcePoint" />
+            <mxPoint x="920" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r3" edge="1" parent="1" source="e_usu_atr" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;exitX=-0.003;exitY=0.379;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.063;entryY=-0.004;entryDx=0;entryDy=0;entryPerimeter=0;" target="e_lot" value="id_usuario_reg">
+          <mxGeometry relative="1" x="-0.0525" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="979" y="-70" />
+            </Array>
+            <mxPoint x="1540" y="-110" as="sourcePoint" />
+            <mxPoint x="980" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r4" edge="1" parent="1" source="e_lot_atr" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;entryX=0;entryY=0.362;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.101;exitDx=0;exitDy=0;exitPerimeter=0;" target="e_ale_atr" value="id_lote">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="920" y="340" />
+              <mxPoint x="920" y="-190" />
+            </Array>
+            <mxPoint x="910" y="340" as="sourcePoint" />
+            <mxPoint x="960" y="-190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r5" edge="1" parent="1" source="e_lot_atr" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;exitX=1.001;exitY=0.656;exitDx=0;exitDy=0;exitPerimeter=0;" value="id_lote">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+            <mxPoint x="960" y="440" as="sourcePoint" />
+            <mxPoint x="1390" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r6" edge="1" parent="1" source="e_lot_atr" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;entryX=-0.002;entryY=0.073;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.906;exitY=0.998;exitDx=0;exitDy=0;exitPerimeter=0;" target="e_mrm_atr" value="id_lote">
+          <mxGeometry relative="1" x="0.2057" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1241" y="680" />
+            </Array>
+            <mxPoint x="1240" y="540" as="sourcePoint" />
+            <mxPoint x="1410" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r7" edge="1" parent="1" source="e_mov_atr" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;exitX=0.647;exitY=1.021;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.516;entryY=0.051;entryDx=0;entryDy=0;entryPerimeter=0;" target="e_mrm" value="id_movimiento">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1170" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r8" edge="1" parent="1" source="e_usu_atr" style="edgeStyle=elbowEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;entryX=0.934;entryY=0.005;entryDx=0;entryDy=0;entryPerimeter=0;elbow=vertical;" target="e_mov" value="id_usuario">
+          <mxGeometry relative="1" x="0.1073" y="8" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1750" y="-10" />
+            </Array>
+            <mxPoint x="1754" y="-60" as="sourcePoint" />
+            <mxPoint x="1752.17" y="309.99999999999994" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r9" edge="1" parent="1" source="e_usu_atr" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;entryX=0.998;entryY=0.13;entryDx=0;entryDy=0;entryPerimeter=0;exitX=-0.003;exitY=0.693;exitDx=0;exitDy=0;exitPerimeter=0;" target="e_rep" value="id_usuario">
+          <mxGeometry relative="1" x="-0.0851" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1480" y="-20" />
+            </Array>
+            <mxPoint x="1500" y="-20" as="sourcePoint" />
+            <mxPoint x="1640" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r10" edge="1" parent="1" source="e_ale_atr" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERzeroToOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;rounded=0;exitX=1.001;exitY=0.41;exitDx=0;exitDy=0;exitPerimeter=0;entryX=-0.002;entryY=0.184;entryDx=0;entryDy=0;entryPerimeter=0;" target="e_usu_atr" value="id_usuario_atiende">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1460" y="-183" />
+              <mxPoint x="1460" y="-101" />
+            </Array>
+            <mxPoint x="1339.9999999999998" y="-187.2840000000001" as="sourcePoint" />
+            <mxPoint x="1550" y="-100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r11" edge="1" parent="1" source="e_mrm_atr" style="edgeStyle=orthogonalEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToMany;endFill=0;fontSize=10;exitX=0.998;exitY=0.344;exitDx=0;exitDy=0;exitPerimeter=0;rounded=1;curved=0;entryX=0.932;entryY=0.992;entryDx=0;entryDy=0;entryPerimeter=0;" target="e_usu_atr" value="|">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1740" y="780" as="sourcePoint" />
+            <mxPoint x="1860" y="-90" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r12" edge="1" parent="1" source="e_usu_atr" style="edgeStyle=elbowEdgeStyle;html=1;startArrow=ERmandOne;startFill=0;endArrow=ERzeroToOne;endFill=0;fontSize=10;rounded=1;entryX=0.9;entryY=0.007;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.3;exitY=1.013;exitDx=0;exitDy=0;exitPerimeter=0;" target="e_cfg" value="id_usuario_config">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1670" y="-60" as="sourcePoint" />
+            <mxPoint x="1670.0000000000002" y="76.154" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
