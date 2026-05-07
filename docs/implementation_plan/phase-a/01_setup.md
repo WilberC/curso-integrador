@@ -6,12 +6,12 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
 
 ## Gradle
 
-- [ ] Crear `settings.gradle`
+- [x] Crear `settings.gradle`
   ```groovy
   rootProject.name = 'plazavea-perecibles'
   ```
 
-- [ ] Crear `build.gradle` con solo las dependencias de Fase A (sin JPA ni PostgreSQL):
+- [x] Crear `build.gradle` con solo las dependencias de Fase A (sin JPA ni PostgreSQL):
   ```groovy
   plugins {
       id 'application'
@@ -42,13 +42,13 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
   }
   ```
 
-- [ ] Verificar que `./gradlew run` compila sin errores (aunque la clase App no exista aún, el build debe configurarse correctamente)
+- [x] Verificar que `./gradlew run` compila sin errores (aunque la clase App no exista aún, el build debe configurarse correctamente)
 
 ---
 
 ## Estructura de Directorios
 
-- [ ] Crear árbol de carpetas vacías:
+- [x] Crear árbol de carpetas vacías:
   ```
   src/
   └── main/
@@ -68,7 +68,7 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
 
 ## App Entry Point
 
-- [ ] Crear `App.java`:
+- [x] Crear `App.java`:
   ```java
   package pe.plazavea.perecibles;
 
@@ -94,7 +94,7 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
   }
   ```
 
-- [ ] Crear `util/SceneManager.java` — singleton que:
+- [x] Crear `util/SceneManager.java` — singleton que:
   - Recibe la `Stage` principal en `init(Stage)`
   - Carga FXML desde `resources/fxml/{nombre}.fxml` en `navigate(String name)`
   - Aplica `styles.css` a cada `Scene` nueva
@@ -104,12 +104,12 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
 
 ## Enums (crear ahora, usados por MockData)
 
-- [ ] Crear `enums/RolUsuario.java` — `OPERARIO, SUPERVISOR`
-- [ ] Crear `enums/EstadoLote.java` — `DISPONIBLE, PROXIMO_VENCER, VENCIDO, RETIRADO`
-- [ ] Crear `enums/TipoMovimiento.java` — `INGRESO, RETIRO, AJUSTE, REMATE, DONACION`
-- [ ] Crear `enums/TipoAlerta.java` — `PROXIMO_VENCER, VENCIDO`
-- [ ] Crear `enums/EstadoAlerta.java` — `PENDIENTE, ATENDIDA, IGNORADA`
-- [ ] Crear `enums/TipoReporte.java` — `STOCK, VENCIDOS, PROXIMOS_VENCER, MERMAS`
+- [x] Crear `enums/RolUsuario.java` — `OPERARIO, SUPERVISOR`
+- [x] Crear `enums/EstadoLote.java` — `DISPONIBLE, PROXIMO_VENCER, VENCIDO, RETIRADO`
+- [x] Crear `enums/TipoMovimiento.java` — `INGRESO, RETIRO, AJUSTE, REMATE, DONACION`
+- [x] Crear `enums/TipoAlerta.java` — `PROXIMO_VENCER, VENCIDO`
+- [x] Crear `enums/EstadoAlerta.java` — `PENDIENTE, ATENDIDA, IGNORADA`
+- [x] Crear `enums/TipoReporte.java` — `STOCK, VENCIDOS, PROXIMOS_VENCER, MERMAS`
 
 ---
 
@@ -117,9 +117,9 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
 
 En Phase A las entidades son POJOs simples (sin `@Entity`). Se reemplazarán con las entidades JPA en Phase B sin cambiar la interfaz pública.
 
-- [ ] Crear clase POJO `model/Lote.java` con campos: `id`, `numeroLote`, `producto` (String), `categoria` (String), `cantidadInicial`, `cantidadActual`, `fechaIngreso`, `fechaVencimiento`, `ubicacion`, `estado (EstadoLote)` — y métodos `getDiasParaVencer()`, `estaVencido()`, `estaProximoAVencer(int)`
-- [ ] Crear clase POJO `model/Alerta.java` con campos: `id`, `tipoAlerta`, `diasParaVencer`, `fechaGeneracion`, `estado`, `loteNumero` (String)
-- [ ] Crear clase POJO `model/Usuario.java` con campos: `id`, `nombre`, `apellido`, `rol (RolUsuario)`
+- [x] Crear clase POJO `model/Lote.java` con campos: `id`, `numeroLote`, `producto` (String), `categoria` (String), `cantidadInicial`, `cantidadActual`, `fechaIngreso`, `fechaVencimiento`, `ubicacion`, `estado (EstadoLote)` — y métodos `getDiasParaVencer()`, `estaVencido()`, `estaProximoAVencer(int)`
+- [x] Crear clase POJO `model/Alerta.java` con campos: `id`, `tipoAlerta`, `diasParaVencer`, `fechaGeneracion`, `estado`, `loteNumero` (String)
+- [x] Crear clase POJO `model/Usuario.java` con campos: `id`, `nombre`, `apellido`, `rol (RolUsuario)`
 
 > Nota: No crear todas las 9 entidades JPA completas en Phase A. Solo los POJOs mínimos que los controladores necesitan.
 
@@ -127,7 +127,7 @@ En Phase A las entidades son POJOs simples (sin `@Entity`). Se reemplazarán con
 
 ## MockData
 
-- [ ] Crear `mock/MockData.java` con datos estáticos en listas `ObservableList` (para enlace con TableView):
+- [x] Crear `mock/MockData.java` con datos estáticos en listas `ObservableList` (para enlace con TableView):
 
   ```java
   package pe.plazavea.perecibles.mock;
@@ -176,7 +176,7 @@ En Phase A las entidades son POJOs simples (sin `@Entity`). Se reemplazarán con
 
 ## CSS Base
 
-- [ ] Crear `resources/css/styles.css` con los design tokens del AGENT.md y estilos base:
+- [x] Crear `resources/css/styles.css` con los design tokens del AGENT.md y estilos base:
   - `.root` con todos los tokens de color y fuente
   - `.btn-primary` — fondo `#FCD535`, texto `#181a20`, radius `6px`
   - `.btn-secondary` — fondo `#1e2329`, texto `#eaecef`, borde `#2b3139`
@@ -192,7 +192,7 @@ En Phase A las entidades son POJOs simples (sin `@Entity`). Se reemplazarán con
 
 ## Verificación
 
-- [ ] `./gradlew run` abre la ventana de Login (pantalla negra con tarjeta centrada)
-- [ ] No hay errores de compilación
-- [ ] Los 6 enums existen y compilan
-- [ ] MockData.getLotes() devuelve 6 lotes sin excepción
+- [x] `./gradlew run` abre la ventana de Login (pantalla negra con tarjeta centrada)
+- [x] No hay errores de compilación
+- [x] Los 6 enums existen y compilan
+- [x] MockData.getLotes() devuelve 6 lotes sin excepción
