@@ -6,6 +6,18 @@
       "sourceType": "github",
       "skillPath": "skills/drawio/SKILL.md",
       "computedHash": "22f4ae5b26c6b71de85a7f4916a3011e5cb5e803927d38fa0404b8f5014536bf"
+    },
+    "java-coding-standards": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/java-coding-standards/SKILL.md",
+      "computedHash": "2c73798d8a1bb9d8380606e5954cddf524ab0f662bfef5fa258e25c264606c46"
+    },
+    "modern-javascript-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/javascript-typescript/skills/modern-javascript-patterns/SKILL.md",
+      "computedHash": "0029f68d5b92753960cf57c00da77913973507350dad148acaa46313691a509a"
     }
   }
 }
