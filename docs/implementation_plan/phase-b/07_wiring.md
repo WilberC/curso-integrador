@@ -1,6 +1,6 @@
 # Fase B — Wiring: Reemplazar Mocks + Empaquetado
 
-Conectar los controladores JavaFX de Phase A con los servicios reales de Phase B. La UI no cambia; solo cambia la fuente de datos.
+Conectar los paneles Swing de Phase A con los servicios reales de Phase B. La UI no cambia; solo cambia la fuente de datos.
 
 ---
 
@@ -10,33 +10,44 @@ Conectar los controladores JavaFX de Phase A con los servicios reales de Phase B
   - Agrega campo `private static Usuario currentUser`
   - Método `login(String email, String password)` llama `UsuarioServicio.login()` y guarda el resultado
   - Método `getCurrentUser()` devuelve el `Usuario` real (no el mock hardcoded)
-  - Método `logout()` limpia `currentUser` y navega a `"login"`
+  - Método `logout()` limpia `currentUser` y llama `Navigator.show("login")`
 
 ---
 
-## Bridge Spring ↔ JavaFX
+## Bridge Spring ↔ Swing
 
-JavaFX instancia sus controladores via FXMLLoader; Spring no los conoce por defecto. Solución: pasar el `ApplicationContext` al loader.
+Swing no usa FXMLLoader — los paneles son instanciados directamente en Java. Spring puede gestionar los paneles anotándolos con `@Component` y obteniendo instancias del `ApplicationContext`.
 
-- [ ] En `App.java`, inicializar Spring antes de JavaFX:
+- [ ] En `App.main()`, inicializar Spring antes de `SwingUtilities.invokeLater`:
   ```java
-  @Override
-  public void start(Stage stage) throws Exception {
-      ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
-      SpringContext.init(ctx);
-      // ... resto del start
+  public static void main(String[] args) {
+      Theme.apply();
+      Fonts.load();
+      ApplicationContext ctx;
+      try {
+          ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+          SpringContext.init(ctx);
+      } catch (Exception e) {
+          SwingUtilities.invokeLater(() -> {
+              JOptionPane.showMessageDialog(null,
+                  "No se pudo conectar a la base de datos.\nVerifique que PostgreSQL esté corriendo.",
+                  "Error de conexión", JOptionPane.ERROR_MESSAGE);
+              System.exit(1);
+          });
+          return;
+      }
+      SwingUtilities.invokeLater(() -> {
+          MainFrame frame = SpringContext.getBean(MainFrame.class);
+          frame.setVisible(true);
+      });
   }
   ```
 
 - [ ] Crear `config/AppConfig.java` con `@Configuration @ComponentScan("pe.plazavea.perecibles")`
 
-- [ ] En `SceneManager.navigate()`, usar un `FXMLLoader` que obtiene controladores del contexto Spring:
-  ```java
-  FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/" + name + ".fxml"));
-  loader.setControllerFactory(SpringContext::getBean);
-  ```
+- [ ] Anotar `MainFrame`, `DashboardPanel`, `InventarioPanel`, `AlertasPanel`, `ReportesPanel` con `@Component` para que Spring los gestione e inyecte los servicios via `@Autowired`
 
-- [ ] Anotar todos los controladores con `@Component` para que Spring los gestione
+- [ ] `SpringContext.java` sigue el mismo patrón — guarda el `ApplicationContext` y expone `getBean(Class<T>)`
 
 ---
 
@@ -44,90 +55,95 @@ JavaFX instancia sus controladores via FXMLLoader; Spring no los conoce por defe
 
 Para cada controlador, reemplazar la llamada a MockData por la llamada al servicio correspondiente. Los tipos devueltos son los mismos (Lote, Alerta, etc.) por lo que el binding con TableView no cambia.
 
-### LoginController
+### LoginPanel
 
-- [ ] Reemplazar hardcoded credentials:
+- [ ] Reemplazar credenciales hardcoded:
   ```java
   // Antes (Phase A):
   if (email.equals("operario@plazavea.com") && password.equals("admin")) { ... }
 
   // Después (Phase B):
-  try {
-      Usuario usuario = usuarioServicio.login(emailField.getText(), passwordField.getText());
-      SessionManager.setCurrentUser(usuario);
-      SceneManager.navigate("dashboard");
-  } catch (RuntimeException e) {
-      errorLabel.setText(e.getMessage());
-      errorLabel.setVisible(true);
-  }
+  new SwingWorker<Usuario, Void>() {
+      @Override protected Usuario doInBackground() throws Exception {
+          return usuarioServicio.login(emailField.getText(), new String(passwordField.getPassword()));
+      }
+      @Override protected void done() {
+          try {
+              Usuario usuario = get();
+              SessionManager.setCurrentUser(usuario);
+              Navigator.show("dashboard");
+          } catch (Exception e) {
+              errorLabel.setText(e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
+              errorLabel.setVisible(true);
+          }
+      }
+  }.execute();
   ```
 
-- [ ] Inyectar `UsuarioServicio` via campo con `@Autowired` o constructor
+- [ ] Inyectar `UsuarioServicio` via `@Autowired`
 
-### DashboardController
+### DashboardPanel
 
 - [ ] Reemplazar `MockData.getLotes()` con `inventarioServicio.consultarStock()`
-- [ ] `refreshDashboard()` ahora corre `inventarioServicio.consultarStock()` en un `Task<List<Lote>>` y actualiza la UI en `Platform.runLater()` para no bloquear el hilo de JavaFX:
+- [ ] `refreshDashboard()` delega a `SwingWorker` para no bloquear el EDT:
   ```java
-  Task<List<Lote>> task = new Task<>() {
-      @Override protected List<Lote> call() { return inventarioServicio.consultarStock(); }
-  };
-  task.setOnSucceeded(e -> updateGauges(task.getValue()));
-  new Thread(task).start();
+  new SwingWorker<List<Lote>, Void>() {
+      @Override protected List<Lote> doInBackground() {
+          return inventarioServicio.consultarStock();
+      }
+      @Override protected void done() {
+          try { updateGauges(get()); }
+          catch (Exception ex) { showErrorToast(ex.getMessage()); }
+      }
+  }.execute();
   ```
 
-### InventarioController
+### InventarioPanel
 
-- [ ] Reemplazar MockData con `inventarioServicio.consultarStock()`
-- [ ] Al guardar desde `NuevoLoteController`, llamar `inventarioServicio.registrarIngreso(lote, SessionManager.getCurrentUser())`
+- [ ] Reemplazar `MockData.getLotes()` con `SwingWorker` que llama `inventarioServicio.consultarStock()`
+- [ ] Al guardar desde `NuevoLoteDialog`, llamar `inventarioServicio.registrarIngreso(lote, SessionManager.getCurrentUser())`
 - [ ] Atajos `V` y `R` ahora llaman `inventarioServicio.registrarRetiro(...)` con el tipo correspondiente
 
-### AlertasController
+### AlertasPanel
 
 - [ ] Reemplazar `MockData.getAlertas()` con `alertaServicio.obtenerPendientes()`
 - [ ] Atender / Ignorar llaman `alertaServicio.atenderAlerta()` / `alertaServicio.ignorarAlerta()`
 
-### ReportesController
+### ReportesPanel
 
 - [ ] Habilitar botón `Exportar CSV` (estaba deshabilitado en Phase A)
-- [ ] Al generar: llamar el método correspondiente de `ReporteServicio` según el `TipoReporte` seleccionado
+- [ ] Al generar: llamar `ReporteServicio` via `SwingWorker` según el `TipoReporte` seleccionado
 - [ ] Al exportar: llamar `reporteServicio.exportarCSV(reporte)`
 
 ---
 
 ## Arranque de AlertaServicio
 
-- [ ] En `App.start()`, después de inicializar Spring:
+- [ ] En `App.main()`, después de inicializar Spring y antes de `SwingUtilities.invokeLater`:
   ```java
   AlertaServicio alertaServicio = SpringContext.getBean(AlertaServicio.class);
   alertaServicio.iniciarScheduler();
   ```
 
-- [ ] En `App.stop()` (llamado al cerrar la ventana):
+- [ ] Registrar shutdown hook en `MainFrame.addWindowListener`:
   ```java
-  @Override
-  public void stop() {
-      SpringContext.getBean(AlertaServicio.class).getScheduler().shutdown();
-  }
+  frame.addWindowListener(new WindowAdapter() {
+      @Override public void windowClosed(WindowEvent e) {
+          SpringContext.getBean(AlertaServicio.class).getScheduler().shutdown();
+      }
+  });
   ```
 
 ---
 
 ## Manejo de Error de Conexión a DB
 
-- [ ] Si el `ApplicationContext` no puede conectar a PostgreSQL al iniciar, mostrar un `Alert` de error antes de abrir la ventana principal:
+- [ ] Si el `ApplicationContext` no puede conectar a PostgreSQL al iniciar, mostrar un `JOptionPane` antes de abrir la ventana principal (ya incluido en el bloque `App.main()` de arriba):
   ```java
-  try {
-      ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
-      SpringContext.init(ctx);
-  } catch (Exception e) {
-      Alert alert = new Alert(Alert.AlertType.ERROR);
-      alert.setTitle("Error de conexión");
-      alert.setContentText("No se pudo conectar a la base de datos. Verifique que PostgreSQL esté corriendo.");
-      alert.showAndWait();
-      Platform.exit();
-      return;
-  }
+  JOptionPane.showMessageDialog(null,
+      "No se pudo conectar a la base de datos.\nVerifique que PostgreSQL esté corriendo.",
+      "Error de conexión", JOptionPane.ERROR_MESSAGE);
+  System.exit(1);
   ```
 
 ---

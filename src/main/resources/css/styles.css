@@ -184,11 +184,28 @@
 
 .login-panel {
     -fx-background-color: -fx-surface-card;
-    -fx-background-radius: -fx-radius-lg;
-    -fx-border-color: -fx-hairline-dark;
-    -fx-border-radius: -fx-radius-lg;
-    -fx-border-width: 1px;
-    -fx-padding: 32px;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 48px 64px;
+}
+
+.login-header {
+    -fx-padding: 0 0 24px 0;
+    -fx-border-color: transparent transparent -fx-hairline-dark transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.login-form {
+    -fx-padding: 24px 0 0 0;
+    -fx-hgap: 16px;
+    -fx-vgap: 16px;
+    -fx-max-width: 720px;
+}
+
+.login-actions {
+    -fx-padding: 8px 0 0 0;
+    -fx-max-width: 720px;
 }
 
 .row-safe {

@@ -2,7 +2,7 @@
 
 ## ¿Qué construimos?
 
-Un sistema de escritorio JavaFX para Plaza Vea que digitaliza el control de productos perecibles: registro de lotes, seguimiento de fechas de vencimiento, alertas automáticas y reportes de mermas. Usuarios: Operarios y Supervisores.
+Un sistema de escritorio Swing + FlatLaf para Plaza Vea que digitaliza el control de productos perecibles: registro de lotes, seguimiento de fechas de vencimiento, alertas automáticas y reportes de mermas. Usuarios: Operarios y Supervisores.
 
 ---
 
@@ -15,7 +15,7 @@ docs/implementation_plan/
 ├── 00_overview.md              ← este archivo
 ├── phase-a/
 │   ├── 01_setup.md             ← estructura del proyecto + Gradle + MockData
-│   ├── 02_screens.md           ← 6 pantallas JavaFX con datos simulados
+│   ├── 02_screens.md           ← 6 pantallas Swing con datos simulados
 │   └── 03_ux_features.md       ← parser de fechas, teclado, gauges
 └── phase-b/
     ├── 04_data_model.md        ← entidades JPA + enums
@@ -33,7 +33,7 @@ docs/implementation_plan/
 | **A** | UI First | Validar UX y flujos antes de tocar la DB | App funcional con datos en memoria |
 | **B** | Logic & DB | Persistencia real y automatización | App completa lista para producción |
 
-**Principio:** Los controladores JavaFX no deben cambiar su interfaz entre fases. En Fase A leen de `MockData`; en Fase B leen de servicios reales. El contrato es el mismo.
+**Principio:** Los paneles Swing no deben cambiar su interfaz entre fases. En Fase A leen de `MockData`; en Fase B leen de servicios reales. El contrato es el mismo.
 
 ---
 

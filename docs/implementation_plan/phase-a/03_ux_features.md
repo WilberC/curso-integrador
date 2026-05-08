@@ -59,14 +59,19 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### Registro de handlers globales
 
-- [ ] En `App.java`, después de crear la `Scene`, registrar:
+- [ ] En `MainFrame`, registrar un `KeyEventDispatcher` global una sola vez:
   ```java
-  scene.addEventHandler(KeyEvent.KEY_PRESSED, KeyboardHandler::dispatch);
+  KeyboardFocusManager.getCurrentKeyboardFocusManager()
+      .addKeyEventDispatcher(event -> {
+          if (event.getID() != KeyEvent.KEY_PRESSED) return false;
+          // dispatchar según pantalla activa y tecla
+          return handleGlobalKey(event);
+      });
   ```
 
-- [ ] Crear `util/KeyboardHandler.java` con método estático `dispatch(KeyEvent event)`:
-  - Lee `SceneManager.getCurrentScreen()` para saber en qué pantalla está el usuario
-  - Despacha al controlador correspondiente si el atajo aplica a esa pantalla
+- [ ] Crear `util/KeyboardHandler.java` con método estático `handle(KeyEvent event, Navigator navigator, SessionManager session)`:
+  - Lee `Navigator.getCurrentName()` para saber en qué pantalla está el usuario
+  - Despacha al panel correspondiente si el atajo aplica a esa pantalla
 
 ### Tabla de atajos
 
@@ -88,18 +93,30 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### Implementación
 
-- [ ] `InventarioController` expone `openNuevoLote()`, `marcarVencido()`, `marcarRemate()`, `selectPrevRow()`, `selectNextRow()`
-- [ ] `AlertasController` expone `atenderSeleccionada()`, `ignorarSeleccionada()`, `selectPrevRow()`, `selectNextRow()`
-- [ ] `SceneManager` mantiene referencia al controlador activo actual; `KeyboardHandler` llama los métodos del controlador activo
-- [ ] Los atajos de navegación (`Ctrl+*`) siempre funcionan, incluso desde modales — excepto si hay un campo de texto con foco (no robar eventos de escritura)
-- [ ] Guardar la `compositeKey` como `new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN)` usando la API de JavaFX en lugar de comparar strings
+- [ ] `InventarioPanel` expone `openNuevoLote()`, `marcarVencido()`, `marcarRemate()`
+- [ ] `AlertasPanel` expone `atenderSeleccionada()`, `ignorarSeleccionada()`
+- [ ] Screen-local shortcuts registrados via `InputMap`/`ActionMap` en cada panel:
+  ```java
+  InputMap im = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+  im.put(KeyStroke.getKeyStroke('N'), "nuevoLote");
+  panel.getActionMap().put("nuevoLote", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) { openNuevoLote(); }
+  });
+  ```
+- [ ] Los atajos de navegación global (`Ctrl+*`) se manejan en el `KeyEventDispatcher` del `MainFrame` — no en los paneles individuales
+- [ ] Nunca interceptar teclas cuando el foco está en un `JTextField` o `JTextArea`:
+  ```java
+  Component focused = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+  if (focused instanceof JTextComponent) return false; // no robar el evento
+  ```
 
-### Barra de atajos inferior
+### Barra de atajos inferior (`ShortcutBar`)
 
-- [ ] Crear componente `HBox` fijo en la parte inferior de la ventana principal (fuera del `BorderPane` center)
-- [ ] Muestra los atajos relevantes a la pantalla actual como chips: `[N] Nuevo` `[V] Vencido` `[R] Remate`
-- [ ] Visible por defecto; se oculta con `?` (toggle en `SessionManager.showShortcuts: BooleanProperty`)
-- [ ] Estilo: fondo `#0b0e11`, texto `#707a8a`, borde superior `#2b3139`, fuente `12px`
+- [ ] `ShortcutBar` vive en el SOUTH del `MainFrame`, siempre presente
+- [ ] `Navigator` llama `shortcutBar.setHints(hintsForScreen(name))` al navegar
+- [ ] Muestra los atajos relevantes a la pantalla actual: `[N] Nuevo` `[V] Vencido` `[R] Remate`
+- [ ] Visible por defecto; `toggle()` alterna visibilidad con `setVisible(!isVisible())`
+- [ ] Estilo: fondo `Theme.SURFACE_ELEVATED`, texto `Theme.MUTED` para descripciones, `Theme.PRIMARY` para teclas, fuente 11px mono para la tecla
 
 ---
 
@@ -107,55 +124,54 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### GaugeCard (componente reutilizable)
 
-- [ ] `component/GaugeCard.java` extiende `VBox`:
+- [ ] `component/GaugeCard.java` extiende `JPanel` (ver implementación completa en `DESIGN.md`):
 
   ```
-  VBox (.gauge-card)
-  ├── Label (.gauge-title)        — "Lotes Vencidos"
-  ├── HBox
-  │   ├── Label (.gauge-value)    — "8" en JetBrains Mono, fuente grande
-  │   └── Label (.gauge-trend)    — "↑ +2" o "↓ -1" (flecha de tendencia)
-  ├── ProgressBar (.gauge-bar)    — porcentaje visual
-  └── Label (.gauge-subtitle)     — "de 45 lotes activos"
+  JPanel (paintComponent → fillRoundRect con SURFACE_CARD)
+  ├── JLabel titulo        — "Lotes Vencidos", inter 14px bold, MUTED
+  ├── JLabel valorGrande   — "8" en JetBrains Mono 32px bold, color semántico
+  ├── JProgressBar         — 6px de alto, color semántico via setForeground()
+  └── JLabel tendencia     — "↑ +2" o "↓ -1", inter 11px, MUTED
   ```
 
-- [ ] Método `setData(String titulo, int valor, int total, int tendencia)`:
+- [ ] Método `setData(String titulo, int valor, int total, int trend)`:
   - Calcula `porcentaje = valor / total`
   - Formatea trend: `+2 → "↑ +2"`, `-1 → "↓ -1"`, `0 → "— sin cambio"`
-  - Aplica la clase CSS de color correcta
+  - Llama `applyState(GaugeState)` según la lógica de umbral
 
-- [ ] Lógica de color (aplicada dinámicamente, no hardcoded):
+- [ ] Lógica de color (dinámicamente, sin CSS):
   ```java
-  void applyColorClass(String metrica, double porcentaje) {
-      getStyleClass().removeAll("safe", "warning", "danger");
-      if (metrica.equals("VENCIDO") && porcentaje > 0) {
-          getStyleClass().add("danger");
-      } else if (metrica.equals("PROXIMO_VENCER") && porcentaje > 0.15) {
-          getStyleClass().add("warning");
-      } else {
-          getStyleClass().add("safe");
-      }
+  public void applyState(GaugeState state) {
+      Color c = switch (state) {
+          case DANGER  -> Theme.DANGER;
+          case WARNING -> Theme.WARNING;
+          case SAFE    -> Theme.SAFE;
+      };
+      valueLabel.setForeground(c);
+      bar.setForeground(c);
+      repaint();
   }
   ```
 
 ### Auto-refresh
 
-- [ ] En `DashboardController.initialize()`:
+- [ ] En `DashboardPanel` (al construir el panel):
   ```java
-  Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(60), e -> refreshDashboard()));
-  timeline.setCycleCount(Animation.INDEFINITE);
-  timeline.play();
+  Timer timer = new Timer(60_000, e -> refreshDashboard());
+  timer.setRepeats(true);
+  timer.start();
+  // Detener en windowClosed o cuando el panel se oculte
   ```
 
-- [ ] `refreshDashboard()`:
-  - En Phase A: recalcula desde `MockData.getLotes()` (mismos datos, se nota cuando se agrega un lote nuevo desde Inventario)
-  - En Phase B: llama `inventarioServicio.consultarStock()` dentro de `Platform.runLater()`
+- [ ] `refreshDashboard()` corre en el EDT (Timer de Swing ya corre en EDT):
+  - En Phase A: recalcula desde `MockData.getLotes()` (se nota cuando se agrega un lote nuevo desde Inventario)
+  - En Phase B: delegar a `SwingWorker` que llama `inventarioServicio.consultarStock()` y llama `updateGauges()` en `done()`
 
 ### Snapshot de tendencia
 
-- [ ] Al iniciar `DashboardController`, guardar el snapshot inicial:
+- [ ] Al inicializar `DashboardPanel`, guardar el snapshot inicial:
   ```java
-  private Map<String, Integer> snapshotAnterior = new HashMap<>();
+  private final Map<String, Integer> snapshotAnterior = new HashMap<>();
   ```
 - [ ] Cada ciclo de refresh compara el valor actual contra el snapshot y calcula la diferencia para la flecha de tendencia
 - [ ] Actualizar snapshot después de calcular la tendencia

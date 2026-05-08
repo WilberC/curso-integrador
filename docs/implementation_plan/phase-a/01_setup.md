@@ -1,12 +1,12 @@
 # Fase A — Setup del Proyecto
 
-Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cualquier lógica real.
+Objetivo: tener un proyecto Swing + FlatLaf corriendo con MockData antes de escribir cualquier lógica real.
 
 ---
 
 ## Gradle
 
-- [x] Crear `settings.gradle`
+- [x] Crear `settings.gradle`:
   ```groovy
   rootProject.name = 'plazavea-perecibles'
   ```
@@ -15,7 +15,7 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
   ```groovy
   plugins {
       id 'application'
-      id 'org.openjfx.javafxplugin' version '0.1.0'
+      // No se necesita plugin de JavaFX — Swing viene incluido en el JDK
   }
 
   group = 'pe.plazavea'
@@ -25,11 +25,6 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
       toolchain { languageVersion = JavaLanguageVersion.of(25) }
   }
 
-  javafx {
-      version = '25'
-      modules = ['javafx.controls', 'javafx.fxml']
-  }
-
   application {
       mainClass = 'pe.plazavea.perecibles.App'
   }
@@ -37,12 +32,13 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
   repositories { mavenCentral() }
 
   dependencies {
-      implementation 'org.controlsfx:controlsfx:11.2.1'
-      implementation 'de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2'
+      implementation 'com.formdev:flatlaf:3.6'
+      implementation 'com.formdev:flatlaf-extras:3.6'
+      implementation 'com.miglayout:miglayout-swing:11.4.2'
   }
   ```
 
-- [x] Verificar que `./gradlew run` compila sin errores (aunque la clase App no exista aún, el build debe configurarse correctamente)
+- [x] Verificar que `./gradlew run` compila sin errores
 
 ---
 
@@ -53,16 +49,20 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
   src/
   └── main/
       ├── java/pe/plazavea/perecibles/
-      │   ├── controller/
-      │   ├── component/
+      │   ├── ui/           ← JPanel + JDialog por pantalla
+      │   ├── component/    ← GaugeCard, SidebarPanel, ShortcutBar, StatusChip
+      │   ├── theme/        ← Theme.java, Fonts.java
       │   ├── mock/
       │   ├── enums/
+      │   ├── model/
       │   └── util/
       └── resources/
-          ├── fxml/
-          ├── css/
+          ├── fonts/        ← Inter-Regular.ttf, Inter-Bold.ttf,
+          │                    JetBrainsMono-Regular.ttf, JetBrainsMono-Bold.ttf
           └── images/
   ```
+
+> **Sin `fxml/` ni `css/`:** Swing no los usa. La UI se construye en código Java. Los estilos se aplican vía `Theme.java` + FlatLaf UIManager.
 
 ---
 
@@ -72,33 +72,45 @@ Objetivo: tener un proyecto JavaFX corriendo con MockData antes de escribir cual
   ```java
   package pe.plazavea.perecibles;
 
-  import javafx.application.Application;
-  import javafx.stage.Stage;
+  import pe.plazavea.perecibles.theme.Fonts;
+  import pe.plazavea.perecibles.theme.Theme;
+  import pe.plazavea.perecibles.ui.MainFrame;
+  import javax.swing.SwingUtilities;
 
-  public class App extends Application {
-
-      @Override
-      public void start(Stage primaryStage) throws Exception {
-          // Phase A: carga directa del login
-          SceneManager.init(primaryStage);
-          SceneManager.navigate("login");
-          primaryStage.setTitle("Plaza Vea — Control de Perecibles");
-          primaryStage.setMinWidth(1024);
-          primaryStage.setMinHeight(700);
-          primaryStage.show();
-      }
+  public class App {
 
       public static void main(String[] args) {
-          launch(args);
+          // MUST be called before any Swing component is created
+          Theme.apply();
+          Fonts.load();
+
+          SwingUtilities.invokeLater(() -> {
+              MainFrame frame = new MainFrame();
+              frame.setTitle("Plaza Vea — Control de Perecibles");
+              frame.setMinimumSize(new java.awt.Dimension(1024, 700));
+              frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+              frame.setVisible(true);
+          });
       }
   }
   ```
 
-- [x] Crear `util/SceneManager.java` — singleton que:
-  - Recibe la `Stage` principal en `init(Stage)`
-  - Carga FXML desde `resources/fxml/{nombre}.fxml` en `navigate(String name)`
-  - Aplica `styles.css` a cada `Scene` nueva
-  - Expone `getCurrentUser()` en Phase A (devuelve mock hardcoded)
+- [x] Crear `theme/Theme.java` con:
+  - Todas las constantes de color (`CANVAS_DARK`, `SURFACE_CARD`, etc.)
+  - Método `apply()` que llama `FlatDarkLaf.setup()` y sobreescribe los UIManager defaults relevantes (ver `DESIGN.md`)
+
+- [x] Crear `theme/Fonts.java` con:
+  - Carga de `Inter` y `JetBrains Mono` desde `/fonts/*.ttf`
+  - Métodos helper: `inter(int style, float size)`, `mono(int style, float size)`
+
+- [x] Crear `util/Navigator.java` — wrapper de `CardLayout`:
+  - Recibe el `JPanel` con `CardLayout` en `init(JPanel cards, CardLayout layout)`
+  - Método `show(String name)` que llama `layout.show(cards, name)`
+  - Método `getCurrentName()` para que el shortcut bar sepa qué pantalla está activa
+
+- [x] Crear `util/SessionManager.java` — singleton:
+  - `setCurrentUser(Usuario)` y `getCurrentUser()`
+  - En Phase A devuelve usuario mock hardcoded según última navegación de login
 
 ---
 
@@ -121,78 +133,83 @@ En Phase A las entidades son POJOs simples (sin `@Entity`). Se reemplazarán con
 - [x] Crear clase POJO `model/Alerta.java` con campos: `id`, `tipoAlerta`, `diasParaVencer`, `fechaGeneracion`, `estado`, `loteNumero` (String)
 - [x] Crear clase POJO `model/Usuario.java` con campos: `id`, `nombre`, `apellido`, `rol (RolUsuario)`
 
-> Nota: No crear todas las 9 entidades JPA completas en Phase A. Solo los POJOs mínimos que los controladores necesitan.
-
 ---
 
 ## MockData
 
-- [x] Crear `mock/MockData.java` con datos estáticos en listas `ObservableList` (para enlace con TableView):
+- [x] Crear `mock/MockData.java` con datos estáticos en `java.util.List` (Swing usa listas Java estándar, no `ObservableList`):
 
   ```java
   package pe.plazavea.perecibles.mock;
 
-  import javafx.collections.FXCollections;
-  import javafx.collections.ObservableList;
   import pe.plazavea.perecibles.enums.*;
   import pe.plazavea.perecibles.model.*;
   import java.time.LocalDate;
+  import java.util.ArrayList;
+  import java.util.List;
 
   public class MockData {
 
-      public static ObservableList<Lote> getLotes() {
-          return FXCollections.observableArrayList(
-              // 3 DISPONIBLE (verde)
-              new Lote(1, "L-001", "Leche Gloria 1L", "Lácteos", 100, 100, LocalDate.now(), LocalDate.now().plusDays(20), "Anaquel A1", EstadoLote.DISPONIBLE),
-              new Lote(2, "L-002", "Yogur Fresa 500g", "Lácteos", 60, 48, LocalDate.now().minusDays(3), LocalDate.now().plusDays(12), "Cámara B2", EstadoLote.DISPONIBLE),
-              new Lote(3, "L-003", "Pollo Entero 1.8kg", "Carnes", 30, 22, LocalDate.now().minusDays(1), LocalDate.now().plusDays(9), "Cámara C1", EstadoLote.DISPONIBLE),
-              // 2 PROXIMO_VENCER (naranja)
-              new Lote(4, "L-004", "Jamón del País 200g", "Embutidos", 40, 15, LocalDate.now().minusDays(5), LocalDate.now().plusDays(5), "Anaquel A3", EstadoLote.PROXIMO_VENCER),
-              new Lote(5, "L-005", "Pan de Molde Bimbo", "Panadería", 24, 10, LocalDate.now().minusDays(2), LocalDate.now().plusDays(3), "Anaquel D1", EstadoLote.PROXIMO_VENCER),
-              // 1 VENCIDO (rojo)
-              new Lote(6, "L-006", "Queso Fresco 250g", "Lácteos", 20, 8, LocalDate.now().minusDays(10), LocalDate.now().minusDays(1), "Anaquel A2", EstadoLote.VENCIDO)
-          );
-      }
+      // Mutable list so NuevoLoteDialog can add to it; panels listen via model refresh
+      private static final List<Lote> lotes = new ArrayList<>(List.of(
+          // 3 DISPONIBLE
+          new Lote(1, "L-001", "Leche Gloria 1L", "Lácteos", 100, 100, LocalDate.now(), LocalDate.now().plusDays(20), "Anaquel A1", EstadoLote.DISPONIBLE),
+          new Lote(2, "L-002", "Yogur Fresa 500g", "Lácteos", 60, 48, LocalDate.now().minusDays(3), LocalDate.now().plusDays(12), "Cámara B2", EstadoLote.DISPONIBLE),
+          new Lote(3, "L-003", "Pollo Entero 1.8kg", "Carnes", 30, 22, LocalDate.now().minusDays(1), LocalDate.now().plusDays(9), "Cámara C1", EstadoLote.DISPONIBLE),
+          // 2 PROXIMO_VENCER
+          new Lote(4, "L-004", "Jamón del País 200g", "Embutidos", 40, 15, LocalDate.now().minusDays(5), LocalDate.now().plusDays(5), "Anaquel A3", EstadoLote.PROXIMO_VENCER),
+          new Lote(5, "L-005", "Pan de Molde Bimbo", "Panadería", 24, 10, LocalDate.now().minusDays(2), LocalDate.now().plusDays(3), "Anaquel D1", EstadoLote.PROXIMO_VENCER),
+          // 1 VENCIDO
+          new Lote(6, "L-006", "Queso Fresco 250g", "Lácteos", 20, 8, LocalDate.now().minusDays(10), LocalDate.now().minusDays(1), "Anaquel A2", EstadoLote.VENCIDO)
+      ));
 
-      public static ObservableList<Alerta> getAlertas() {
-          return FXCollections.observableArrayList(
-              new Alerta(1, TipoAlerta.PROXIMO_VENCER, 5, "L-004 — Jamón del País", EstadoAlerta.PENDIENTE),
-              new Alerta(2, TipoAlerta.PROXIMO_VENCER, 3, "L-005 — Pan de Molde Bimbo", EstadoAlerta.PENDIENTE),
-              new Alerta(3, TipoAlerta.VENCIDO, 0, "L-006 — Queso Fresco 250g", EstadoAlerta.PENDIENTE)
-          );
-      }
+      private static final List<Alerta> alertas = new ArrayList<>(List.of(
+          new Alerta(1, TipoAlerta.PROXIMO_VENCER, 5, "L-004 — Jamón del País", EstadoAlerta.PENDIENTE),
+          new Alerta(2, TipoAlerta.PROXIMO_VENCER, 3, "L-005 — Pan de Molde Bimbo", EstadoAlerta.PENDIENTE),
+          new Alerta(3, TipoAlerta.VENCIDO, 0, "L-006 — Queso Fresco 250g", EstadoAlerta.PENDIENTE)
+      ));
 
-      public static Usuario getOperario() {
-          return new Usuario(1, "Carlos", "Quispe", RolUsuario.OPERARIO);
-      }
+      public static List<Lote> getLotes()     { return lotes; }
+      public static List<Alerta> getAlertas() { return alertas; }
 
-      public static Usuario getSupervisor() {
-          return new Usuario(2, "Ana", "Torres", RolUsuario.SUPERVISOR);
-      }
+      public static Usuario getOperario()   { return new Usuario(1, "Carlos", "Quispe", RolUsuario.OPERARIO); }
+      public static Usuario getSupervisor() { return new Usuario(2, "Ana", "Torres", RolUsuario.SUPERVISOR); }
   }
   ```
 
+  > `List` estándar — cuando `NuevoLoteDialog` agrega un lote, los paneles llaman `tableModel.fireTableDataChanged()` tras cerrar el diálogo.
+
 ---
 
-## CSS Base
+## MainFrame y Navegación Base
 
-- [x] Crear `resources/css/styles.css` con los design tokens del AGENT.md y estilos base:
-  - `.root` con todos los tokens de color y fuente
-  - `.btn-primary` — fondo `#FCD535`, texto `#181a20`, radius `6px`
-  - `.btn-secondary` — fondo `#1e2329`, texto `#eaecef`, borde `#2b3139`
-  - `.card` — fondo `#1e2329`, radius `12px`, padding `24px`
-  - `.row-safe` — texto `#0ecb81`
-  - `.row-warning` — texto `#f0a500`
-  - `.row-danger` — texto `#f6465d`
-  - `.sidebar` — fondo `#0b0e11`, borde derecho `#2b3139`
-  - `.nav-item` — texto `#707a8a`; `.nav-item.active` — texto `#eaecef`
-  - `.muted` — texto `#707a8a`, tamaño `12px`
+- [x] Crear `ui/MainFrame.java`:
+  - Extiende `JFrame`
+  - Layout raíz: `JPanel` con `BorderLayout`
+  - WEST: `SidebarPanel` (200px)
+  - CENTER: `JPanel` con `CardLayout` (las pantallas)
+  - SOUTH: `ShortcutBar` (28px)
+  - Registra los shortcuts globales via `KeyboardFocusManager`
+
+- [x] Crear `component/SidebarPanel.java`:
+  - Fondo `Theme.SURFACE_CARD`, layout `BoxLayout Y_AXIS`
+  - Wordmark label en `Theme.PRIMARY` (56px de alto)
+  - Nav items: Dashboard, Inventario, Alertas, Reportes
+  - `NavItem` con efecto activo (barra izquierda amarilla de 3px)
+  - Footer: nombre usuario + rol + botón "Cerrar Sesión"
+
+- [x] Crear `component/ShortcutBar.java`:
+  - Fondo `Theme.SURFACE_ELEVATED`, alto `28px`
+  - Borde superior `Theme.HAIRLINE_DARK`
+  - Método `setHints(List<ShortcutHint>)` que reemplaza los chips de la barra
+  - Toggle de visibilidad con atajo `?`
 
 ---
 
 ## Verificación
 
-- [x] `./gradlew run` abre la ventana de Login (pantalla negra con tarjeta centrada)
+- [x] `./gradlew run` abre la ventana con tema oscuro (FlatLaf activo)
 - [x] No hay errores de compilación
 - [x] Los 6 enums existen y compilan
-- [x] MockData.getLotes() devuelve 6 lotes sin excepción
+- [x] `MockData.getLotes()` devuelve 6 lotes sin excepción
+- [x] `Theme.CANVAS_DARK` es el color de fondo de la ventana principal

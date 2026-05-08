@@ -1,6 +1,6 @@
 # Sistema de Control de Productos Perecibles - Plaza Vea
 
-Aplicacion de escritorio JavaFX para controlar inventario de productos perecibles en tiendas Plaza Vea. El sistema centraliza el registro de lotes, seguimiento de fechas de vencimiento, alertas automaticas y reportes de mermas.
+Aplicacion de escritorio Swing + FlatLaf para controlar inventario de productos perecibles en tiendas Plaza Vea. El sistema centraliza el registro de lotes, seguimiento de fechas de vencimiento, alertas automaticas y reportes de mermas.
 
 El objetivo del proyecto es reemplazar el control manual de vencimientos por una herramienta local de tienda que ayude a reducir perdidas por productos vencidos durante la operacion diaria.
 
@@ -14,13 +14,13 @@ El objetivo del proyecto es reemplazar el control manual de vencimientos por una
 El proyecto esta iniciando la Fase A: una version UI-first con datos simulados antes de integrar base de datos.
 
 - [x] Configuracion Gradle creada
-- [x] JavaFX configurado
+- [x] FlatLaf y MigLayout configurados
 - [x] Estructura base de paquetes creada
 - [x] Pantalla inicial de login creada
 - [x] Enums de dominio creados
 - [x] POJOs minimos de Fase A creados
 - [x] `MockData` creado
-- [x] CSS base con tokens visuales creado
+- [x] Tokens visuales en `Theme.java` creados
 - [x] Compilacion verificada
 - [ ] Pantallas principales de la Fase A
 - [ ] Atajos de teclado
@@ -36,9 +36,9 @@ El checklist detallado esta en `docs/implementation_plan/phase-a/01_setup.md`.
 |-------------|---------|-----|
 | Java | 25 | Lenguaje principal |
 | Gradle | 9.5.0 | Build y ejecucion |
-| JavaFX | 25 | Interfaz de escritorio |
-| ControlsFX | 11.2.1 | Componentes JavaFX avanzados |
-| FontAwesomeFX | 4.7.0-9.1.2 | Iconos |
+| Swing | (incluido en JDK) | Interfaz de escritorio nativa |
+| FlatLaf | 3.6 | Look & Feel moderno oscuro |
+| MigLayout | 11.4.2 | Layout para formularios |
 | PostgreSQL | 16 | Persistencia en Fase B |
 
 Las versiones de Java y Gradle estan fijadas en `mise.toml`.
@@ -101,14 +101,14 @@ src/main/resources/
 
 Carpetas principales:
 
-- `controller/`: controladores JavaFX.
-- `component/`: componentes reutilizables de UI.
+- `ui/`: paneles y dialogos Swing (uno por pantalla).
+- `component/`: componentes reutilizables (GaugeCard, SidebarPanel, ShortcutBar).
+- `theme/`: tokens de color/fuente (`Theme.java`, `Fonts.java`).
 - `enums/`: enumeraciones del dominio.
 - `mock/`: datos simulados usados durante Fase A.
 - `model/`: POJOs de dominio para Fase A.
-- `util/`: utilidades transversales como navegacion de escenas.
-- `resources/fxml/`: vistas JavaFX.
-- `resources/css/`: estilos globales y tokens visuales.
+- `util/`: utilidades transversales (Navigator, SessionManager).
+- `resources/fonts/`: archivos .ttf de Inter y JetBrains Mono.
 
 ## Flujo de Implementacion
 
@@ -116,7 +116,7 @@ El plan completo vive en `docs/implementation_plan/`:
 
 - `00_overview.md`: vision general, fases y criterios de exito.
 - `phase-a/01_setup.md`: configuracion inicial del proyecto.
-- `phase-a/02_screens.md`: pantallas JavaFX con datos simulados.
+- `phase-a/02_screens.md`: pantallas Swing con datos simulados.
 - `phase-a/03_ux_features.md`: parser de fechas, teclado y gauges.
 - `phase-b/04_data_model.md`: entidades JPA.
 - `phase-b/05_repositories.md`: repositorios Spring Data.
