@@ -1,8 +1,10 @@
 package pe.plazavea.perecibles.ui.panel;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -17,6 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
 import pe.plazavea.perecibles.enums.EstadoLote;
 import pe.plazavea.perecibles.mock.MockData;
 import pe.plazavea.perecibles.model.Lote;
@@ -34,7 +37,7 @@ public final class InventarioPanel extends JPanel {
     private final JTable table = TableFactory.loteTable(model);
     private final JTextField search = new JTextField();
     private final JComboBox<String> categoria = new JComboBox<>(new String[]{"Todas", "Lacteos", "Carnes", "Embutidos", "Panaderia"});
-    private final JComboBox<String> estado = new JComboBox<>(new String[]{"Todos", "Disponible", "Proximo vencer", "Vencido", "Retirado"});
+    private final JComboBox<String> estado = new JComboBox<>(new String[]{"Todos", "Disponible", "Próximo vencer", "Vencido", "Retirado"});
 
     public InventarioPanel(java.awt.Frame owner) {
         this.owner = owner;
@@ -75,12 +78,12 @@ public final class InventarioPanel extends JPanel {
         return panel;
     }
 
-    private void openNuevoLote() {
+    public void openNuevoLote() {
         new NuevoLoteDialog(owner).setVisible(true);
         refreshTable();
     }
 
-    private void refreshTable() {
+    public void refreshTable() {
         String query = search.getText().trim().toLowerCase();
         String selectedCategory = String.valueOf(categoria.getSelectedItem());
         String selectedState = String.valueOf(estado.getSelectedItem());
@@ -97,24 +100,56 @@ public final class InventarioPanel extends JPanel {
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_N, 0), "nuevoLote");
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_V, 0), "marcarVencido");
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "marcarRemate");
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "filaAnterior");
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "filaSiguiente");
         getActionMap().put("nuevoLote", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent event) {
-                openNuevoLote();
+                if (!isTextEditing()) {
+                    openNuevoLote();
+                }
             }
         });
         getActionMap().put("marcarVencido", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent event) {
-                updateSelected(EstadoLote.VENCIDO);
+                if (!isTextEditing()) {
+                    marcarVencido();
+                }
             }
         });
         getActionMap().put("marcarRemate", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent event) {
-                updateSelected(EstadoLote.RETIRADO);
+                if (!isTextEditing()) {
+                    marcarRemate();
+                }
             }
         });
+        getActionMap().put("filaAnterior", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                if (!isTextEditing()) {
+                    moveSelection(-1);
+                }
+            }
+        });
+        getActionMap().put("filaSiguiente", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                if (!isTextEditing()) {
+                    moveSelection(1);
+                }
+            }
+        });
+    }
+
+    public void marcarVencido() {
+        updateSelected(EstadoLote.VENCIDO);
+    }
+
+    public void marcarRemate() {
+        updateSelected(EstadoLote.RETIRADO);
     }
 
     private void updateSelected(EstadoLote newState) {
@@ -126,10 +161,25 @@ public final class InventarioPanel extends JPanel {
         refreshTable();
     }
 
+    private void moveSelection(int delta) {
+        if (table.getRowCount() == 0) {
+            return;
+        }
+        int selected = table.getSelectedRow();
+        int next = Math.max(0, Math.min(table.getRowCount() - 1, selected + delta));
+        table.setRowSelectionInterval(next, next);
+        table.scrollRectToVisible(table.getCellRect(next, 0, true));
+    }
+
+    private boolean isTextEditing() {
+        Component focused = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        return focused instanceof JTextComponent;
+    }
+
     private String stateLabel(EstadoLote estado) {
         return switch (estado) {
             case DISPONIBLE -> "Disponible";
-            case PROXIMO_VENCER -> "Proximo vencer";
+            case PROXIMO_VENCER -> "Próximo vencer";
             case VENCIDO -> "Vencido";
             case RETIRADO -> "Retirado";
         };
@@ -152,4 +202,3 @@ public final class InventarioPanel extends JPanel {
         }
     }
 }
-

@@ -84,7 +84,7 @@ public final class ReportesPanel extends JPanel {
         filters.add(Box.createVerticalStrut(Theme.SP_XS));
         var exportar = Buttons.secondary("Exportar CSV");
         exportar.setEnabled(false);
-        exportar.addActionListener(event -> JOptionPane.showMessageDialog(this, "Esta funcion estara disponible en la version completa"));
+        exportar.addActionListener(event -> JOptionPane.showMessageDialog(this, "Esta función estará disponible en la versión completa"));
         filters.add(exportar);
 
         preview.setEditable(false);
@@ -117,7 +117,7 @@ public final class ReportesPanel extends JPanel {
         panel.add(Box.createVerticalStrut(Theme.SP_XXS));
     }
 
-    private void generateReport() {
+    public void generateReport() {
         TipoReporte tipo = (TipoReporte) tipoReporte.getSelectedItem();
         long vencidos = MockData.getLotes().stream().filter(lote -> lote.estaVencido()).count();
         long proximos = MockData.getLotes().stream().filter(lote -> lote.estaProximoAVencer(7)).count();
@@ -125,7 +125,7 @@ public final class ReportesPanel extends JPanel {
         String detail = switch (tipo) {
             case STOCK -> "Unidades en stock: " + stock;
             case VENCIDOS -> "Lotes vencidos: " + vencidos;
-            case PROXIMOS_VENCER -> "Lotes proximos a vencer: " + proximos;
+            case PROXIMOS_VENCER -> "Lotes próximos a vencer: " + proximos;
             case MERMAS -> "Mermas registradas hoy: 3";
         };
         preview.setText("""
@@ -141,4 +141,3 @@ public final class ReportesPanel extends JPanel {
                 """.formatted(tipo, desde.getText(), hasta.getText(), LocalDate.now(), MockData.getLotes().size(), detail));
     }
 }
-

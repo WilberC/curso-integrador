@@ -1,4 +1,4 @@
-# Fase A — Características UX Avanzadas
+﻿# Fase A — Características UX Avanzadas
 
 Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phase B solo cambia la fuente de datos, no la lógica de UX.
 
@@ -24,7 +24,7 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### Implementación
 
-- [ ] Crear `util/DateParser.java` con método estático `Optional<LocalDate> parse(String input)`:
+- [x] Crear `util/DateParser.java` con método estático `Optional<LocalDate> parse(String input)`:
 
   ```java
   // Regex a implementar (en orden de prioridad):
@@ -39,19 +39,19 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
   // 5. Fallback: DateTimeFormatter con patrones ["dd/MM/yyyy", "dd-MM-yyyy", "yyyy-MM-dd"]
   ```
 
-- [ ] Método privado `nextWeekday(DayOfWeek target)`:
+- [x] Método privado `nextWeekday(DayOfWeek target)`:
   - Itera `LocalDate.now().plusDays(1)` hasta encontrar el primer día que coincida con `target`
 
-- [ ] Si ningún patrón coincide, devolver `Optional.empty()`
+- [x] Si ningún patrón coincide, devolver `Optional.empty()`
 
 ### Integración en el formulario Nuevo Lote
 
-- [ ] El `TextField` de fecha de vencimiento tiene un `ChangeListener` en su `textProperty()`
-- [ ] Al cambiar el texto, llama `DateParser.parse(texto)` y actualiza el `Label` de preview:
+- [x] El `TextField` de fecha de vencimiento tiene un `ChangeListener` en su `textProperty()`
+- [x] Al cambiar el texto, llama `DateParser.parse(texto)` y actualiza el `Label` de preview:
   - Éxito: `"→ 15 de junio de 2026"` en color `#0ecb81`
   - Fallo: `"Fecha no reconocida"` en color `#f6465d`
-- [ ] Al guardar el formulario, si el texto aún no está parseable → bloquear guardado y mostrar borde rojo
-- [ ] Formatear la fecha resuelta en español usando `DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy", new Locale("es", "PE"))`
+- [x] Al guardar el formulario, si el texto aún no está parseable → bloquear guardado y mostrar borde rojo
+- [x] Formatear la fecha resuelta en español usando `DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy", new Locale("es", "PE"))`
 
 ---
 
@@ -59,7 +59,7 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### Registro de handlers globales
 
-- [ ] En `MainFrame`, registrar un `KeyEventDispatcher` global una sola vez:
+- [x] En `MainFrame`, registrar un `KeyEventDispatcher` global una sola vez:
   ```java
   KeyboardFocusManager.getCurrentKeyboardFocusManager()
       .addKeyEventDispatcher(event -> {
@@ -69,7 +69,7 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
       });
   ```
 
-- [ ] Crear `util/KeyboardHandler.java` con método estático `handle(KeyEvent event, Navigator navigator, SessionManager session)`:
+- [x] Crear `util/KeyboardHandler.java` con método estático `handle(KeyEvent event, Navigator navigator, SessionManager session)`:
   - Lee `Navigator.getCurrentName()` para saber en qué pantalla está el usuario
   - Despacha al panel correspondiente si el atajo aplica a esa pantalla
 
@@ -93,9 +93,9 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### Implementación
 
-- [ ] `InventarioPanel` expone `openNuevoLote()`, `marcarVencido()`, `marcarRemate()`
-- [ ] `AlertasPanel` expone `atenderSeleccionada()`, `ignorarSeleccionada()`
-- [ ] Screen-local shortcuts registrados via `InputMap`/`ActionMap` en cada panel:
+- [x] `InventarioPanel` expone `openNuevoLote()`, `marcarVencido()`, `marcarRemate()`
+- [x] `AlertasPanel` expone `atenderSeleccionada()`, `ignorarSeleccionada()`
+- [x] Screen-local shortcuts registrados via `InputMap`/`ActionMap` en cada panel:
   ```java
   InputMap im = panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
   im.put(KeyStroke.getKeyStroke('N'), "nuevoLote");
@@ -103,8 +103,8 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
       public void actionPerformed(ActionEvent e) { openNuevoLote(); }
   });
   ```
-- [ ] Los atajos de navegación global (`Ctrl+*`) se manejan en el `KeyEventDispatcher` del `MainFrame` — no en los paneles individuales
-- [ ] Nunca interceptar teclas cuando el foco está en un `JTextField` o `JTextArea`:
+- [x] Los atajos de navegación global (`Ctrl+*`) se manejan en el `KeyEventDispatcher` del `MainFrame` — no en los paneles individuales
+- [x] Nunca interceptar teclas cuando el foco está en un `JTextField` o `JTextArea`:
   ```java
   Component focused = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
   if (focused instanceof JTextComponent) return false; // no robar el evento
@@ -112,11 +112,11 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### Barra de atajos inferior (`ShortcutBar`)
 
-- [ ] `ShortcutBar` vive en el SOUTH del `MainFrame`, siempre presente
-- [ ] `Navigator` llama `shortcutBar.setHints(hintsForScreen(name))` al navegar
-- [ ] Muestra los atajos relevantes a la pantalla actual: `[N] Nuevo` `[V] Vencido` `[R] Remate`
-- [ ] Visible por defecto; `toggle()` alterna visibilidad con `setVisible(!isVisible())`
-- [ ] Estilo: fondo `Theme.SURFACE_ELEVATED`, texto `Theme.MUTED` para descripciones, `Theme.PRIMARY` para teclas, fuente 11px mono para la tecla
+- [x] `ShortcutBar` vive en el SOUTH del `MainFrame`, siempre presente
+- [x] `Navigator` llama `shortcutBar.setHints(hintsForScreen(name))` al navegar
+- [x] Muestra los atajos relevantes a la pantalla actual: `[N] Nuevo` `[V] Vencido` `[R] Remate`
+- [x] Visible por defecto; `toggle()` alterna visibilidad con `setVisible(!isVisible())`
+- [x] Estilo: fondo `Theme.SURFACE_ELEVATED`, texto `Theme.MUTED` para descripciones, `Theme.PRIMARY` para teclas, fuente 11px mono para la tecla
 
 ---
 
@@ -124,7 +124,7 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### GaugeCard (componente reutilizable)
 
-- [ ] `component/GaugeCard.java` extiende `JPanel` (ver implementación completa en `DESIGN.md`):
+- [x] `component/GaugeCard.java` extiende `JPanel` (ver implementación completa en `DESIGN.md`):
 
   ```
   JPanel (paintComponent → fillRoundRect con SURFACE_CARD)
@@ -134,12 +134,12 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
   └── JLabel tendencia     — "↑ +2" o "↓ -1", inter 11px, MUTED
   ```
 
-- [ ] Método `setData(String titulo, int valor, int total, int trend)`:
+- [x] Método `setData(String titulo, int valor, int total, int trend)`:
   - Calcula `porcentaje = valor / total`
   - Formatea trend: `+2 → "↑ +2"`, `-1 → "↓ -1"`, `0 → "— sin cambio"`
   - Llama `applyState(GaugeState)` según la lógica de umbral
 
-- [ ] Lógica de color (dinámicamente, sin CSS):
+- [x] Lógica de color (dinámicamente, sin CSS):
   ```java
   public void applyState(GaugeState state) {
       Color c = switch (state) {
@@ -155,7 +155,7 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
 
 ### Auto-refresh
 
-- [ ] En `DashboardPanel` (al construir el panel):
+- [x] En `DashboardPanel` (al construir el panel):
   ```java
   Timer timer = new Timer(60_000, e -> refreshDashboard());
   timer.setRepeats(true);
@@ -163,18 +163,18 @@ Implementar los tres patrones del "Estado del Arte" con datos simulados. En Phas
   // Detener en windowClosed o cuando el panel se oculte
   ```
 
-- [ ] `refreshDashboard()` corre en el EDT (Timer de Swing ya corre en EDT):
+- [x] `refreshDashboard()` corre en el EDT (Timer de Swing ya corre en EDT):
   - En Phase A: recalcula desde `MockData.getLotes()` (se nota cuando se agrega un lote nuevo desde Inventario)
   - En Phase B: delegar a `SwingWorker` que llama `inventarioServicio.consultarStock()` y llama `updateGauges()` en `done()`
 
 ### Snapshot de tendencia
 
-- [ ] Al inicializar `DashboardPanel`, guardar el snapshot inicial:
+- [x] Al inicializar `DashboardPanel`, guardar el snapshot inicial:
   ```java
   private final Map<String, Integer> snapshotAnterior = new HashMap<>();
   ```
-- [ ] Cada ciclo de refresh compara el valor actual contra el snapshot y calcula la diferencia para la flecha de tendencia
-- [ ] Actualizar snapshot después de calcular la tendencia
+- [x] Cada ciclo de refresh compara el valor actual contra el snapshot y calcula la diferencia para la flecha de tendencia
+- [x] Actualizar snapshot después de calcular la tendencia
 
 ---
 

@@ -4,10 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
-import java.awt.event.KeyEvent;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 import pe.plazavea.perecibles.enums.RolUsuario;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.panel.AlertasPanel;
@@ -18,6 +17,7 @@ import pe.plazavea.perecibles.ui.panel.ReportesPanel;
 import pe.plazavea.perecibles.ui.panel.ShortcutBar;
 import pe.plazavea.perecibles.ui.panel.SidebarPanel;
 import pe.plazavea.perecibles.ui.panel.ToolbarPanel;
+import pe.plazavea.perecibles.util.KeyboardHandler;
 import pe.plazavea.perecibles.util.SessionManager;
 
 public final class MainFrame extends JFrame implements Navigator {
@@ -29,6 +29,11 @@ public final class MainFrame extends JFrame implements Navigator {
     private final ToolbarPanel toolbar = new ToolbarPanel();
     private final ShortcutBar shortcutBar = new ShortcutBar();
     private final SidebarPanel sidebar = new SidebarPanel(this);
+    private final DashboardPanel dashboardPanel = new DashboardPanel();
+    private final InventarioPanel inventarioPanel = new InventarioPanel(this);
+    private final AlertasPanel alertasPanel = new AlertasPanel();
+    private final ReportesPanel reportesPanel = new ReportesPanel();
+    private String currentScreen = "login";
 
     public MainFrame() {
         super("Plaza Vea - Control de Perecibles");
@@ -47,6 +52,7 @@ public final class MainFrame extends JFrame implements Navigator {
     @Override
     public void show(String screen) {
         if ("login".equals(screen)) {
+            currentScreen = "login";
             rootLayout.show(rootCards, "login");
             return;
         }
@@ -59,8 +65,10 @@ public final class MainFrame extends JFrame implements Navigator {
         sidebar.refreshSession();
         rootLayout.show(rootCards, "shell");
         contentLayout.show(contentCards, screen);
+        currentScreen = screen;
         sidebar.setActive(screen);
         toolbar.setScreenTitle(titleFor(screen));
+        shortcutBar.setHints(hintsForScreen(screen));
     }
 
     private JPanel buildShell() {
@@ -73,10 +81,10 @@ public final class MainFrame extends JFrame implements Navigator {
         center.add(contentCards, BorderLayout.CENTER);
 
         contentCards.setBackground(Theme.CANVAS_DARK);
-        contentCards.add(new DashboardPanel(), "dashboard");
-        contentCards.add(new InventarioPanel(this), "inventario");
-        contentCards.add(new AlertasPanel(), "alertas");
-        contentCards.add(new ReportesPanel(), "reportes");
+        contentCards.add(dashboardPanel, "dashboard");
+        contentCards.add(inventarioPanel, "inventario");
+        contentCards.add(alertasPanel, "alertas");
+        contentCards.add(reportesPanel, "reportes");
 
         shell.add(sidebar, BorderLayout.WEST);
         shell.add(center, BorderLayout.CENTER);
@@ -85,51 +93,31 @@ public final class MainFrame extends JFrame implements Navigator {
     }
 
     private void registerShortcuts() {
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(event -> {
-            if (event.getID() != KeyEvent.KEY_PRESSED) {
-                return false;
-            }
-            boolean ctrl = (event.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0;
-            if (ctrl && event.getKeyCode() == KeyEvent.VK_G) {
-                show("dashboard");
-                return true;
-            }
-            if (ctrl && event.getKeyCode() == KeyEvent.VK_I) {
-                show("inventario");
-                return true;
-            }
-            if (ctrl && event.getKeyCode() == KeyEvent.VK_A) {
-                show("alertas");
-                return true;
-            }
-            if (ctrl && event.getKeyCode() == KeyEvent.VK_R) {
-                show("reportes");
-                return true;
-            }
-            if (event.getKeyCode() == KeyEvent.VK_SLASH && event.isShiftDown()) {
-                shortcutBar.toggle();
-                return true;
-            }
-            if (event.getKeyCode() == KeyEvent.VK_F5) {
-                refreshCurrentScreen();
-                return true;
-            }
-            return false;
-        });
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .addKeyEventDispatcher(event -> KeyboardHandler.handle(event, this));
     }
 
-    private void refreshCurrentScreen() {
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() {
-                return null;
-            }
+    @Override
+    public String getCurrentName() {
+        return currentScreen;
+    }
 
-            @Override
-            protected void done() {
-                toolbar.setScreenTitle("Actualizado");
+    @Override
+    public void refreshCurrentScreen() {
+        switch (currentScreen) {
+            case "dashboard" -> dashboardPanel.refreshDashboard();
+            case "inventario" -> inventarioPanel.refreshTable();
+            case "alertas" -> alertasPanel.refreshAlerts();
+            case "reportes" -> reportesPanel.generateReport();
+            default -> {
             }
-        }.execute();
+        }
+        toolbar.setScreenTitle(titleFor(currentScreen) + " - Actualizado");
+    }
+
+    @Override
+    public void toggleShortcutBar() {
+        shortcutBar.toggle();
     }
 
     private String titleFor(String screen) {
@@ -139,6 +127,37 @@ public final class MainFrame extends JFrame implements Navigator {
             case "alertas" -> "Alertas";
             case "reportes" -> "Reportes";
             default -> "Control de Perecibles";
+        };
+    }
+
+    private List<ShortcutBar.ShortcutHint> hintsForScreen(String screen) {
+        return switch (screen) {
+            case "inventario" -> List.of(
+                    new ShortcutBar.ShortcutHint("N", "Nuevo"),
+                    new ShortcutBar.ShortcutHint("V", "Vencido"),
+                    new ShortcutBar.ShortcutHint("R", "Remate"),
+                    new ShortcutBar.ShortcutHint("F5", "Refrescar"),
+                    new ShortcutBar.ShortcutHint("?", "Atajos")
+            );
+            case "alertas" -> List.of(
+                    new ShortcutBar.ShortcutHint("V", "Atender"),
+                    new ShortcutBar.ShortcutHint("I", "Ignorar"),
+                    new ShortcutBar.ShortcutHint("F5", "Refrescar"),
+                    new ShortcutBar.ShortcutHint("?", "Atajos")
+            );
+            case "reportes" -> List.of(
+                    new ShortcutBar.ShortcutHint("Ctrl+G", "Dashboard"),
+                    new ShortcutBar.ShortcutHint("Ctrl+I", "Inventario"),
+                    new ShortcutBar.ShortcutHint("Ctrl+A", "Alertas"),
+                    new ShortcutBar.ShortcutHint("F5", "Refrescar")
+            );
+            default -> List.of(
+                    new ShortcutBar.ShortcutHint("Ctrl+G", "Dashboard"),
+                    new ShortcutBar.ShortcutHint("Ctrl+I", "Inventario"),
+                    new ShortcutBar.ShortcutHint("Ctrl+A", "Alertas"),
+                    new ShortcutBar.ShortcutHint("F5", "Refrescar"),
+                    new ShortcutBar.ShortcutHint("?", "Atajos")
+            );
         };
     }
 }

@@ -71,12 +71,12 @@ public final class LoginPanel extends JPanel {
         card.add(Box.createVerticalStrut(Theme.SP_LG));
         card.add(field("Usuario", emailField));
         card.add(Box.createVerticalStrut(Theme.SP_SM));
-        card.add(field("Contrasena", passwordField));
+        card.add(field("Contraseña", passwordField));
         card.add(Box.createVerticalStrut(Theme.SP_SM));
         card.add(errorLabel);
         card.add(Box.createVerticalStrut(Theme.SP_MD));
 
-        var login = Buttons.primary("Iniciar Sesion");
+        var login = Buttons.primary("Iniciar Sesión");
         login.addActionListener(event -> attemptLogin());
         login.setAlignmentX(LEFT_ALIGNMENT);
         login.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
@@ -171,4 +171,3 @@ public final class LoginPanel extends JPanel {
         }
     }
 }
-

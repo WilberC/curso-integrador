@@ -7,7 +7,9 @@ import java.awt.GridLayout;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -35,6 +37,7 @@ public final class DashboardPanel extends JPanel {
     private final LoteTableModel urgentModel = new LoteTableModel(List.of());
     private final JLabel timestampLabel = new JLabel();
     private final Timer timer = new Timer(60_000, event -> refreshDashboard());
+    private final Map<String, Integer> snapshotAnterior = new HashMap<>();
 
     public DashboardPanel() {
         setLayout(new BorderLayout(0, Theme.SP_LG));
@@ -74,13 +77,20 @@ public final class DashboardPanel extends JPanel {
         int activeTotal = (int) lotes.stream().filter(lote -> lote.getEstado() != EstadoLote.RETIRADO).count();
         int proximos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.PROXIMO_VENCER).count();
         int vencidos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.VENCIDO).count();
-        GaugeState state = vencidos > 0 ? GaugeState.DANGER : proximos * 100.0 / Math.max(activeTotal, 1) >= 15 ? GaugeState.WARNING : GaugeState.SAFE;
+        int proximosPct = percent(proximos, activeTotal);
+        int vencidosPct = percent(vencidos, activeTotal);
+        int mermasDia = 3;
+        GaugeState state = vencidos > 0 ? GaugeState.DANGER : proximosPct >= 15 ? GaugeState.WARNING : GaugeState.SAFE;
 
         gauges.removeAll();
-        gauges.add(new GaugeCard("Total lotes activos", activeTotal, Math.max(activeTotal, 1), 0, state));
-        gauges.add(new GaugeCard("% Proximos a vencer", percent(proximos, activeTotal), 100, 1, proximos > 0 ? GaugeState.WARNING : GaugeState.SAFE));
-        gauges.add(new GaugeCard("% Vencidos", percent(vencidos, activeTotal), 100, 0, vencidos > 0 ? GaugeState.DANGER : GaugeState.SAFE));
-        gauges.add(new GaugeCard("Mermas del dia", 3, 10, -1, GaugeState.WARNING));
+        gauges.add(new GaugeCard("Total lotes activos", activeTotal, Math.max(activeTotal, 1), trend("total", activeTotal), state));
+        gauges.add(new GaugeCard("% Próximos a vencer", proximosPct, 100, trend("proximos", proximosPct), proximosPct >= 15 ? GaugeState.WARNING : GaugeState.SAFE));
+        gauges.add(new GaugeCard("% Vencidos", vencidosPct, 100, trend("vencidos", vencidosPct), vencidos > 0 ? GaugeState.DANGER : GaugeState.SAFE));
+        gauges.add(new GaugeCard("Mermas del día", mermasDia, 10, trend("mermas", mermasDia), GaugeState.WARNING));
+        snapshotAnterior.put("total", activeTotal);
+        snapshotAnterior.put("proximos", proximosPct);
+        snapshotAnterior.put("vencidos", vencidosPct);
+        snapshotAnterior.put("mermas", mermasDia);
         urgentModel.setData(lotes.stream()
                 .filter(lote -> lote.getEstado() != EstadoLote.RETIRADO)
                 .sorted(Comparator.comparingLong(Lote::getDiasParaVencer))
@@ -117,5 +127,8 @@ public final class DashboardPanel extends JPanel {
     private int percent(int value, int total) {
         return total > 0 ? (int) Math.round(value * 100.0 / total) : 0;
     }
-}
 
+    private int trend(String key, int value) {
+        return value - snapshotAnterior.getOrDefault(key, value);
+    }
+}

@@ -79,7 +79,7 @@ public final class NuevoLoteDialog extends JDialog {
         addFormRow(body, "Producto", productoField);
         addFormRow(body, "Nro. Lote", numeroField);
         addFormRow(body, "Cantidad inicial", cantidadField);
-        addFormRow(body, "Ubicacion", ubicacionField);
+        addFormRow(body, "Ubicación", ubicacionField);
         addFormRow(body, "Vencimiento", buildDateInput());
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, Theme.SP_XS, Theme.SP_MD));
@@ -176,7 +176,7 @@ public final class NuevoLoteDialog extends JDialog {
 
     private void updateDatePreview() {
         DateParser.parse(vencimientoField.getText()).ifPresentOrElse(date -> {
-            datePreview.setText("-> " + DateParser.formatLong(date));
+            datePreview.setText("→ " + DateParser.formatLong(date));
             datePreview.setForeground(Theme.SAFE);
             vencimientoField.setBorder(defaultBorder());
         }, () -> {
@@ -229,4 +229,3 @@ public final class NuevoLoteDialog extends JDialog {
         );
     }
 }
-

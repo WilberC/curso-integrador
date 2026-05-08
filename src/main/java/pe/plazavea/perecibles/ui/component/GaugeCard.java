@@ -57,7 +57,7 @@ public final class GaugeCard extends JPanel {
         titleLabel.setText(title);
         valueLabel.setText(String.valueOf(value));
         progressBar.setValue(total > 0 ? (int) ((value * 100.0) / total) : 0);
-        trendLabel.setText(trend > 0 ? "+%d desde ayer".formatted(trend) : trend < 0 ? "%d desde ayer".formatted(trend) : "sin cambio");
+        trendLabel.setText(trend > 0 ? "↑ +%d".formatted(trend) : trend < 0 ? "↓ %d".formatted(trend) : "— sin cambio");
     }
 
     public void applyState(GaugeState state) {
@@ -68,6 +68,7 @@ public final class GaugeCard extends JPanel {
         };
         valueLabel.setForeground(color);
         progressBar.setForeground(color);
+        repaint();
     }
 
     @Override
