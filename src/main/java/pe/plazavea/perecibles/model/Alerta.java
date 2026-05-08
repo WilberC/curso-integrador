@@ -10,7 +10,7 @@ public class Alerta {
     private final TipoAlerta tipoAlerta;
     private final int diasParaVencer;
     private final LocalDate fechaGeneracion;
-    private final EstadoAlerta estado;
+    private EstadoAlerta estado;
     private final String loteNumero;
 
     public Alerta(int id, TipoAlerta tipoAlerta, int diasParaVencer, String loteNumero, EstadoAlerta estado) {
@@ -51,6 +51,10 @@ public class Alerta {
 
     public EstadoAlerta getEstado() {
         return estado;
+    }
+
+    public void setEstado(EstadoAlerta estado) {
+        this.estado = estado;
     }
 
     public String getLoteNumero() {

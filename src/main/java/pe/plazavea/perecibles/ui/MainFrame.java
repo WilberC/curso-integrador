@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
+import pe.plazavea.perecibles.enums.RolUsuario;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.panel.AlertasPanel;
 import pe.plazavea.perecibles.ui.panel.DashboardPanel;
@@ -17,6 +18,7 @@ import pe.plazavea.perecibles.ui.panel.ReportesPanel;
 import pe.plazavea.perecibles.ui.panel.ShortcutBar;
 import pe.plazavea.perecibles.ui.panel.SidebarPanel;
 import pe.plazavea.perecibles.ui.panel.ToolbarPanel;
+import pe.plazavea.perecibles.util.SessionManager;
 
 public final class MainFrame extends JFrame implements Navigator {
 
@@ -48,7 +50,13 @@ public final class MainFrame extends JFrame implements Navigator {
             rootLayout.show(rootCards, "login");
             return;
         }
+        if ("reportes".equals(screen)
+                && (SessionManager.getCurrentUser() == null
+                || SessionManager.getCurrentUser().getRol() != RolUsuario.SUPERVISOR)) {
+            screen = "dashboard";
+        }
 
+        sidebar.refreshSession();
         rootLayout.show(rootCards, "shell");
         contentLayout.show(contentCards, screen);
         sidebar.setActive(screen);

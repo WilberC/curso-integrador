@@ -1,16 +1,27 @@
 package pe.plazavea.perecibles.ui.panel;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.Timer;
 import pe.plazavea.perecibles.enums.EstadoLote;
 import pe.plazavea.perecibles.mock.MockData;
 import pe.plazavea.perecibles.model.Lote;
+import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
+import pe.plazavea.perecibles.ui.component.Buttons;
 import pe.plazavea.perecibles.ui.component.GaugeCard;
 import pe.plazavea.perecibles.ui.component.GaugeState;
 import pe.plazavea.perecibles.ui.table.LoteTableModel;
@@ -18,32 +29,93 @@ import pe.plazavea.perecibles.ui.table.TableFactory;
 
 public final class DashboardPanel extends JPanel {
 
+    private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private final JPanel gauges = new JPanel(new GridLayout(2, 2, Theme.SP_LG, Theme.SP_LG));
+    private final LoteTableModel urgentModel = new LoteTableModel(List.of());
+    private final JLabel timestampLabel = new JLabel();
+    private final Timer timer = new Timer(60_000, event -> refreshDashboard());
+
     public DashboardPanel() {
         setLayout(new BorderLayout(0, Theme.SP_LG));
         setBackground(Theme.CANVAS_DARK);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
 
+        gauges.setBackground(Theme.CANVAS_DARK);
+        JTable table = TableFactory.loteTable(urgentModel);
+        JScrollPane scrollPane = TableFactory.scrollPane(table);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, gauges, scrollPane);
+        splitPane.setResizeWeight(0.68);
+        splitPane.setBorder(BorderFactory.createEmptyBorder());
+        splitPane.setDividerSize(8);
+
+        add(buildToolbar(), BorderLayout.NORTH);
+        add(splitPane, BorderLayout.CENTER);
+        refreshDashboard();
+        timer.setRepeats(true);
+        timer.start();
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (timer != null) {
+            if (visible) {
+                timer.start();
+                refreshDashboard();
+            } else {
+                timer.stop();
+            }
+        }
+    }
+
+    public void refreshDashboard() {
         List<Lote> lotes = MockData.getLotes();
-        int total = lotes.size();
-        int disponibles = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.DISPONIBLE).count();
+        int activeTotal = (int) lotes.stream().filter(lote -> lote.getEstado() != EstadoLote.RETIRADO).count();
         int proximos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.PROXIMO_VENCER).count();
         int vencidos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.VENCIDO).count();
-        int unidades = lotes.stream().mapToInt(Lote::getCantidadActual).sum();
+        GaugeState state = vencidos > 0 ? GaugeState.DANGER : proximos * 100.0 / Math.max(activeTotal, 1) >= 15 ? GaugeState.WARNING : GaugeState.SAFE;
 
-        JPanel gauges = new JPanel(new GridLayout(2, 2, Theme.SP_LG, Theme.SP_LG));
-        gauges.setBackground(Theme.CANVAS_DARK);
-        gauges.add(new GaugeCard("Lotes disponibles", disponibles, total, 2, GaugeState.SAFE));
-        gauges.add(new GaugeCard("Proximos a vencer", proximos, total, 1, proximos > 0 ? GaugeState.WARNING : GaugeState.SAFE));
-        gauges.add(new GaugeCard("Vencidos", vencidos, total, 0, vencidos > 0 ? GaugeState.DANGER : GaugeState.SAFE));
-        gauges.add(new GaugeCard("Unidades en stock", unidades, unidades, -8, GaugeState.SAFE));
-
-        List<Lote> urgentes = lotes.stream()
+        gauges.removeAll();
+        gauges.add(new GaugeCard("Total lotes activos", activeTotal, Math.max(activeTotal, 1), 0, state));
+        gauges.add(new GaugeCard("% Proximos a vencer", percent(proximos, activeTotal), 100, 1, proximos > 0 ? GaugeState.WARNING : GaugeState.SAFE));
+        gauges.add(new GaugeCard("% Vencidos", percent(vencidos, activeTotal), 100, 0, vencidos > 0 ? GaugeState.DANGER : GaugeState.SAFE));
+        gauges.add(new GaugeCard("Mermas del dia", 3, 10, -1, GaugeState.WARNING));
+        urgentModel.setData(lotes.stream()
+                .filter(lote -> lote.getEstado() != EstadoLote.RETIRADO)
                 .sorted(Comparator.comparingLong(Lote::getDiasParaVencer))
                 .limit(10)
-                .toList();
-        JTable table = TableFactory.loteTable(new LoteTableModel(urgentes));
+                .toList());
+        timestampLabel.setText("Actualizado " + TIMESTAMP.format(LocalDateTime.now()));
+        gauges.revalidate();
+        gauges.repaint();
+    }
 
-        add(gauges, BorderLayout.CENTER);
-        add(TableFactory.scrollPane(table), BorderLayout.SOUTH);
+    private JPanel buildToolbar() {
+        JPanel toolbar = new JPanel(new BorderLayout());
+        toolbar.setBackground(Theme.CANVAS_DARK);
+        toolbar.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_MD, 0));
+
+        timestampLabel.setFont(Fonts.mono(Font.PLAIN, 12f));
+        timestampLabel.setForeground(Theme.MUTED_STRONG);
+
+        JButton refresh = Buttons.secondary("Refrescar");
+        refresh.addActionListener(event -> refreshDashboard());
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        actions.setBackground(Theme.CANVAS_DARK);
+        actions.add(refresh);
+
+        JLabel title = new JLabel("Riesgo operativo");
+        title.setFont(Fonts.inter(Font.BOLD, 15f));
+        title.setForeground(Theme.ON_DARK);
+        toolbar.add(title, BorderLayout.WEST);
+        toolbar.add(timestampLabel, BorderLayout.CENTER);
+        toolbar.add(actions, BorderLayout.EAST);
+        return toolbar;
+    }
+
+    private int percent(int value, int total) {
+        return total > 0 ? (int) Math.round(value * 100.0 / total) : 0;
     }
 }
+

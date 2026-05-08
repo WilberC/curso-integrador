@@ -10,7 +10,7 @@ public final class LoteTableModel extends AbstractTableModel {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final String[] COLUMNS = {
-            "Lote", "Producto", "Categoria", "Stock", "Vence", "Dias", "Ubicacion", "Estado"
+            "Producto", "Nro. Lote", "Categoria", "Cantidad", "Vencimiento", "Dias", "Estado", "Acciones"
     };
 
     private final List<Lote> lotes = new ArrayList<>();
@@ -48,14 +48,14 @@ public final class LoteTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Lote lote = lotes.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> lote.getNumeroLote();
-            case 1 -> lote.getProducto();
+            case 0 -> lote.getProducto();
+            case 1 -> lote.getNumeroLote();
             case 2 -> lote.getCategoria();
             case 3 -> lote.getCantidadActual();
             case 4 -> DATE_FORMAT.format(lote.getFechaVencimiento());
             case 5 -> lote.getDiasParaVencer();
-            case 6 -> lote.getUbicacion();
-            case 7 -> lote.getEstado();
+            case 6 -> lote.getEstado();
+            case 7 -> "V  R";
             default -> "";
         };
     }

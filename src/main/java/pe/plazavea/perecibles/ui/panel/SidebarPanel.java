@@ -15,13 +15,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import pe.plazavea.perecibles.mock.MockData;
+import pe.plazavea.perecibles.enums.RolUsuario;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.Navigator;
+import pe.plazavea.perecibles.util.SessionManager;
 
 public final class SidebarPanel extends JPanel {
 
     private final Map<String, NavItem> items = new LinkedHashMap<>();
+    private final JLabel footerName = new JLabel();
+    private final JLabel footerRole = new JLabel();
 
     public SidebarPanel(Navigator navigator) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -36,10 +40,26 @@ public final class SidebarPanel extends JPanel {
         addItem("reportes", "Reportes", navigator);
         add(Box.createVerticalGlue());
         add(userFooter());
+        refreshSession();
     }
 
     public void setActive(String screen) {
         items.forEach((key, item) -> item.setActive(key.equals(screen)));
+    }
+
+    public void refreshSession() {
+        var user = SessionManager.getCurrentUser();
+        if (user == null) {
+            user = MockData.getSupervisor();
+        }
+        footerName.setText(user.getNombre() + " " + user.getApellido());
+        footerRole.setText(user.getRol().name());
+        NavItem reportes = items.get("reportes");
+        if (reportes != null) {
+            reportes.setVisible(user.getRol() == RolUsuario.SUPERVISOR);
+        }
+        revalidate();
+        repaint();
     }
 
     private JPanel wordmark() {
@@ -83,16 +103,14 @@ public final class SidebarPanel extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(Theme.SP_MD, Theme.SP_MD, Theme.SP_MD, Theme.SP_MD));
         panel.setMaximumSize(new Dimension(200, 96));
 
-        JLabel name = new JLabel(MockData.getSupervisor().getNombre() + " " + MockData.getSupervisor().getApellido());
-        name.setFont(Fonts.inter(Font.BOLD, 13f));
-        name.setForeground(Theme.BODY);
-        JLabel role = new JLabel(MockData.getSupervisor().getRol().name());
-        role.setFont(Fonts.inter(Font.PLAIN, 11f));
-        role.setForeground(Theme.MUTED);
+        footerName.setFont(Fonts.inter(Font.BOLD, 13f));
+        footerName.setForeground(Theme.BODY);
+        footerRole.setFont(Fonts.inter(Font.PLAIN, 11f));
+        footerRole.setForeground(Theme.MUTED);
 
-        panel.add(name);
+        panel.add(footerName);
         panel.add(Box.createVerticalStrut(Theme.SP_XXS));
-        panel.add(role);
+        panel.add(footerRole);
         return panel;
     }
 

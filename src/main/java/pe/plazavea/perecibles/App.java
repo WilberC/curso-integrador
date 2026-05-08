@@ -11,8 +11,8 @@ public final class App {
     }
 
     public static void main(String[] args) {
-        Fonts.load();
         Theme.apply();
+        Fonts.load();
 
         SwingUtilities.invokeLater(() -> {
             MainFrame frame = new MainFrame();

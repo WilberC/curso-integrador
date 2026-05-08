@@ -14,7 +14,17 @@ public final class AlertaTableModel extends AbstractTableModel {
     private final List<Alerta> alertas = new ArrayList<>();
 
     public AlertaTableModel(List<Alerta> alertas) {
-        this.alertas.addAll(alertas);
+        setData(alertas);
+    }
+
+    public void setData(List<Alerta> newAlertas) {
+        alertas.clear();
+        alertas.addAll(newAlertas);
+        fireTableDataChanged();
+    }
+
+    public Alerta getAlertaAt(int row) {
+        return alertas.get(row);
     }
 
     @Override
@@ -41,7 +51,7 @@ public final class AlertaTableModel extends AbstractTableModel {
             case 2 -> alerta.getDiasParaVencer();
             case 3 -> DATE_FORMAT.format(alerta.getFechaGeneracion());
             case 4 -> alerta.getEstado();
-            case 5 -> "Atender";
+            case 5 -> "Atender / Ignorar";
             default -> "";
         };
     }

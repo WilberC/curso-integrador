@@ -11,6 +11,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import pe.plazavea.perecibles.enums.EstadoLote;
+import pe.plazavea.perecibles.enums.TipoAlerta;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.StatusChip;
@@ -24,20 +25,27 @@ public final class TableFactory {
         JTable table = baseTable(model);
         table.setDefaultRenderer(Object.class, new LoteCellRenderer(model));
         table.getColumnModel().getColumn(3).setCellRenderer(new NumericCellRenderer(model));
+        table.getColumnModel().getColumn(4).setCellRenderer(new NumericCellRenderer(model));
         table.getColumnModel().getColumn(5).setCellRenderer(new NumericCellRenderer(model));
-        table.getColumnModel().getColumn(7).setCellRenderer(new StatusCellRenderer());
-        table.getColumnModel().getColumn(0).setPreferredWidth(80);
-        table.getColumnModel().getColumn(1).setPreferredWidth(180);
-        table.getColumnModel().getColumn(3).setPreferredWidth(70);
-        table.getColumnModel().getColumn(5).setPreferredWidth(60);
+        table.getColumnModel().getColumn(6).setCellRenderer(new StatusCellRenderer());
+        table.getColumnModel().getColumn(7).setCellRenderer(new ActionCellRenderer("V  R"));
+        table.getColumnModel().getColumn(0).setPreferredWidth(190);
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);
+        table.getColumnModel().getColumn(2).setPreferredWidth(120);
+        table.getColumnModel().getColumn(3).setPreferredWidth(90);
+        table.getColumnModel().getColumn(4).setPreferredWidth(120);
+        table.getColumnModel().getColumn(5).setPreferredWidth(80);
+        table.getColumnModel().getColumn(6).setPreferredWidth(130);
+        table.getColumnModel().getColumn(7).setPreferredWidth(90);
         return table;
     }
 
     public static JTable alertaTable(AlertaTableModel model) {
         JTable table = baseTable(model);
         table.setDefaultRenderer(Object.class, new DefaultDarkCellRenderer());
+        table.getColumnModel().getColumn(0).setCellRenderer(new AlertTypeCellRenderer());
         table.getColumnModel().getColumn(2).setCellRenderer(new AlertNumericCellRenderer());
-        table.getColumnModel().getColumn(5).setCellRenderer(new ActionCellRenderer());
+        table.getColumnModel().getColumn(5).setCellRenderer(new ActionCellRenderer("Atender / Ignorar"));
         return table;
     }
 
@@ -138,11 +146,31 @@ public final class TableFactory {
         }
     }
 
+    private static final class AlertTypeCellRenderer implements TableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
+            if (value instanceof TipoAlerta tipo) {
+                EstadoLote estado = tipo == TipoAlerta.VENCIDO ? EstadoLote.VENCIDO : EstadoLote.PROXIMO_VENCER;
+                StatusChip chip = new StatusChip(estado);
+                chip.setText(tipo == TipoAlerta.VENCIDO ? "VENCIDO" : "PROXIMO A VENCER");
+                chip.setHorizontalAlignment(SwingConstants.CENTER);
+                return chip;
+            }
+            return new JLabel(String.valueOf(value));
+        }
+    }
+
     private static final class ActionCellRenderer extends DefaultDarkCellRenderer {
+        private final String labelText;
+
+        private ActionCellRenderer(String labelText) {
+            this.labelText = labelText;
+        }
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, selected, focus, row, column);
-            label.setText("Atender");
+            label.setText(labelText);
             label.setHorizontalAlignment(SwingConstants.CENTER);
             label.setForeground(Theme.PRIMARY);
             label.setFont(Fonts.inter(Font.BOLD, 13f));

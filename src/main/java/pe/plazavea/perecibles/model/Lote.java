@@ -15,7 +15,7 @@ public class Lote {
     private final LocalDate fechaIngreso;
     private final LocalDate fechaVencimiento;
     private final String ubicacion;
-    private final EstadoLote estado;
+    private EstadoLote estado;
 
     public Lote(
             int id,
@@ -79,6 +79,10 @@ public class Lote {
 
     public EstadoLote getEstado() {
         return estado;
+    }
+
+    public void setEstado(EstadoLote estado) {
+        this.estado = estado;
     }
 
     public long getDiasParaVencer() {
