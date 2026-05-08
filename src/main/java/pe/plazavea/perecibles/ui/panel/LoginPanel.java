@@ -17,9 +17,11 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.SwingWorker;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import pe.plazavea.perecibles.mock.MockData;
+import pe.plazavea.perecibles.model.Usuario;
+import pe.plazavea.perecibles.service.UsuarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.Navigator;
@@ -32,9 +34,11 @@ public final class LoginPanel extends JPanel {
     private final JPasswordField passwordField = new JPasswordField("admin");
     private final JLabel errorLabel = new JLabel("Credenciales incorrectas");
     private final Navigator navigator;
+    private final UsuarioServicio usuarioServicio;
 
-    public LoginPanel(Navigator navigator) {
+    public LoginPanel(Navigator navigator, UsuarioServicio usuarioServicio) {
         this.navigator = navigator;
+        this.usuarioServicio = usuarioServicio;
         setLayout(new BorderLayout());
         setBackground(Theme.CANVAS_DARK);
 
@@ -108,19 +112,27 @@ public final class LoginPanel extends JPanel {
     private void attemptLogin() {
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword());
-        if ("operario@plazavea.com".equalsIgnoreCase(email) && "admin".equals(password)) {
-            SessionManager.setCurrentUser(MockData.getOperario());
-            navigator.show("dashboard");
-            return;
-        }
-        if ("supervisor@plazavea.com".equalsIgnoreCase(email) && "admin".equals(password)) {
-            SessionManager.setCurrentUser(MockData.getSupervisor());
-            navigator.show("dashboard");
-            return;
-        }
-        errorLabel.setVisible(true);
-        revalidate();
-        repaint();
+        errorLabel.setVisible(false);
+        new SwingWorker<Usuario, Void>() {
+            @Override
+            protected Usuario doInBackground() {
+                return usuarioServicio.login(email, password);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    SessionManager.setCurrentUser(get());
+                    navigator.show("dashboard");
+                } catch (Exception exception) {
+                    Throwable cause = exception.getCause() == null ? exception : exception.getCause();
+                    errorLabel.setText(cause.getMessage());
+                    errorLabel.setVisible(true);
+                    revalidate();
+                    repaint();
+                }
+            }
+        }.execute();
     }
 
     private void registerLoginShortcut() {

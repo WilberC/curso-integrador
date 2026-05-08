@@ -17,10 +17,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import pe.plazavea.perecibles.enums.EstadoLote;
-import pe.plazavea.perecibles.mock.MockData;
 import pe.plazavea.perecibles.model.Lote;
+import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
@@ -29,6 +32,8 @@ import pe.plazavea.perecibles.ui.component.GaugeState;
 import pe.plazavea.perecibles.ui.table.LoteTableModel;
 import pe.plazavea.perecibles.ui.table.TableFactory;
 
+@Component
+@Lazy
 public final class DashboardPanel extends JPanel {
 
     private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -38,8 +43,10 @@ public final class DashboardPanel extends JPanel {
     private final JLabel timestampLabel = new JLabel();
     private final Timer timer = new Timer(60_000, event -> refreshDashboard());
     private final Map<String, Integer> snapshotAnterior = new HashMap<>();
+    private final InventarioServicio inventarioServicio;
 
-    public DashboardPanel() {
+    public DashboardPanel(InventarioServicio inventarioServicio) {
+        this.inventarioServicio = inventarioServicio;
         setLayout(new BorderLayout(0, Theme.SP_LG));
         setBackground(Theme.CANVAS_DARK);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
@@ -73,7 +80,24 @@ public final class DashboardPanel extends JPanel {
     }
 
     public void refreshDashboard() {
-        List<Lote> lotes = MockData.getLotes();
+        new SwingWorker<List<Lote>, Void>() {
+            @Override
+            protected List<Lote> doInBackground() {
+                return inventarioServicio.consultarStock();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    updateGauges(get());
+                } catch (Exception exception) {
+                    timestampLabel.setText("Error al actualizar: " + exception.getMessage());
+                }
+            }
+        }.execute();
+    }
+
+    private void updateGauges(List<Lote> lotes) {
         int activeTotal = (int) lotes.stream().filter(lote -> lote.getEstado() != EstadoLote.RETIRADO).count();
         int proximos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.PROXIMO_VENCER).count();
         int vencidos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.VENCIDO).count();

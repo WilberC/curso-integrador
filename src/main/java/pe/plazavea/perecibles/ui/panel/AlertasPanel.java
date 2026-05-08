@@ -11,26 +11,33 @@ import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
 import javax.swing.text.JTextComponent;
 import pe.plazavea.perecibles.enums.EstadoAlerta;
-import pe.plazavea.perecibles.mock.MockData;
 import pe.plazavea.perecibles.model.Alerta;
+import pe.plazavea.perecibles.service.AlertaServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.table.AlertaTableModel;
 import pe.plazavea.perecibles.ui.table.TableFactory;
+import pe.plazavea.perecibles.util.SessionManager;
 
+@org.springframework.context.annotation.Lazy
+@org.springframework.stereotype.Component
 public final class AlertasPanel extends JPanel {
 
     private final AlertaTableModel model = new AlertaTableModel(List.of());
     private final JTable table = TableFactory.alertaTable(model);
     private final JLabel countBadge = new JLabel();
     private final JCheckBox showAll = new JCheckBox("Mostrar todas");
+    private final AlertaServicio alertaServicio;
 
-    public AlertasPanel() {
+    public AlertasPanel(AlertaServicio alertaServicio) {
+        this.alertaServicio = alertaServicio;
         setLayout(new BorderLayout());
         setBackground(Theme.CANVAS_DARK);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
@@ -65,12 +72,31 @@ public final class AlertasPanel extends JPanel {
     }
 
     public void refreshAlerts() {
-        List<Alerta> alertas = MockData.getAlertas().stream()
-                .filter(alerta -> showAll.isSelected() || alerta.getEstado() == EstadoAlerta.PENDIENTE)
-                .toList();
-        model.setData(alertas);
-        long pendientes = MockData.getAlertas().stream().filter(alerta -> alerta.getEstado() == EstadoAlerta.PENDIENTE).count();
-        countBadge.setText("[" + pendientes + "]");
+        new SwingWorker<List<Alerta>, Void>() {
+            @Override
+            protected List<Alerta> doInBackground() {
+                return showAll.isSelected() ? alertaServicio.obtenerTodas() : alertaServicio.obtenerPendientes();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<Alerta> alertas = get();
+                    model.setData(alertas);
+                    long pendientes = alertas.stream()
+                            .filter(alerta -> alerta.getEstado() == EstadoAlerta.PENDIENTE)
+                            .count();
+                    countBadge.setText("[" + pendientes + "]");
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(
+                            AlertasPanel.this,
+                            "No se pudieron cargar las alertas: " + exception.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        }.execute();
     }
 
     private void registerShortcuts() {
@@ -114,20 +140,45 @@ public final class AlertasPanel extends JPanel {
     }
 
     public void atenderSeleccionada() {
-        updateSelected(EstadoAlerta.ATENDIDA);
+        updateSelected(true);
     }
 
     public void ignorarSeleccionada() {
-        updateSelected(EstadoAlerta.IGNORADA);
+        updateSelected(false);
     }
 
-    private void updateSelected(EstadoAlerta estado) {
+    private void updateSelected(boolean atender) {
         int selected = table.getSelectedRow();
         if (selected < 0) {
             return;
         }
-        model.getAlertaAt(table.convertRowIndexToModel(selected)).setEstado(estado);
-        refreshAlerts();
+        Alerta alerta = model.getAlertaAt(table.convertRowIndexToModel(selected));
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                if (atender) {
+                    alertaServicio.atenderAlerta(alerta.getIdAlerta(), SessionManager.getCurrentUser());
+                } else {
+                    alertaServicio.ignorarAlerta(alerta.getIdAlerta());
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                    refreshAlerts();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(
+                            AlertasPanel.this,
+                            "No se pudo actualizar la alerta: " + exception.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        }.execute();
     }
 
     private void moveSelection(int delta) {

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -15,22 +16,33 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import pe.plazavea.perecibles.enums.RolUsuario;
 import pe.plazavea.perecibles.enums.TipoReporte;
-import pe.plazavea.perecibles.mock.MockData;
+import pe.plazavea.perecibles.model.Reporte;
+import pe.plazavea.perecibles.service.ReporteServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
 import pe.plazavea.perecibles.util.SessionManager;
 
+@Component
+@Lazy
 public final class ReportesPanel extends JPanel {
 
-    private final JComboBox<TipoReporte> tipoReporte = new JComboBox<>(TipoReporte.values());
-    private final JFormattedTextField desde = new JFormattedTextField("01/05/2026");
-    private final JFormattedTextField hasta = new JFormattedTextField("31/05/2026");
-    private final JTextArea preview = new JTextArea();
+    private static final DateTimeFormatter INPUT_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public ReportesPanel() {
+    private final JComboBox<TipoReporte> tipoReporte = new JComboBox<>(TipoReporte.values());
+    private final JFormattedTextField desde = new JFormattedTextField(INPUT_DATE.format(LocalDate.now().withDayOfMonth(1)));
+    private final JFormattedTextField hasta = new JFormattedTextField(INPUT_DATE.format(LocalDate.now()));
+    private final JTextArea preview = new JTextArea();
+    private final ReporteServicio reporteServicio;
+    private Reporte currentReporte;
+
+    public ReportesPanel(ReporteServicio reporteServicio) {
+        this.reporteServicio = reporteServicio;
         setLayout(new BorderLayout());
         setBackground(Theme.CANVAS_DARK);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
@@ -83,8 +95,7 @@ public final class ReportesPanel extends JPanel {
         filters.add(generar);
         filters.add(Box.createVerticalStrut(Theme.SP_XS));
         var exportar = Buttons.secondary("Exportar CSV");
-        exportar.setEnabled(false);
-        exportar.addActionListener(event -> JOptionPane.showMessageDialog(this, "Esta función estará disponible en la versión completa"));
+        exportar.addActionListener(event -> exportCurrentReport());
         filters.add(exportar);
 
         preview.setEditable(false);
@@ -119,25 +130,60 @@ public final class ReportesPanel extends JPanel {
 
     public void generateReport() {
         TipoReporte tipo = (TipoReporte) tipoReporte.getSelectedItem();
-        long vencidos = MockData.getLotes().stream().filter(lote -> lote.estaVencido()).count();
-        long proximos = MockData.getLotes().stream().filter(lote -> lote.estaProximoAVencer(7)).count();
-        int stock = MockData.getLotes().stream().mapToInt(lote -> lote.getCantidadActual()).sum();
-        String detail = switch (tipo) {
-            case STOCK -> "Unidades en stock: " + stock;
-            case VENCIDOS -> "Lotes vencidos: " + vencidos;
-            case PROXIMOS_VENCER -> "Lotes próximos a vencer: " + proximos;
-            case MERMAS -> "Mermas registradas hoy: 3";
-        };
-        preview.setText("""
-                REPORTE DE PERECIBLES
+        LocalDate inicio = LocalDate.parse(desde.getText(), INPUT_DATE);
+        LocalDate fin = LocalDate.parse(hasta.getText(), INPUT_DATE);
+        new SwingWorker<Reporte, Void>() {
+            @Override
+            protected Reporte doInBackground() {
+                return switch (tipo) {
+                    case STOCK -> reporteServicio.generarReporteStock(inicio, fin, SessionManager.getCurrentUser());
+                    case VENCIDOS -> reporteServicio.generarReporteVencidos(inicio, fin, SessionManager.getCurrentUser());
+                    case PROXIMOS_VENCER -> reporteServicio.generarReporteProximosAVencer(inicio, fin, SessionManager.getCurrentUser());
+                    case MERMAS -> reporteServicio.generarReporteMermas(inicio, fin, SessionManager.getCurrentUser());
+                };
+            }
 
-                Tipo: %s
-                Desde: %s
-                Hasta: %s
-                Generado: %s
+            @Override
+            protected void done() {
+                try {
+                    currentReporte = get();
+                    preview.setText(reporteServicio.resumen(currentReporte));
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(
+                            ReportesPanel.this,
+                            "No se pudo generar el reporte: " + exception.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        }.execute();
+    }
 
-                Lotes monitoreados: %d
-                %s
-                """.formatted(tipo, desde.getText(), hasta.getText(), LocalDate.now(), MockData.getLotes().size(), detail));
+    private void exportCurrentReport() {
+        if (currentReporte == null) {
+            return;
+        }
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                reporteServicio.exportarCSV(currentReporte);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(
+                            ReportesPanel.this,
+                            "No se pudo exportar el CSV: " + exception.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        }.execute();
     }
 }

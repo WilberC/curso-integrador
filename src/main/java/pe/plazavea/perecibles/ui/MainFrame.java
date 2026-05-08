@@ -4,10 +4,17 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import pe.plazavea.perecibles.enums.RolUsuario;
+import pe.plazavea.perecibles.config.SpringContext;
+import pe.plazavea.perecibles.service.AlertaServicio;
+import pe.plazavea.perecibles.service.UsuarioServicio;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.panel.AlertasPanel;
 import pe.plazavea.perecibles.ui.panel.DashboardPanel;
@@ -20,6 +27,8 @@ import pe.plazavea.perecibles.ui.panel.ToolbarPanel;
 import pe.plazavea.perecibles.util.KeyboardHandler;
 import pe.plazavea.perecibles.util.SessionManager;
 
+@Component
+@Lazy
 public final class MainFrame extends JFrame implements Navigator {
 
     private final CardLayout rootLayout = new CardLayout();
@@ -29,23 +38,36 @@ public final class MainFrame extends JFrame implements Navigator {
     private final ToolbarPanel toolbar = new ToolbarPanel();
     private final ShortcutBar shortcutBar = new ShortcutBar();
     private final SidebarPanel sidebar = new SidebarPanel(this);
-    private final DashboardPanel dashboardPanel = new DashboardPanel();
-    private final InventarioPanel inventarioPanel = new InventarioPanel(this);
-    private final AlertasPanel alertasPanel = new AlertasPanel();
-    private final ReportesPanel reportesPanel = new ReportesPanel();
+    private final DashboardPanel dashboardPanel;
+    private final InventarioPanel inventarioPanel;
+    private final AlertasPanel alertasPanel;
+    private final ReportesPanel reportesPanel;
+    private final UsuarioServicio usuarioServicio;
     private String currentScreen = "login";
 
-    public MainFrame() {
+    public MainFrame(
+            DashboardPanel dashboardPanel,
+            InventarioPanel inventarioPanel,
+            AlertasPanel alertasPanel,
+            ReportesPanel reportesPanel,
+            UsuarioServicio usuarioServicio
+    ) {
         super("Plaza Vea - Control de Perecibles");
+        this.dashboardPanel = dashboardPanel;
+        this.inventarioPanel = inventarioPanel;
+        this.alertasPanel = alertasPanel;
+        this.reportesPanel = reportesPanel;
+        this.usuarioServicio = usuarioServicio;
         setMinimumSize(new Dimension(1024, 700));
         setSize(1180, 760);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        rootCards.add(new LoginPanel(this), "login");
+        rootCards.add(new LoginPanel(this, usuarioServicio), "login");
         rootCards.add(buildShell(), "shell");
         setContentPane(rootCards);
         registerShortcuts();
+        registerShutdown();
         show("login");
     }
 
@@ -95,6 +117,15 @@ public final class MainFrame extends JFrame implements Navigator {
     private void registerShortcuts() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
                 .addKeyEventDispatcher(event -> KeyboardHandler.handle(event, this));
+    }
+
+    private void registerShutdown() {
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent event) {
+                SpringContext.getBean(AlertaServicio.class).getScheduler().shutdown();
+            }
+        });
     }
 
     @Override

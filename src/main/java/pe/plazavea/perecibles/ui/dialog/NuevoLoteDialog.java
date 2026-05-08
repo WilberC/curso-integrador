@@ -5,9 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.KeyEvent;
-import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -15,36 +13,40 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingWorker;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import net.miginfocom.swing.MigLayout;
-import pe.plazavea.perecibles.enums.EstadoLote;
-import pe.plazavea.perecibles.mock.MockData;
 import pe.plazavea.perecibles.model.Lote;
+import pe.plazavea.perecibles.model.ProductoPerecible;
+import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
 import pe.plazavea.perecibles.util.DateParser;
+import pe.plazavea.perecibles.util.SessionManager;
 
 public final class NuevoLoteDialog extends JDialog {
 
-    private final Map<String, String> categoriasPorProducto = new LinkedHashMap<>();
-    private final JComboBox<String> productoField;
+    private final JComboBox<ProductoPerecible> productoField;
     private final JTextField numeroField = textField("");
     private final JTextField cantidadField = textField("");
     private final JTextField ubicacionField = textField("");
     private final JTextField vencimientoField = textField("Hoy + 15");
     private final JLabel datePreview = new JLabel(" ");
+    private final InventarioServicio inventarioServicio;
 
-    public NuevoLoteDialog(Frame owner) {
+    public NuevoLoteDialog(Frame owner, InventarioServicio inventarioServicio, List<ProductoPerecible> productos) {
         super(owner, "Nuevo Lote", true);
-        MockData.getLotes().forEach(lote -> categoriasPorProducto.putIfAbsent(lote.getProducto(), lote.getCategoria()));
-        productoField = new JComboBox<>(categoriasPorProducto.keySet().toArray(String[]::new));
+        this.inventarioServicio = inventarioServicio;
+        productoField = new JComboBox<>(productos.toArray(ProductoPerecible[]::new));
+        productoField.setRenderer((list, value, index, selected, focused) -> new JLabel(value == null ? "" : value.getNombre()));
         setSize(480, 520);
         setResizable(false);
         setLocationRelativeTo(owner);
@@ -79,7 +81,7 @@ public final class NuevoLoteDialog extends JDialog {
         addFormRow(body, "Producto", productoField);
         addFormRow(body, "Nro. Lote", numeroField);
         addFormRow(body, "Cantidad inicial", cantidadField);
-        addFormRow(body, "Ubicación", ubicacionField);
+        addFormRow(body, "Ubicacion", ubicacionField);
         addFormRow(body, "Vencimiento", buildDateInput());
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, Theme.SP_XS, Theme.SP_MD));
@@ -148,24 +150,42 @@ public final class NuevoLoteDialog extends JDialog {
             vencimientoField.setBorder(BorderFactory.createLineBorder(Theme.DANGER, 1, true));
             valid = false;
         }
-        if (!valid) {
+        ProductoPerecible producto = (ProductoPerecible) productoField.getSelectedItem();
+        if (!valid || producto == null) {
             return;
         }
-        String producto = String.valueOf(productoField.getSelectedItem());
+
+        Lote lote = new Lote();
         int cantidad = Integer.parseInt(cantidadField.getText());
-        MockData.addLote(new Lote(
-                MockData.nextLoteId(),
-                numeroField.getText().trim(),
-                producto,
-                categoriasPorProducto.getOrDefault(producto, "General"),
-                cantidad,
-                cantidad,
-                LocalDate.now(),
-                parsedDate.orElseThrow(),
-                ubicacionField.getText().trim(),
-                EstadoLote.DISPONIBLE
-        ));
-        dispose();
+        lote.setNumeroLote(numeroField.getText().trim());
+        lote.setProducto(producto);
+        lote.setCantidadInicial((double) cantidad);
+        lote.setCantidadActual((double) cantidad);
+        lote.setFechaVencimiento(parsedDate.orElseThrow());
+        lote.setUbicacion(ubicacionField.getText().trim());
+
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                inventarioServicio.registrarIngreso(lote, SessionManager.getCurrentUser());
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                    dispose();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(
+                            NuevoLoteDialog.this,
+                            "No se pudo registrar el lote: " + exception.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        }.execute();
     }
 
     private boolean requireText(JTextField field) {
@@ -176,7 +196,7 @@ public final class NuevoLoteDialog extends JDialog {
 
     private void updateDatePreview() {
         DateParser.parse(vencimientoField.getText()).ifPresentOrElse(date -> {
-            datePreview.setText("→ " + DateParser.formatLong(date));
+            datePreview.setText("-> " + DateParser.formatLong(date));
             datePreview.setForeground(Theme.SAFE);
             vencimientoField.setBorder(defaultBorder());
         }, () -> {

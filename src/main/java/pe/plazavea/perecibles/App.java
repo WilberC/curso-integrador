@@ -1,9 +1,11 @@
 package pe.plazavea.perecibles;
 
 import javax.swing.SwingUtilities;
+import javax.swing.JOptionPane;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import pe.plazavea.perecibles.config.JpaConfig;
+import pe.plazavea.perecibles.config.AppConfig;
 import pe.plazavea.perecibles.config.SpringContext;
+import pe.plazavea.perecibles.service.AlertaServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.MainFrame;
@@ -15,11 +17,25 @@ public final class App {
 
     public static void main(String[] args) {
         Theme.apply();
-        SpringContext.init(new AnnotationConfigApplicationContext(JpaConfig.class));
         Fonts.load();
+        try {
+            SpringContext.init(new AnnotationConfigApplicationContext(AppConfig.class));
+            SpringContext.getBean(AlertaServicio.class).iniciarScheduler();
+        } catch (Exception exception) {
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "No se pudo conectar a la base de datos.\nVerifique que PostgreSQL este corriendo.",
+                        "Error de conexion",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                System.exit(1);
+            });
+            return;
+        }
 
         SwingUtilities.invokeLater(() -> {
-            MainFrame frame = new MainFrame();
+            MainFrame frame = SpringContext.getBean(MainFrame.class);
             frame.setVisible(true);
         });
     }

@@ -13,34 +13,44 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import pe.plazavea.perecibles.enums.EstadoLote;
-import pe.plazavea.perecibles.mock.MockData;
+import pe.plazavea.perecibles.enums.TipoMovimiento;
 import pe.plazavea.perecibles.model.Lote;
+import pe.plazavea.perecibles.model.ProductoPerecible;
+import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
 import pe.plazavea.perecibles.ui.dialog.NuevoLoteDialog;
 import pe.plazavea.perecibles.ui.table.LoteTableModel;
 import pe.plazavea.perecibles.ui.table.TableFactory;
+import pe.plazavea.perecibles.util.SessionManager;
 
+@org.springframework.context.annotation.Lazy
+@org.springframework.stereotype.Component
 public final class InventarioPanel extends JPanel {
 
-    private final java.awt.Frame owner;
     private final LoteTableModel model = new LoteTableModel(List.of());
     private final JTable table = TableFactory.loteTable(model);
     private final JTextField search = new JTextField();
     private final JComboBox<String> categoria = new JComboBox<>(new String[]{"Todas", "Lacteos", "Carnes", "Embutidos", "Panaderia"});
-    private final JComboBox<String> estado = new JComboBox<>(new String[]{"Todos", "Disponible", "Próximo vencer", "Vencido", "Retirado"});
+    private final JComboBox<String> estado = new JComboBox<>(new String[]{"Todos", "Disponible", "Proximo vencer", "Vencido", "Retirado"});
+    private final InventarioServicio inventarioServicio;
+    private List<Lote> currentLotes = List.of();
+    private List<ProductoPerecible> productos = List.of();
 
-    public InventarioPanel(java.awt.Frame owner) {
-        this.owner = owner;
+    public InventarioPanel(InventarioServicio inventarioServicio) {
+        this.inventarioServicio = inventarioServicio;
         setLayout(new BorderLayout());
         setBackground(Theme.CANVAS_DARK);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
@@ -64,9 +74,9 @@ public final class InventarioPanel extends JPanel {
         search.setPreferredSize(new Dimension(220, 36));
         search.setMaximumSize(new Dimension(260, 36));
         search.putClientProperty("JTextField.placeholderText", "Buscar producto o lote");
-        search.getDocument().addDocumentListener(new SimpleDocumentListener(this::refreshTable));
-        categoria.addActionListener(event -> refreshTable());
-        estado.addActionListener(event -> refreshTable());
+        search.getDocument().addDocumentListener(new SimpleDocumentListener(this::applyFilters));
+        categoria.addActionListener(event -> applyFilters());
+        estado.addActionListener(event -> applyFilters());
 
         panel.add(nuevo);
         panel.add(Box.createHorizontalStrut(Theme.SP_MD));
@@ -79,15 +89,41 @@ public final class InventarioPanel extends JPanel {
     }
 
     public void openNuevoLote() {
-        new NuevoLoteDialog(owner).setVisible(true);
+        java.awt.Frame owner = (java.awt.Frame) SwingUtilities.getWindowAncestor(this);
+        new NuevoLoteDialog(owner, inventarioServicio, productos).setVisible(true);
         refreshTable();
     }
 
     public void refreshTable() {
+        new SwingWorker<List<Lote>, Void>() {
+            @Override
+            protected List<Lote> doInBackground() {
+                productos = inventarioServicio.listarProductos();
+                return inventarioServicio.consultarStock();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    currentLotes = get();
+                    applyFilters();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(
+                            InventarioPanel.this,
+                            "No se pudo cargar el inventario: " + exception.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        }.execute();
+    }
+
+    private void applyFilters() {
         String query = search.getText().trim().toLowerCase();
         String selectedCategory = String.valueOf(categoria.getSelectedItem());
         String selectedState = String.valueOf(estado.getSelectedItem());
-        model.setData(MockData.getLotes().stream()
+        model.setData(currentLotes.stream()
                 .filter(lote -> query.isBlank()
                         || lote.getProducto().toLowerCase().contains(query)
                         || lote.getNumeroLote().toLowerCase().contains(query))
@@ -145,20 +181,47 @@ public final class InventarioPanel extends JPanel {
     }
 
     public void marcarVencido() {
-        updateSelected(EstadoLote.VENCIDO);
+        updateSelected(TipoMovimiento.RETIRO, "Retiro por vencimiento");
     }
 
     public void marcarRemate() {
-        updateSelected(EstadoLote.RETIRADO);
+        updateSelected(TipoMovimiento.REMATE, "Remate preventivo");
     }
 
-    private void updateSelected(EstadoLote newState) {
+    private void updateSelected(TipoMovimiento tipo, String motivo) {
         int selected = table.getSelectedRow();
         if (selected < 0) {
             return;
         }
-        model.getLoteAt(table.convertRowIndexToModel(selected)).setEstado(newState);
-        refreshTable();
+        Lote lote = model.getLoteAt(table.convertRowIndexToModel(selected));
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                inventarioServicio.registrarRetiro(
+                        lote.getIdLote(),
+                        lote.getCantidadActualValue(),
+                        tipo,
+                        motivo,
+                        SessionManager.getCurrentUser()
+                );
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                    refreshTable();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(
+                            InventarioPanel.this,
+                            "No se pudo actualizar el lote: " + exception.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        }.execute();
     }
 
     private void moveSelection(int delta) {
@@ -179,7 +242,7 @@ public final class InventarioPanel extends JPanel {
     private String stateLabel(EstadoLote estado) {
         return switch (estado) {
             case DISPONIBLE -> "Disponible";
-            case PROXIMO_VENCER -> "Próximo vencer";
+            case PROXIMO_VENCER -> "Proximo vencer";
             case VENCIDO -> "Vencido";
             case RETIRADO -> "Retirado";
         };
