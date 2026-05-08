@@ -6,7 +6,7 @@ Prerequisito: Phase A completa y aprobada. Solo entonces agregar JPA al proyecto
 
 ## Actualizar build.gradle
 
-- [ ] Agregar dependencias de Phase B al `build.gradle`:
+- [x] Agregar dependencias de Phase B al `build.gradle`:
   ```groovy
   dependencies {
       // ... dependencias de Phase A ...
@@ -30,7 +30,7 @@ Prerequisito: Phase A completa y aprobada. Solo entonces agregar JPA al proyecto
 
 ## Configuración JPA
 
-- [ ] Crear `.env.example`:
+- [x] Crear `.env.example`:
   ```
   POSTGRES_DB=plazavea_perecibles
   POSTGRES_USER=plazavea
@@ -39,7 +39,7 @@ Prerequisito: Phase A completa y aprobada. Solo entonces agregar JPA al proyecto
   DB_DDL_AUTO=create-drop
   ```
 
-- [ ] Crear `config/JpaConfig.java`:
+- [x] Crear `config/JpaConfig.java`:
   - Usa `Dotenv.load()` para leer el `.env`
   - Crea `EntityManagerFactory` con propiedades Hibernate:
     - `hibernate.dialect` → `PostgreSQLDialect`
@@ -47,7 +47,7 @@ Prerequisito: Phase A completa y aprobada. Solo entonces agregar JPA al proyecto
     - `hibernate.show_sql` → `true` (solo en dev)
   - Crea `JpaTransactionManager`
 
-- [ ] Crear `config/SpringContext.java` — `ApplicationContext` estático para inyección manual en controladores JavaFX:
+- [x] Crear `config/SpringContext.java` — `ApplicationContext` estático para inyección manual en controladores JavaFX:
   ```java
   public class SpringContext {
       private static ApplicationContext context;
@@ -70,7 +70,7 @@ Los enums creados en Phase A se usan directamente con `@Enumerated(EnumType.STRI
 
 ### Usuario
 
-- [ ] Crear `model/Usuario.java`:
+- [x] Crear `model/Usuario.java`:
   ```java
   @Entity @Table(name = "usuario")
   public class Usuario {
@@ -105,18 +105,18 @@ Los enums creados en Phase A se usan directamente con `@Enumerated(EnumType.STRI
 
 ### Categoria
 
-- [ ] Crear `model/Categoria.java`:
+- [x] Crear `model/Categoria.java`:
   - `idCategoria` (PK), `nombre` (unique, 80), `descripcion` (255)
 
 ### ProductoPerecible
 
-- [ ] Crear `model/ProductoPerecible.java`:
+- [x] Crear `model/ProductoPerecible.java`:
   - `idProducto` (PK), `nombre` (150), `descripcion`, `unidadMedida` (30)
   - `@ManyToOne @JoinColumn(name = "id_categoria") Categoria categoria`
 
 ### Lote
 
-- [ ] Crear `model/Lote.java` — entidad central:
+- [x] Crear `model/Lote.java` — entidad central:
   ```java
   @Entity @Table(name = "lote")
   public class Lote {
@@ -167,7 +167,7 @@ Los enums creados en Phase A se usan directamente con `@Enumerated(EnumType.STRI
 
 ### MovimientoInventario
 
-- [ ] Crear `model/MovimientoInventario.java`:
+- [x] Crear `model/MovimientoInventario.java`:
   - `idMovimiento` (PK), `tipo (TipoMovimiento)`, `cantidad`, `fechaMovimiento (LocalDateTime)`, `motivo`
   - `@ManyToOne Lote lote`
   - `@ManyToOne Usuario usuario`
@@ -175,7 +175,7 @@ Los enums creados en Phase A se usan directamente con `@Enumerated(EnumType.STRI
 
 ### Merma
 
-- [ ] Crear `model/Merma.java`:
+- [x] Crear `model/Merma.java`:
   - `idMerma` (PK), `cantidad`, `fechaRegistro (LocalDateTime)`, `motivo`
   - `@ManyToOne Lote lote` (NOT NULL)
   - `@ManyToOne MovimientoInventario movimiento` (`@JoinColumn(nullable = true)`)
@@ -183,7 +183,7 @@ Los enums creados en Phase A se usan directamente con `@Enumerated(EnumType.STRI
 
 ### Alerta
 
-- [ ] Crear `model/Alerta.java`:
+- [x] Crear `model/Alerta.java`:
   - `idAlerta` (PK), `tipoAlerta (TipoAlerta)`, `diasParaVencer (int)`, `fechaGeneracion (LocalDateTime)`, `estado (EstadoAlerta)` default PENDIENTE
   - `@ManyToOne Lote lote`
   - `@ManyToOne @JoinColumn(nullable = true) Usuario usuarioAtiende`
@@ -191,13 +191,13 @@ Los enums creados en Phase A se usan directamente con `@Enumerated(EnumType.STRI
 
 ### Reporte
 
-- [ ] Crear `model/Reporte.java`:
+- [x] Crear `model/Reporte.java`:
   - `idReporte` (PK), `tipo (TipoReporte)`, `fechaGeneracion (LocalDateTime)`, `fechaInicio (LocalDate)`, `fechaFin (LocalDate)`
   - `@ManyToOne Usuario usuario`
 
 ### ConfiguracionAlerta
 
-- [ ] Crear `model/ConfiguracionAlerta.java`:
+- [x] Crear `model/ConfiguracionAlerta.java`:
   - `idConfig` (PK), `diasAlertaAmarilla (int)` default 7, `diasAlertaRoja (int)` default 2, `activo (boolean)` default true
   - `@OneToOne @JoinColumn(name = "id_usuario_config") Usuario usuarioConfig`
 
@@ -205,7 +205,7 @@ Los enums creados en Phase A se usan directamente con `@Enumerated(EnumType.STRI
 
 ## Docker + Base de Datos
 
-- [ ] Crear `docker-compose.yml`:
+- [x] Crear `docker-compose.yml`:
   ```yaml
   services:
     db:
@@ -223,14 +223,14 @@ Los enums creados en Phase A se usan directamente con `@Enumerated(EnumType.STRI
     pgdata:
   ```
 
-- [ ] Copiar `.env.example` a `.env` y agregar `.env` al `.gitignore`
+- [x] Copiar `.env.example` a `.env` y agregar `.env` al `.gitignore`
 
 ---
 
 ## Verificación Phase B — Data Model
 
-- [ ] `docker-compose up -d` levanta PostgreSQL sin errores
-- [ ] `./gradlew run` con `DB_DDL_AUTO=create-drop` crea las 9 tablas (verificar con `psql` o DBeaver)
-- [ ] Tablas creadas: `usuario`, `categoria`, `producto_perecible`, `lote`, `movimiento_inventario`, `merma`, `alerta`, `reporte`, `configuracion_alerta`
-- [ ] `Lote.getDiasParaVencer()` devuelve el valor correcto con fechas reales
-- [ ] `Lote.actualizarEstado(7, 2)` cambia el estado según los días calculados
+- [x] `docker-compose up -d` levanta PostgreSQL sin errores
+- [x] `./gradlew run` con `DB_DDL_AUTO=create-drop` crea las 9 tablas (verificar con `psql` o DBeaver)
+- [x] Tablas creadas: `usuario`, `categoria`, `producto_perecible`, `lote`, `movimiento_inventario`, `merma`, `alerta`, `reporte`, `configuracion_alerta`
+- [x] `Lote.getDiasParaVencer()` devuelve el valor correcto con fechas reales
+- [x] `Lote.actualizarEstado(7, 2)` cambia el estado según los días calculados
