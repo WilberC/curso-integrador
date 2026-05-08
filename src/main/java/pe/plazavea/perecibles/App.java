@@ -1,23 +1,22 @@
 package pe.plazavea.perecibles;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
-import pe.plazavea.perecibles.util.SceneManager;
+import javax.swing.SwingUtilities;
+import pe.plazavea.perecibles.theme.Fonts;
+import pe.plazavea.perecibles.theme.Theme;
+import pe.plazavea.perecibles.ui.MainFrame;
 
-public class App extends Application {
+public final class App {
 
-    @Override
-    public void start(Stage primaryStage) {
-        SceneManager.init(primaryStage);
-        SceneManager.navigate("login");
-
-        primaryStage.setTitle("Plaza Vea - Control de Perecibles");
-        primaryStage.setMinWidth(1024);
-        primaryStage.setMinHeight(700);
-        primaryStage.show();
+    private App() {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        Fonts.load();
+        Theme.apply();
+
+        SwingUtilities.invokeLater(() -> {
+            MainFrame frame = new MainFrame();
+            frame.setVisible(true);
+        });
     }
 }

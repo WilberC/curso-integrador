@@ -21,11 +21,11 @@ El proyecto esta iniciando la Fase A: una version UI-first con datos simulados a
 - [x] POJOs minimos de Fase A creados
 - [x] `MockData` creado
 - [x] Tokens visuales en `Theme.java` creados
+- [x] Pantallas principales de la Fase A
+- [x] Atajos de teclado base
 - [x] Compilacion verificada
-- [ ] Pantallas principales de la Fase A
-- [ ] Atajos de teclado
 - [ ] Parser de fechas en lenguaje natural
-- [ ] Dashboard con gauges
+- [x] Dashboard con gauges
 - [ ] Persistencia real con PostgreSQL
 
 El checklist detallado esta en `docs/implementation_plan/phase-a/01_setup.md`.
@@ -86,29 +86,24 @@ En sistemas donde Java 25 ya este disponible en el entorno, tambien se puede usa
 ```text
 src/main/java/pe/plazavea/perecibles/
 ├── App.java
-├── controller/
-├── component/
 ├── enums/
 ├── mock/
 ├── model/
-└── util/
-
-src/main/resources/
-├── css/
-├── fxml/
-└── images/
+├── theme/
+└── ui/
 ```
 
 Carpetas principales:
 
 - `ui/`: paneles y dialogos Swing (uno por pantalla).
-- `component/`: componentes reutilizables (GaugeCard, SidebarPanel, ShortcutBar).
+- `ui/component/`: componentes reutilizables (GaugeCard, StatusChip, Buttons).
+- `ui/panel/`: pantallas y regiones principales (Login, Dashboard, Sidebar, Toolbar).
+- `ui/table/`: modelos y renderers para `JTable`.
 - `theme/`: tokens de color/fuente (`Theme.java`, `Fonts.java`).
 - `enums/`: enumeraciones del dominio.
 - `mock/`: datos simulados usados durante Fase A.
 - `model/`: POJOs de dominio para Fase A.
-- `util/`: utilidades transversales (Navigator, SessionManager).
-- `resources/fonts/`: archivos .ttf de Inter y JetBrains Mono.
+- `resources/fonts/`: archivos .ttf de Inter y JetBrains Mono cuando se agreguen; si no existen, `Fonts.java` usa fuentes del sistema.
 
 ## Flujo de Implementacion
 
@@ -128,8 +123,7 @@ El plan completo vive en `docs/implementation_plan/`:
 - Clases en `PascalCase`.
 - Variables y metodos en `camelCase`.
 - Constantes en `UPPER_SNAKE_CASE`.
-- FXML en `kebab-case`.
-- CSS classes en `kebab-case`.
+- No usar FXML ni CSS; la UI se construye con Swing y se estiliza con FlatLaf + `Theme.java`.
 - Nombres tecnicos en ingles; nombres del dominio y textos de UI en espanol.
 
 ## Autor

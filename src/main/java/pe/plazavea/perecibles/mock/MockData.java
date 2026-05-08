@@ -1,8 +1,7 @@
 package pe.plazavea.perecibles.mock;
 
+import java.util.List;
 import java.time.LocalDate;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import pe.plazavea.perecibles.enums.EstadoAlerta;
 import pe.plazavea.perecibles.enums.EstadoLote;
 import pe.plazavea.perecibles.enums.RolUsuario;
@@ -16,9 +15,9 @@ public final class MockData {
     private MockData() {
     }
 
-    public static ObservableList<Lote> getLotes() {
+    public static List<Lote> getLotes() {
         LocalDate today = LocalDate.now();
-        return FXCollections.observableArrayList(
+        return List.of(
                 new Lote(1, "L-001", "Leche Gloria 1L", "Lacteos", 100, 100, today, today.plusDays(20), "Anaquel A1", EstadoLote.DISPONIBLE),
                 new Lote(2, "L-002", "Yogur Fresa 500g", "Lacteos", 60, 48, today.minusDays(3), today.plusDays(12), "Camara B2", EstadoLote.DISPONIBLE),
                 new Lote(3, "L-003", "Pollo Entero 1.8kg", "Carnes", 30, 22, today.minusDays(1), today.plusDays(9), "Camara C1", EstadoLote.DISPONIBLE),
@@ -28,8 +27,8 @@ public final class MockData {
         );
     }
 
-    public static ObservableList<Alerta> getAlertas() {
-        return FXCollections.observableArrayList(
+    public static List<Alerta> getAlertas() {
+        return List.of(
                 new Alerta(1, TipoAlerta.PROXIMO_VENCER, 5, "L-004 - Jamon del Pais", EstadoAlerta.PENDIENTE),
                 new Alerta(2, TipoAlerta.PROXIMO_VENCER, 3, "L-005 - Pan de Molde Bimbo", EstadoAlerta.PENDIENTE),
                 new Alerta(3, TipoAlerta.VENCIDO, 0, "L-006 - Queso Fresco 250g", EstadoAlerta.PENDIENTE)
