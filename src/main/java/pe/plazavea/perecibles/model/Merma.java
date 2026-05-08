@@ -39,7 +39,7 @@ public class Merma {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    protected Merma() {
+    public Merma() {
     }
 
     public Integer getIdMerma() {

@@ -30,7 +30,7 @@ public class ConfiguracionAlerta {
     @JoinColumn(name = "id_usuario_config")
     private Usuario usuarioConfig;
 
-    protected ConfiguracionAlerta() {
+    public ConfiguracionAlerta() {
     }
 
     public Integer getIdConfig() {

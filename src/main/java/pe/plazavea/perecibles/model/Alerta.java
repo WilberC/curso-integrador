@@ -49,7 +49,7 @@ public class Alerta {
     @Transient
     private String loteNumero;
 
-    protected Alerta() {
+    public Alerta() {
     }
 
     public Alerta(int id, TipoAlerta tipoAlerta, int diasParaVencer, String loteNumero, EstadoAlerta estado) {

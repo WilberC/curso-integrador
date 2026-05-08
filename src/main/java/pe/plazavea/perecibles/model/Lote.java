@@ -50,7 +50,7 @@ public class Lote {
     @JoinColumn(name = "id_usuario_reg", nullable = false)
     private Usuario usuarioRegistro;
 
-    protected Lote() {
+    public Lote() {
     }
 
     public Lote(

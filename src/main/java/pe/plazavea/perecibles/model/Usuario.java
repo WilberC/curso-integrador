@@ -41,7 +41,7 @@ public class Usuario {
     @Column(nullable = false)
     private LocalDate fechaCreacion = LocalDate.now();
 
-    protected Usuario() {
+    public Usuario() {
     }
 
     public Usuario(int id, String nombre, String apellido, RolUsuario rol) {

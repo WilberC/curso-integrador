@@ -37,7 +37,7 @@ public class Reporte {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    protected Reporte() {
+    public Reporte() {
     }
 
     public Integer getIdReporte() {

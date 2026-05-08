@@ -21,7 +21,7 @@ public class Categoria {
     @Column(length = 255)
     private String descripcion;
 
-    protected Categoria() {
+    public Categoria() {
     }
 
     public Categoria(String nombre) {

@@ -1,0 +1,17 @@
+package pe.plazavea.perecibles.repository;
+
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import pe.plazavea.perecibles.enums.EstadoAlerta;
+import pe.plazavea.perecibles.model.Alerta;
+
+public interface AlertaRepository extends JpaRepository<Alerta, Integer> {
+    List<Alerta> findByEstado(EstadoAlerta estado);
+
+    List<Alerta> findByLoteIdLote(Integer idLote);
+
+    Optional<Alerta> findByLoteIdLoteAndEstado(Integer idLote, EstadoAlerta estado);
+
+    long countByEstado(EstadoAlerta estado);
+}

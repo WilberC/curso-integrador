@@ -30,7 +30,7 @@ public class ProductoPerecible {
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;
 
-    protected ProductoPerecible() {
+    public ProductoPerecible() {
     }
 
     public ProductoPerecible(String nombre, Categoria categoria) {

@@ -42,34 +42,62 @@ public class MovimientoInventario {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    protected MovimientoInventario() {
+    public MovimientoInventario() {
     }
 
     public Integer getIdMovimiento() {
         return idMovimiento;
     }
 
+    public void setIdMovimiento(Integer idMovimiento) {
+        this.idMovimiento = idMovimiento;
+    }
+
     public TipoMovimiento getTipo() {
         return tipo;
+    }
+
+    public void setTipo(TipoMovimiento tipo) {
+        this.tipo = tipo;
     }
 
     public Double getCantidad() {
         return cantidad;
     }
 
+    public void setCantidad(Double cantidad) {
+        this.cantidad = cantidad;
+    }
+
     public LocalDateTime getFechaMovimiento() {
         return fechaMovimiento;
+    }
+
+    public void setFechaMovimiento(LocalDateTime fechaMovimiento) {
+        this.fechaMovimiento = fechaMovimiento;
     }
 
     public String getMotivo() {
         return motivo;
     }
 
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
+    }
+
     public Lote getLote() {
         return lote;
     }
 
+    public void setLote(Lote lote) {
+        this.lote = lote;
+    }
+
     public Usuario getUsuario() {
         return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 }
