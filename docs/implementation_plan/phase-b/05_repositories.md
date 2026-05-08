@@ -6,7 +6,7 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## UsuarioRepository
 
-- [ ] Crear `repository/UsuarioRepository.java`:
+- [x] Crear `repository/UsuarioRepository.java`:
   ```java
   public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
       Optional<Usuario> findByEmail(String email);
@@ -19,7 +19,7 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## CategoriaRepository
 
-- [ ] Crear `repository/CategoriaRepository.java`:
+- [x] Crear `repository/CategoriaRepository.java`:
   ```java
   public interface CategoriaRepository extends JpaRepository<Categoria, Integer> {
       Optional<Categoria> findByNombreIgnoreCase(String nombre);
@@ -31,7 +31,7 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## ProductoPerecibleRepository
 
-- [ ] Crear `repository/ProductoPerecibleRepository.java`:
+- [x] Crear `repository/ProductoPerecibleRepository.java`:
   ```java
   public interface ProductoPerecibleRepository extends JpaRepository<ProductoPerecible, Integer> {
       List<ProductoPerecible> findByCategoriaId(Integer idCategoria);
@@ -43,7 +43,7 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## LoteRepository
 
-- [ ] Crear `repository/LoteRepository.java` — el repositorio con más queries custom:
+- [x] Crear `repository/LoteRepository.java` — el repositorio con más queries custom:
   ```java
   public interface LoteRepository extends JpaRepository<Lote, Integer> {
       List<Lote> findByEstado(EstadoLote estado);
@@ -74,7 +74,7 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## MovimientoInventarioRepository
 
-- [ ] Crear `repository/MovimientoInventarioRepository.java`:
+- [x] Crear `repository/MovimientoInventarioRepository.java`:
   ```java
   public interface MovimientoInventarioRepository extends JpaRepository<MovimientoInventario, Integer> {
       List<MovimientoInventario> findByLoteIdLote(Integer idLote);
@@ -87,7 +87,7 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## AlertaRepository
 
-- [ ] Crear `repository/AlertaRepository.java`:
+- [x] Crear `repository/AlertaRepository.java`:
   ```java
   public interface AlertaRepository extends JpaRepository<Alerta, Integer> {
       List<Alerta> findByEstado(EstadoAlerta estado);
@@ -101,7 +101,7 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## ReporteRepository
 
-- [ ] Crear `repository/ReporteRepository.java`:
+- [x] Crear `repository/ReporteRepository.java`:
   ```java
   public interface ReporteRepository extends JpaRepository<Reporte, Integer> {
       List<Reporte> findByTipo(TipoReporte tipo);
@@ -114,7 +114,7 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## ConfiguracionAlertaRepository
 
-- [ ] Crear `repository/ConfiguracionAlertaRepository.java`:
+- [x] Crear `repository/ConfiguracionAlertaRepository.java`:
   ```java
   public interface ConfiguracionAlertaRepository extends JpaRepository<ConfiguracionAlerta, Integer> {
       Optional<ConfiguracionAlerta> findFirstByActivoTrue();  // configuración global activa
@@ -126,8 +126,8 @@ Un repositorio por entidad. Todos extienden `JpaRepository<T, Integer>`.
 
 ## Verificación Phase B — Repositorios
 
-- [ ] `UsuarioRepository.findByEmail("operario@plazavea.com")` devuelve el usuario sembrado
-- [ ] `LoteRepository.findByEstado(EstadoLote.VENCIDO)` devuelve solo lotes vencidos
-- [ ] `LoteRepository.findProximosAVencer(LocalDate.now(), LocalDate.now().plusDays(7))` devuelve los lotes correctos
-- [ ] `AlertaRepository.countByEstado(EstadoAlerta.PENDIENTE)` devuelve el conteo esperado
-- [ ] `ConfiguracionAlertaRepository.findFirstByActivoTrue()` devuelve la config sembrada con diasAmarilla=7
+- [x] `UsuarioRepository.findByEmail("operario@plazavea.com")` devuelve el usuario sembrado
+- [x] `LoteRepository.findByEstado(EstadoLote.VENCIDO)` devuelve solo lotes vencidos
+- [x] `LoteRepository.findProximosAVencer(LocalDate.now(), LocalDate.now().plusDays(7))` devuelve los lotes correctos
+- [x] `AlertaRepository.countByEstado(EstadoAlerta.PENDIENTE)` devuelve el conteo esperado
+- [x] `ConfiguracionAlertaRepository.findFirstByActivoTrue()` devuelve la config sembrada con diasAmarilla=7

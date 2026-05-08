@@ -11,12 +11,26 @@ java {
     }
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
+
 repositories {
     mavenCentral()
 }
 
 application {
     mainClass = 'pe.plazavea.perecibles.App'
+}
+
+distributions {
+    main {
+        contents {
+            from('.') {
+                include '.env'
+            }
+        }
+    }
 }
 
 dependencies {
@@ -37,4 +51,33 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.register('jpackage', Exec) {
+    group = 'distribution'
+    description = 'Genera el instalador nativo con jpackage.'
+    dependsOn tasks.named('installDist')
+
+    doFirst {
+        def destination = layout.buildDirectory.dir('jpackage').get().asFile
+        destination.mkdirs()
+
+        def args = [
+                'jpackage',
+                '--name', 'Plaza Vea - Perecibles',
+                '--vendor', 'Supermercados Peruanos S.A.',
+                '--app-version', project.version.toString(),
+                '--input', layout.buildDirectory.dir("install/${project.name}/lib").get().asFile.absolutePath,
+                '--main-jar', jar.archiveFileName.get(),
+                '--main-class', application.mainClass.get(),
+                '--dest', destination.absolutePath,
+                '--java-options', '-Xmx512m'
+        ]
+
+        if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+            args.addAll(['--win-menu', '--win-shortcut', '--type', 'msi'])
+        }
+
+        commandLine args
+    }
 }

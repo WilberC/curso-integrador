@@ -6,7 +6,7 @@
 
 ## UsuarioServicio
 
-- [ ] Crear `service/UsuarioServicio.java`:
+- [x] Crear `service/UsuarioServicio.java`:
 
   ```java
   @Service
@@ -55,7 +55,7 @@
 
 ## InventarioServicio
 
-- [ ] Crear `service/InventarioServicio.java`:
+- [x] Crear `service/InventarioServicio.java`:
 
   ```java
   @Service
@@ -140,7 +140,7 @@
 
 ## AlertaServicio
 
-- [ ] Crear `service/AlertaServicio.java`:
+- [x] Crear `service/AlertaServicio.java`:
 
   ```java
   @Service
@@ -221,7 +221,7 @@
 
 ## ReporteServicio
 
-- [ ] Crear `service/ReporteServicio.java`:
+- [x] Crear `service/ReporteServicio.java`:
 
   ```java
   @Service
@@ -282,9 +282,9 @@
 
 ## Verificación Phase B — Servicios
 
-- [ ] `UsuarioServicio.login("operario@plazavea.com", "admin")` devuelve el usuario (con datos sembrados en DB)
-- [ ] `UsuarioServicio.login("correo@mal.com", "xxx")` lanza excepción con mensaje claro
-- [ ] `InventarioServicio.registrarIngreso(lote, usuario)` persiste el lote y crea el MovimientoInventario
-- [ ] Después de `registrarRetiro()` con tipo VENCIDO, se crea una Merma en la DB
-- [ ] `AlertaServicio.generarAlertas()` crea Alertas para lotes con fecha próxima
-- [ ] `ReporteServicio.exportarCSV()` genera un archivo `.csv` abre con la aplicación del OS
+- [x] `UsuarioServicio.login("operario@plazavea.com", "admin")` devuelve el usuario (con datos sembrados en DB)
+- [x] `UsuarioServicio.login("correo@mal.com", "xxx")` lanza excepción con mensaje claro
+- [x] `InventarioServicio.registrarIngreso(lote, usuario)` persiste el lote y crea el MovimientoInventario
+- [x] Después de `registrarRetiro()` con tipo VENCIDO, se crea una Merma en la DB
+- [x] `AlertaServicio.generarAlertas()` crea Alertas para lotes con fecha próxima
+- [x] `ReporteServicio.exportarCSV()` genera un archivo `.csv` abre con la aplicación del OS
