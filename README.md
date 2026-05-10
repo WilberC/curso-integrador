@@ -57,6 +57,14 @@ mise install
 
 ## Como Ejecutar
 
+Ejecutar la aplicacion con el script corto:
+
+```bash
+./scripts/run.sh
+```
+
+`gradlew run` ya compila las clases y procesa recursos antes de abrir la aplicacion, asi que no es necesario correr `compileJava processResources` manualmente cada vez.
+
 Compilar:
 
 ```bash

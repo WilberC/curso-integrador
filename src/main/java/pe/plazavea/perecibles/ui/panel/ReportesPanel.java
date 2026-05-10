@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import pe.plazavea.perecibles.enums.RolUsuario;
 import pe.plazavea.perecibles.enums.TipoReporte;
 import pe.plazavea.perecibles.model.Reporte;
+import pe.plazavea.perecibles.model.Usuario;
 import pe.plazavea.perecibles.service.ReporteServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
@@ -59,7 +60,8 @@ public final class ReportesPanel extends JPanel {
 
     private void rebuild() {
         removeAll();
-        if (SessionManager.getCurrentUser() != null && SessionManager.getCurrentUser().getRol() != RolUsuario.SUPERVISOR) {
+        Usuario currentUser = SessionManager.getCurrentUser();
+        if (currentUser == null || currentUser.getRol() != RolUsuario.SUPERVISOR) {
             add(accessDenied(), BorderLayout.CENTER);
         } else {
             add(reportContent(), BorderLayout.CENTER);
@@ -129,6 +131,12 @@ public final class ReportesPanel extends JPanel {
     }
 
     public void generateReport() {
+        Usuario currentUser = SessionManager.getCurrentUser();
+        if (currentUser == null || currentUser.getRol() != RolUsuario.SUPERVISOR) {
+            preview.setText("");
+            return;
+        }
+
         TipoReporte tipo = (TipoReporte) tipoReporte.getSelectedItem();
         LocalDate inicio = LocalDate.parse(desde.getText(), INPUT_DATE);
         LocalDate fin = LocalDate.parse(hasta.getText(), INPUT_DATE);
@@ -136,10 +144,10 @@ public final class ReportesPanel extends JPanel {
             @Override
             protected Reporte doInBackground() {
                 return switch (tipo) {
-                    case STOCK -> reporteServicio.generarReporteStock(inicio, fin, SessionManager.getCurrentUser());
-                    case VENCIDOS -> reporteServicio.generarReporteVencidos(inicio, fin, SessionManager.getCurrentUser());
-                    case PROXIMOS_VENCER -> reporteServicio.generarReporteProximosAVencer(inicio, fin, SessionManager.getCurrentUser());
-                    case MERMAS -> reporteServicio.generarReporteMermas(inicio, fin, SessionManager.getCurrentUser());
+                    case STOCK -> reporteServicio.generarReporteStock(inicio, fin, currentUser);
+                    case VENCIDOS -> reporteServicio.generarReporteVencidos(inicio, fin, currentUser);
+                    case PROXIMOS_VENCER -> reporteServicio.generarReporteProximosAVencer(inicio, fin, currentUser);
+                    case MERMAS -> reporteServicio.generarReporteMermas(inicio, fin, currentUser);
                 };
             }
 
