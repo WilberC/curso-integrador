@@ -1,12 +1,12 @@
 ## Overview
 
-The Plaza Vea Perecibles desktop app is a **dark-first, data-dense inventory tool** built with **Java Swing + FlatLaf**. The visual language borrows the authority of financial trading UIs — near-black canvas, a single energetic accent, and monospace numerical type — and applies it to inventory management. The result should feel like a professional instrument that belongs on a Windows/macOS workstation, not a web portal in a window.
+The Plaza Vea Perecibles desktop app is a **light-first, editorial inventory tool** built with **Java Swing + FlatLaf**. The visual language borrows the clarity of professional print interfaces — white canvas, ink-black type, generous whitespace, and a near-black CTA — applied to inventory management. The result should feel like a precise, legible instrument: easy to read at a glance, calm under pressure, and authoritative without decoration.
 
-**Why Swing + FlatLaf over JavaFX:** JavaFX's styling model is CSS-driven (designed for rich internet apps), which naturally produces web-like results. Swing renders through Java2D against the OS painting model — window chrome, scrollbars, focus rings, and system dialogs are all OS-native. FlatLaf (used by IntelliJ IDEA, DataGrip, and other JetBrains tools) layers a modern flat dark theme on top while keeping that native character.
+**Why Swing + FlatLaf over JavaFX:** JavaFX's styling model is CSS-driven (designed for rich internet apps), which naturally produces web-like results. Swing renders through Java2D against the OS painting model — window chrome, scrollbars, focus rings, and system dialogs are all OS-native. FlatLaf (used by IntelliJ IDEA, DataGrip, and other JetBrains tools) layers a modern flat light theme on top while keeping that native character.
 
 **Platform reality:** 1080p or 1440p workstation monitor. No touch, no responsive breakpoints. Mouse + keyboard is the primary input model; keyboard-first operation is a first-class goal.
 
-**Atmosphere:** Deep near-black canvas (`#0b0e11`) with a single accent — **Plaza Yellow** (`#FCD535`). Semantic colors handle stock status: green for safe, amber for near-expiry, red for expired.
+**Atmosphere:** White editorial canvas (`#ffffff`) with ink-black type (`#181d26`) and generous whitespace. Visual emphasis comes from color contrast and status semantics — not from dark surfaces, saturated gradients, or background decoration.
 
 **Font split:**
 - **Inter** — all labels, headings, body copy, button text.
@@ -21,44 +21,44 @@ Define all colors as `java.awt.Color` constants in one class. Never hardcode hex
 ```java
 package pe.plazavea.perecibles.theme;
 
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 import javax.swing.*;
 import java.awt.*;
 
 public final class Theme {
 
-    // ── Canvas ──────────────────────────────────────────────────
-    public static final Color CANVAS_DARK      = hex("#0b0e11"); // window background floor
-    public static final Color SURFACE_CARD     = hex("#1e2329"); // sidebar, panels, table bg
-    public static final Color SURFACE_ELEVATED = hex("#2b3139"); // toolbar, hover, inputs
+    // ── Canvas (light surfaces) ─────────────────────────────────
+    public static final Color CANVAS          = hex("#ffffff"); // window background floor
+    public static final Color SURFACE_SOFT    = hex("#f8fafc"); // sidebar, panels, table bg
+    public static final Color SURFACE_STRONG  = hex("#e0e2e6"); // toolbar, section headers, dividers
 
-    // ── Accent ──────────────────────────────────────────────────
-    public static final Color PRIMARY          = hex("#FCD535"); // yellow — CTA button, wordmark
-    public static final Color PRIMARY_ACTIVE   = hex("#f0b90b"); // button hover/press
-    public static final Color PRIMARY_DISABLED = hex("#3a3a1f"); // disabled button bg
-    public static final Color ON_PRIMARY       = hex("#181a20"); // text ON yellow surfaces
+    // ── Brand / Primary ─────────────────────────────────────────
+    public static final Color PRIMARY         = hex("#181d26"); // near-black — CTA button, active nav bar
+    public static final Color PRIMARY_ACTIVE  = hex("#0d1218"); // button press state
+    public static final Color PRIMARY_DISABLED= hex("#c8cdd4"); // disabled button bg
+    public static final Color ON_PRIMARY      = hex("#ffffff"); // text ON dark buttons and surfaces
 
     // ── Stock Semantics ─────────────────────────────────────────
-    public static final Color SAFE             = hex("#0ecb81"); // DISPONIBLE
-    public static final Color WARNING          = hex("#f0a500"); // PROXIMO_VENCER
-    public static final Color DANGER           = hex("#f6465d"); // VENCIDO
+    public static final Color SAFE            = hex("#006400"); // DISPONIBLE
+    public static final Color WARNING         = hex("#b45309"); // PROXIMO_VENCER
+    public static final Color DANGER          = hex("#aa2d00"); // VENCIDO
 
-    // ── Semantic tints (dark bg chip) ───────────────────────────
-    public static final Color SAFE_TINT        = hex("#0a2e20"); // chip bg for DISPONIBLE
-    public static final Color WARNING_TINT     = hex("#2e1f00"); // chip bg for PROXIMO_VENCER
-    public static final Color DANGER_TINT      = hex("#2e0a10"); // chip bg for VENCIDO
+    // ── Semantic tints (light bg chip) ───────────────────────────
+    public static final Color SAFE_TINT       = hex("#dcfce7"); // chip bg for DISPONIBLE
+    public static final Color WARNING_TINT    = hex("#fef3c7"); // chip bg for PROXIMO_VENCER
+    public static final Color DANGER_TINT     = hex("#fee2e2"); // chip bg for VENCIDO
 
-    // ── Text ────────────────────────────────────────────────────
-    public static final Color BODY             = hex("#eaecef"); // default text on dark
-    public static final Color MUTED            = hex("#707a8a"); // column headers, captions
-    public static final Color MUTED_STRONG     = hex("#929aa5"); // louder secondary labels
-    public static final Color ON_DARK          = hex("#ffffff"); // max-contrast on canvas
-    public static final Color INK              = hex("#181a20"); // text on light surfaces
+    // ── Text ─────────────────────────────────────────────────────
+    public static final Color INK             = hex("#181d26"); // strongest text — headings, primary buttons
+    public static final Color BODY            = hex("#333840"); // default running text
+    public static final Color MUTED           = hex("#41454d"); // captions, secondary labels
+    public static final Color MUTED_STRONG    = hex("#9297a0"); // column headers, hints
+    public static final Color ON_DARK         = hex("#ffffff"); // text on dark surfaces (PRIMARY bg)
 
-    // ── Borders ─────────────────────────────────────────────────
-    public static final Color HAIRLINE_DARK    = hex("#2b3139"); // dividers on dark
-    public static final Color HAIRLINE_LIGHT   = hex("#eaecef"); // borders on light dialogs
-    public static final Color FOCUS_RING       = PRIMARY;        // keyboard focus outline
+    // ── Borders ──────────────────────────────────────────────────
+    public static final Color HAIRLINE        = hex("#dddddd"); // dividers, input outlines
+    public static final Color BORDER_STRONG   = hex("#9297a0"); // strong borders, disabled secondary outlines
+    public static final Color FOCUS_RING      = hex("#458fff"); // keyboard focus outline (blue, visible on white)
 
     // ── Radius (use in paintComponent / setBorder) ───────────────
     public static final int RADIUS_SM = 4;
@@ -82,30 +82,30 @@ public final class Theme {
 
     /** Call once at JVM start — before any Swing component is created. */
     public static void apply() {
-        FlatDarkLaf.setup();
+        FlatIntelliJLaf.setup();
 
-        UIManager.put("Panel.background",               CANVAS_DARK);
-        UIManager.put("RootPane.background",            CANVAS_DARK);
-        UIManager.put("OptionPane.background",          SURFACE_CARD);
+        UIManager.put("Panel.background",               CANVAS);
+        UIManager.put("RootPane.background",            CANVAS);
+        UIManager.put("OptionPane.background",          SURFACE_SOFT);
 
-        UIManager.put("Table.background",               SURFACE_CARD);
+        UIManager.put("Table.background",               SURFACE_SOFT);
         UIManager.put("Table.foreground",               BODY);
-        UIManager.put("Table.selectionBackground",      new Color(0xFCD535).darker().darker());
-        UIManager.put("Table.selectionForeground",      BODY);
-        UIManager.put("Table.gridColor",                HAIRLINE_DARK);
-        UIManager.put("TableHeader.background",         SURFACE_ELEVATED);
+        UIManager.put("Table.selectionBackground",      new Color(0xe8eaed));
+        UIManager.put("Table.selectionForeground",      INK);
+        UIManager.put("Table.gridColor",                HAIRLINE);
+        UIManager.put("TableHeader.background",         SURFACE_STRONG);
         UIManager.put("TableHeader.foreground",         MUTED);
 
-        UIManager.put("TextField.background",           SURFACE_ELEVATED);
-        UIManager.put("TextField.foreground",           BODY);
-        UIManager.put("TextField.caretForeground",      BODY);
-        UIManager.put("ComboBox.background",            SURFACE_ELEVATED);
-        UIManager.put("ComboBox.foreground",            BODY);
-        UIManager.put("PasswordField.background",       SURFACE_ELEVATED);
+        UIManager.put("TextField.background",           CANVAS);
+        UIManager.put("TextField.foreground",           INK);
+        UIManager.put("TextField.caretForeground",      INK);
+        UIManager.put("ComboBox.background",            CANVAS);
+        UIManager.put("ComboBox.foreground",            INK);
+        UIManager.put("PasswordField.background",       CANVAS);
 
-        UIManager.put("ScrollPane.background",          CANVAS_DARK);
-        UIManager.put("ScrollBar.thumbColor",           SURFACE_ELEVATED);
-        UIManager.put("ScrollBar.trackColor",           SURFACE_CARD);
+        UIManager.put("ScrollPane.background",          CANVAS);
+        UIManager.put("ScrollBar.thumbColor",           SURFACE_STRONG);
+        UIManager.put("ScrollBar.trackColor",           SURFACE_SOFT);
 
         UIManager.put("Component.arc",                  RADIUS_MD);
         UIManager.put("Button.arc",                     RADIUS_MD);
@@ -183,14 +183,14 @@ public final class Fonts {
 ┌─────────────────────────────────────────────────────────────────┐
 │  JFrame title bar (OS-native window chrome)                      │
 ├──────────┬──────────────────────────────────────────────────────┤
-│          │  Toolbar JPanel  (40px, SURFACE_ELEVATED)             │
+│          │  Toolbar JPanel  (40px, SURFACE_STRONG)               │
 │ Sidebar  ├──────────────────────────────────────────────────────┤
 │ JPanel   │                                                        │
 │ (200px)  │     Content JPanel — CardLayout (fills rest)          │
 │          │                                                        │
 │          │                                                        │
 ├──────────┴──────────────────────────────────────────────────────┤
-│  ShortcutBar JPanel  (28px, SURFACE_ELEVATED)                    │
+│  ShortcutBar JPanel  (28px, SURFACE_STRONG)                      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -198,7 +198,7 @@ Root layout in `MainFrame extends JFrame`:
 
 ```java
 JPanel root = new JPanel(new BorderLayout());
-root.setBackground(Theme.CANVAS_DARK);
+root.setBackground(Theme.CANVAS);
 
 SidebarPanel sidebar = new SidebarPanel();   // 200px fixed
 JPanel center = new JPanel(new BorderLayout());
@@ -214,10 +214,10 @@ root.add(center,       BorderLayout.CENTER);
 root.add(shortcutBar,  BorderLayout.SOUTH);
 ```
 
-- **Sidebar:** 200px fixed (`setPreferredSize(new Dimension(200, 0))`). Background `SURFACE_CARD`.
-- **Toolbar:** 40px. Background `SURFACE_ELEVATED`. Bottom border hairline `HAIRLINE_DARK`.
-- **Content area:** `CardLayout`. Background `CANVAS_DARK`. Panels swap in/out without full rebuilds.
-- **Shortcut bar:** 28px. Background `SURFACE_ELEVATED`. Top border hairline `HAIRLINE_DARK`. Toggle with `?`.
+- **Sidebar:** 200px fixed (`setPreferredSize(new Dimension(200, 0))`). Background `SURFACE_SOFT`.
+- **Toolbar:** 40px. Background `SURFACE_STRONG`. Bottom border hairline `HAIRLINE`.
+- **Content area:** `CardLayout`. Background `CANVAS`. Panels swap in/out without full rebuilds.
+- **Shortcut bar:** 28px. Background `SURFACE_STRONG`. Top border hairline `HAIRLINE`. Toggle with `?`.
 
 ---
 
@@ -259,13 +259,13 @@ Depth comes from background-color steps, never from drop shadows.
 
 | Level | Color | Use |
 |---|---|---|
-| Floor | `CANVAS_DARK` (`#0b0e11`) | JFrame root, default JPanel background |
-| Card | `SURFACE_CARD` (`#1e2329`) | Sidebar, JTable background, GaugeCard |
-| Elevated | `SURFACE_ELEVATED` (`#2b3139`) | Toolbar, hovered rows, JTextField background |
-| Focus ring | `FOCUS_RING` = `PRIMARY` | FlatLaf handles via `Component.focusColor` |
-| Modal overlay | `new Color(0, 0, 0, 153)` painted on glass pane | Semi-transparent dim behind JDialog |
+| Floor | `CANVAS` (`#ffffff`) | JFrame root, default JPanel background |
+| Card | `SURFACE_SOFT` (`#f8fafc`) | Sidebar, JTable background, GaugeCard |
+| Elevated | `SURFACE_STRONG` (`#e0e2e6`) | Toolbar, section headers, dividers |
+| Focus ring | `FOCUS_RING` (`#458fff`) | FlatLaf handles via `Component.focusColor` |
+| Modal overlay | `new Color(0, 0, 0, 80)` painted on glass pane | Semi-transparent dim behind JDialog |
 
-No custom drop shadow painting on cards. The 12-step lightness jump between `CANVAS_DARK` and `SURFACE_CARD` is sufficient visual separation.
+No custom drop shadow painting on cards. The contrast between `CANVAS` and `SURFACE_SOFT` is sufficient visual separation without shadows or dark backgrounds.
 
 The one exception: `NuevoLoteDialog` draws a subtle shadow using FlatLaf's built-in window decoration:
 
@@ -336,7 +336,7 @@ public class StatusChip extends JLabel {
 ### Sidebar Navigation (`SidebarPanel extends JPanel`)
 
 - `setPreferredSize(new Dimension(200, 0))`
-- Background `SURFACE_CARD`
+- Background `SURFACE_SOFT`
 - Layout: `BoxLayout Y_AXIS`
 - Children:
   - Wordmark area: `JPanel` 56px tall, horizontally centered `JLabel`
@@ -355,7 +355,7 @@ public class NavItem extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setPreferredSize(new Dimension(200, 48));
         setMaximumSize(new Dimension(200, 48));
-        setBackground(Theme.SURFACE_CARD);
+        setBackground(Theme.SURFACE_SOFT);
         setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_MD, 0, Theme.SP_MD));
         add(new JLabel(icon));
         add(Box.createHorizontalStrut(Theme.SP_SM));
@@ -368,7 +368,7 @@ public class NavItem extends JPanel {
     @Override protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (active) {
-            // 3px yellow left-bar
+            // 3px ink left-bar signals active screen
             g.setColor(Theme.PRIMARY);
             g.fillRect(0, 0, 3, getHeight());
         }
@@ -376,7 +376,7 @@ public class NavItem extends JPanel {
 
     public void setActive(boolean active) {
         this.active = active;
-        setBackground(active ? Theme.SURFACE_ELEVATED : Theme.SURFACE_CARD);
+        setBackground(active ? Theme.SURFACE_STRONG : Theme.SURFACE_SOFT);
         // update label foreground
         repaint();
     }
@@ -386,8 +386,8 @@ public class NavItem extends JPanel {
 Add hover via `MouseAdapter`:
 ```java
 navItem.addMouseListener(new MouseAdapter() {
-    public void mouseEntered(MouseEvent e) { navItem.setBackground(Theme.SURFACE_ELEVATED); navItem.repaint(); }
-    public void mouseExited(MouseEvent e)  { if (!navItem.isActive()) { navItem.setBackground(Theme.SURFACE_CARD); navItem.repaint(); } }
+    public void mouseEntered(MouseEvent e) { navItem.setBackground(Theme.SURFACE_STRONG); navItem.repaint(); }
+    public void mouseExited(MouseEvent e)  { if (!navItem.isActive()) { navItem.setBackground(Theme.SURFACE_SOFT); navItem.repaint(); } }
 });
 ```
 
@@ -397,8 +397,8 @@ navItem.addMouseListener(new MouseAdapter() {
 ToolbarPanel panel = new ToolbarPanel();
 // setPreferredSize sets height; width is managed by BorderLayout
 panel.setPreferredSize(new Dimension(0, 40));
-panel.setBackground(Theme.SURFACE_ELEVATED);
-panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.HAIRLINE_DARK));
+panel.setBackground(Theme.SURFACE_STRONG);
+panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.HAIRLINE));
 panel.setLayout(new BorderLayout());
 // Left: action buttons
 // Right: search + filter
@@ -432,9 +432,9 @@ Hover/press states are handled by FlatLaf automatically using color derivation f
 public static JButton secondaryButton(String text) {
     JButton btn = new JButton(text);
     btn.setFont(Fonts.inter(Font.BOLD, 13f));
-    btn.setBackground(Theme.SURFACE_ELEVATED);
-    btn.setForeground(Theme.BODY);
-    btn.setBorder(BorderFactory.createLineBorder(Theme.HAIRLINE_DARK, 1, true));
+    btn.setBackground(Theme.CANVAS);
+    btn.setForeground(Theme.INK);
+    btn.setBorder(BorderFactory.createLineBorder(Theme.HAIRLINE, 1, true));
     btn.setFocusPainted(false);
     btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     return btn;
@@ -461,14 +461,14 @@ UIManager defaults from `Theme.apply()` handle background and foreground. Apply 
 
 ```java
 field.setBorder(BorderFactory.createCompoundBorder(
-    BorderFactory.createLineBorder(Theme.HAIRLINE_DARK, 1, true),
+    BorderFactory.createLineBorder(Theme.HAIRLINE, 1, true),
     BorderFactory.createEmptyBorder(
         Theme.SP_XS, Theme.SP_SM, Theme.SP_XS, Theme.SP_SM)
 ));
 field.setPreferredSize(new Dimension(0, 36));
 ```
 
-FlatLaf shows the yellow `FOCUS_RING` automatically on focus.
+FlatLaf shows the blue `FOCUS_RING` automatically on focus.
 
 For validation error state:
 ```java
@@ -519,24 +519,24 @@ JTable table = new JTable(model);
 table.setRowHeight(40);
 table.setShowGrid(false);
 table.setIntercellSpacing(new Dimension(0, 0));
-table.setBackground(Theme.SURFACE_CARD);
+table.setBackground(Theme.SURFACE_SOFT);
 table.setForeground(Theme.BODY);
 table.setFont(Fonts.inter(Font.PLAIN, 13f));
-table.setSelectionBackground(new Color(0x3a3a1f)); // derive(PRIMARY, -75%)
-table.setSelectionForeground(Theme.BODY);
-table.getTableHeader().setBackground(Theme.SURFACE_ELEVATED);
+table.setSelectionBackground(new Color(0xe8eaed));
+table.setSelectionForeground(Theme.INK);
+table.getTableHeader().setBackground(Theme.SURFACE_STRONG);
 table.getTableHeader().setForeground(Theme.MUTED);
 table.getTableHeader().setFont(Fonts.inter(Font.PLAIN, 11f));
 table.getTableHeader().setPreferredSize(new Dimension(0, 32));
 
 // Hairline row separator
 table.setShowHorizontalLines(true);
-table.setGridColor(Theme.HAIRLINE_DARK);
+table.setGridColor(Theme.HAIRLINE);
 
 // Wrap in scroll pane
 JScrollPane scroll = new JScrollPane(table);
 scroll.setBorder(BorderFactory.createEmptyBorder());
-scroll.getViewport().setBackground(Theme.SURFACE_CARD);
+scroll.getViewport().setBackground(Theme.SURFACE_SOFT);
 ```
 
 **Row coloring** via a custom renderer at the row level — override `prepareRenderer`:
@@ -549,13 +549,13 @@ table = new JTable(model) {
         Lote lote = model.getLoteAt(row);
         if (!isRowSelected(row)) {
             if (lote.getEstado() == EstadoLote.VENCIDO) {
-                c.setBackground(SURFACE_CARD);
+                c.setBackground(SURFACE_SOFT);
                 c.setForeground(Theme.DANGER);
             } else if (lote.getEstado() == EstadoLote.PROXIMO_VENCER) {
-                c.setBackground(SURFACE_CARD);
+                c.setBackground(SURFACE_SOFT);
                 c.setForeground(Theme.WARNING);
             } else {
-                c.setBackground(SURFACE_CARD);
+                c.setBackground(SURFACE_SOFT);
                 c.setForeground(Theme.BODY);
             }
         }
@@ -585,7 +585,7 @@ TableColumn cantidadCol = table.getColumnModel().getColumn(COL_CANTIDAD);
 cantidadCol.setCellRenderer((tbl, val, sel, foc, row, col) -> {
     JLabel lbl = new JLabel(val.toString(), SwingConstants.RIGHT);
     lbl.setFont(Fonts.mono(Font.PLAIN, 14f));
-    lbl.setForeground(sel ? Theme.BODY : Theme.MUTED_STRONG);
+    lbl.setForeground(sel ? Theme.INK : Theme.MUTED_STRONG);
     lbl.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
     return lbl;
 });
@@ -603,7 +603,7 @@ public class GaugeCard extends JPanel {
 
     public GaugeCard() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Theme.SURFACE_CARD);
+        setBackground(Theme.SURFACE_SOFT);
         setBorder(BorderFactory.createEmptyBorder(
             Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
 
@@ -611,13 +611,14 @@ public class GaugeCard extends JPanel {
         titleLabel.setForeground(Theme.MUTED);
 
         valueLabel.setFont(Fonts.mono(Font.BOLD, 32f));
+        valueLabel.setForeground(Theme.INK);
 
         bar.setPreferredSize(new Dimension(Integer.MAX_VALUE, 6));
         bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 6));
         bar.setString("");
         bar.setStringPainted(false);
         bar.setBorderPainted(false);
-        bar.setBackground(Theme.SURFACE_ELEVATED);
+        bar.setBackground(Theme.SURFACE_STRONG);
 
         trendLabel.setFont(Fonts.inter(Font.PLAIN, 11f));
         trendLabel.setForeground(Theme.MUTED);
@@ -674,31 +675,31 @@ public class NuevoLoteDialog extends JDialog {
         setSize(480, 520);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setBackground(Theme.SURFACE_CARD);
-        getRootPane().putClientProperty("FlatLaf.style", "background: #1e2329");
+        setBackground(Theme.SURFACE_SOFT);
+        getRootPane().putClientProperty("FlatLaf.style", "background: #f8fafc");
         buildLayout();
         registerEscapeKey();
     }
 
     private void buildLayout() {
         JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(Theme.SURFACE_CARD);
+        root.setBackground(Theme.SURFACE_SOFT);
 
         // Header
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(Theme.SURFACE_CARD);
+        header.setBackground(Theme.SURFACE_SOFT);
         header.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.HAIRLINE_DARK),
+            BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.HAIRLINE),
             BorderFactory.createEmptyBorder(20, Theme.SP_LG, Theme.SP_MD, Theme.SP_LG)
         ));
         JLabel title = new JLabel("Nuevo Lote");
         title.setFont(Fonts.inter(Font.BOLD, 18f));
-        title.setForeground(Theme.ON_DARK);
+        title.setForeground(Theme.INK);
         header.add(title, BorderLayout.WEST);
 
         // Body — use MigLayout for clean form alignment
         JPanel body = new JPanel(new MigLayout("insets 24, gapy 12", "[right][grow, fill]"));
-        body.setBackground(Theme.SURFACE_CARD);
+        body.setBackground(Theme.SURFACE_SOFT);
         addFormRow(body, "Producto",        new JComboBox<>());
         addFormRow(body, "N° Lote",         new JTextField());
         addFormRow(body, "Cantidad",        new JTextField());
@@ -707,8 +708,8 @@ public class NuevoLoteDialog extends JDialog {
 
         // Footer
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, Theme.SP_XS, Theme.SP_MD));
-        footer.setBackground(Theme.SURFACE_CARD);
-        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE_DARK));
+        footer.setBackground(Theme.SURFACE_SOFT);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE));
         footer.add(Buttons.secondaryButton("Cancelar"));
         footer.add(Buttons.primaryButton("Registrar"));
 
@@ -735,10 +736,10 @@ public class ShortcutBar extends JPanel {
 
     public ShortcutBar() {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        setBackground(Theme.SURFACE_ELEVATED);
+        setBackground(Theme.SURFACE_STRONG);
         setPreferredSize(new Dimension(0, 28));
         setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE_DARK),
+            BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE),
             BorderFactory.createEmptyBorder(0, Theme.SP_MD, 0, Theme.SP_MD)
         ));
     }
@@ -748,7 +749,7 @@ public class ShortcutBar extends JPanel {
         for (ShortcutHint hint : hints) {
             JLabel key  = new JLabel("[" + hint.key() + "]");
             key.setFont(Fonts.mono(Font.PLAIN, 11f));
-            key.setForeground(Theme.PRIMARY);
+            key.setForeground(Theme.INK);
 
             JLabel desc = new JLabel(hint.description());
             desc.setFont(Fonts.inter(Font.PLAIN, 11f));
@@ -870,7 +871,7 @@ timer.start();
 ## Screens at a Glance
 
 ### Login (`LoginPanel extends JPanel`)
-Full-window `StackPane`-equivalent: `JPanel` with `GridBagLayout` to center a `JPanel` card (400px wide). Background `CANVAS_DARK`. Wordmark `JLabel` in `PRIMARY`. `JTextField` + `JPasswordField` + primary "Iniciar Sesión" button. `JLabel` error (initially invisible). No sidebar, no toolbar.
+Full-window `StackPane`-equivalent: `JPanel` with `GridBagLayout` to center a `JPanel` card (400px wide). Background `CANVAS`. Wordmark `JLabel` in `INK`. `JTextField` + `JPasswordField` + primary "Iniciar Sesión" button. `JLabel` error (initially invisible). No sidebar, no toolbar.
 
 ### Dashboard (`DashboardPanel extends JPanel`)
 `GridLayout(2, 2, SP_LG, SP_LG)` of 4 `GaugeCard` instances in CENTER of content area. Below (or in a split using JSplitPane): `JTable` of top-10 urgent lotes. Toolbar: current timestamp label + refresh button.
@@ -899,14 +900,17 @@ Full-window `StackPane`-equivalent: `JPanel` with `GridBagLayout` to center a `J
 - Use `InputMap`/`ActionMap` for keyboard shortcuts. Never use raw `KeyListener`.
 - Keep `NuevoLoteDialog` at exactly 480px wide. Use `setResizable(false)` on all dialogs.
 - Let FlatLaf handle button hover/press states. Only set `setBackground()` for the resting color.
+- Trust whitespace and surface-step contrast (`CANVAS` → `SURFACE_SOFT` → `SURFACE_STRONG`) for depth. No drop shadows needed.
+- Keep semantic status colors (`SAFE`, `WARNING`, `DANGER`) in foreground text and chip tints only — never as full panel backgrounds.
 
 ### Don't
 - Don't call `setOpaque(false)` on panels unless you are custom-painting them — it causes repaint artifacts in Swing.
 - Don't use `null` layout. Every panel must have an explicit `LayoutManager`.
 - Don't use `GridBagLayout` for forms — use `MigLayout` instead. GridBagLayout constraints are fragile.
 - Don't do DB work in `ActionListener` callbacks directly. Always delegate to a `SwingWorker`.
-- Don't use `#FF0000` or fully-saturated colors. The semantic tokens are calibrated for the dark canvas.
-- Don't use yellow (`PRIMARY`) for error states or stock warnings. Yellow is brand accent only.
+- Don't use fully-saturated colors. The semantic tokens (`SAFE`, `WARNING`, `DANGER`) are calibrated for legibility on a white canvas — don't substitute with raw `#ff0000` or `#00ff00`.
+- Don't flip to dark surfaces (`#0b0e11` or similar) for emphasis. Emphasis comes from ink-black type, status color, and surface-step contrast — not from dark backgrounds.
 - Don't make table rows fully opaque red/green. Use foreground-color + 3px left-border treatment via `prepareRenderer` / cell renderer.
 - Don't call `repaint()` from a background thread. Use `SwingUtilities.invokeLater(() -> repaint())` if you must trigger it from outside the EDT.
 - Don't use `JOptionPane` for routine feedback. Use the `Notifications` toast for non-blocking feedback; reserve `JOptionPane` for destructive confirmations only.
+- Don't use `FlatDarkLaf`. The theme is `FlatIntelliJLaf` (light). Switching to dark breaks all `CANVAS` / `SURFACE_SOFT` / `SURFACE_STRONG` assumptions.
