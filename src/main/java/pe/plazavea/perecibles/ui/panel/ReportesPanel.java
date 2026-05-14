@@ -45,7 +45,7 @@ public final class ReportesPanel extends JPanel {
     public ReportesPanel(ReporteServicio reporteServicio) {
         this.reporteServicio = reporteServicio;
         setLayout(new BorderLayout());
-        setBackground(Theme.CANVAS_DARK);
+        setBackground(Theme.CANVAS);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
         rebuild();
     }
@@ -74,13 +74,13 @@ public final class ReportesPanel extends JPanel {
     private JSplitPane reportContent() {
         JPanel filters = new JPanel();
         filters.setLayout(new BoxLayout(filters, BoxLayout.Y_AXIS));
-        filters.setBackground(Theme.SURFACE_CARD);
+        filters.setBackground(Theme.SURFACE_SOFT);
         filters.setPreferredSize(new Dimension(240, 0));
         filters.setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
 
         JLabel title = new JLabel("Filtros");
         title.setFont(Fonts.inter(Font.BOLD, 15f));
-        title.setForeground(Theme.ON_DARK);
+        title.setForeground(Theme.INK);
         filters.add(title);
         filters.add(Box.createVerticalStrut(Theme.SP_MD));
         addLabel(filters, "Tipo de Reporte");
@@ -102,7 +102,7 @@ public final class ReportesPanel extends JPanel {
 
         preview.setEditable(false);
         preview.setFont(Fonts.mono(Font.PLAIN, 14f));
-        preview.setBackground(Theme.SURFACE_CARD);
+        preview.setBackground(Theme.SURFACE_SOFT);
         preview.setForeground(Theme.BODY);
         preview.setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
 
@@ -114,7 +114,7 @@ public final class ReportesPanel extends JPanel {
 
     private JPanel accessDenied() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Theme.CANVAS_DARK);
+        panel.setBackground(Theme.CANVAS);
         JLabel label = new JLabel("Acceso denegado: reportes solo esta disponible para Supervisores.");
         label.setFont(Fonts.inter(Font.BOLD, 15f));
         label.setForeground(Theme.DANGER);

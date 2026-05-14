@@ -95,14 +95,14 @@ public final class MainFrame extends JFrame implements Navigator {
 
     private JPanel buildShell() {
         JPanel shell = new JPanel(new BorderLayout());
-        shell.setBackground(Theme.CANVAS_DARK);
+        shell.setBackground(Theme.CANVAS);
 
         JPanel center = new JPanel(new BorderLayout());
-        center.setBackground(Theme.CANVAS_DARK);
+        center.setBackground(Theme.CANVAS);
         center.add(toolbar, BorderLayout.NORTH);
         center.add(contentCards, BorderLayout.CENTER);
 
-        contentCards.setBackground(Theme.CANVAS_DARK);
+        contentCards.setBackground(Theme.CANVAS);
         contentCards.add(dashboardPanel, "dashboard");
         contentCards.add(inventarioPanel, "inventario");
         contentCards.add(alertasPanel, "alertas");

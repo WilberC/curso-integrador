@@ -48,10 +48,10 @@ public final class DashboardPanel extends JPanel {
     public DashboardPanel(InventarioServicio inventarioServicio) {
         this.inventarioServicio = inventarioServicio;
         setLayout(new BorderLayout(0, Theme.SP_LG));
-        setBackground(Theme.CANVAS_DARK);
+        setBackground(Theme.CANVAS);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
 
-        gauges.setBackground(Theme.CANVAS_DARK);
+        gauges.setBackground(Theme.CANVAS);
         JTable table = TableFactory.loteTable(urgentModel);
         JScrollPane scrollPane = TableFactory.scrollPane(table);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, gauges, scrollPane);
@@ -127,7 +127,7 @@ public final class DashboardPanel extends JPanel {
 
     private JPanel buildToolbar() {
         JPanel toolbar = new JPanel(new BorderLayout());
-        toolbar.setBackground(Theme.CANVAS_DARK);
+        toolbar.setBackground(Theme.CANVAS);
         toolbar.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_MD, 0));
 
         timestampLabel.setFont(Fonts.mono(Font.PLAIN, 12f));
@@ -136,12 +136,12 @@ public final class DashboardPanel extends JPanel {
         JButton refresh = Buttons.secondary("Refrescar");
         refresh.addActionListener(event -> refreshDashboard());
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        actions.setBackground(Theme.CANVAS_DARK);
+        actions.setBackground(Theme.CANVAS);
         actions.add(refresh);
 
         JLabel title = new JLabel("Riesgo operativo");
         title.setFont(Fonts.inter(Font.BOLD, 15f));
-        title.setForeground(Theme.ON_DARK);
+        title.setForeground(Theme.INK);
         toolbar.add(title, BorderLayout.WEST);
         toolbar.add(timestampLabel, BorderLayout.CENTER);
         toolbar.add(actions, BorderLayout.EAST);

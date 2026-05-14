@@ -15,10 +15,10 @@ public final class ShortcutBar extends JPanel {
 
     public ShortcutBar() {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        setBackground(Theme.SURFACE_ELEVATED);
+        setBackground(Theme.SURFACE_STRONG);
         setPreferredSize(new Dimension(0, 28));
         setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE_DARK),
+                BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE),
                 BorderFactory.createEmptyBorder(0, Theme.SP_MD, 0, Theme.SP_MD)
         ));
         setHints(List.of(

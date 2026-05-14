@@ -42,7 +42,7 @@ public final class TableFactory {
 
     public static JTable alertaTable(AlertaTableModel model) {
         JTable table = baseTable(model);
-        table.setDefaultRenderer(Object.class, new DefaultDarkCellRenderer());
+        table.setDefaultRenderer(Object.class, new DefaultLightCellRenderer());
         table.getColumnModel().getColumn(0).setCellRenderer(new AlertTypeCellRenderer());
         table.getColumnModel().getColumn(2).setCellRenderer(new AlertNumericCellRenderer());
         table.getColumnModel().getColumn(5).setCellRenderer(new ActionCellRenderer("Atender / Ignorar"));
@@ -52,7 +52,7 @@ public final class TableFactory {
     public static JScrollPane scrollPane(JTable table) {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(Theme.SURFACE_CARD);
+        scrollPane.getViewport().setBackground(Theme.SURFACE_SOFT);
         return scrollPane;
     }
 
@@ -62,20 +62,20 @@ public final class TableFactory {
         table.setShowGrid(false);
         table.setShowHorizontalLines(true);
         table.setIntercellSpacing(new Dimension(0, 0));
-        table.setGridColor(Theme.HAIRLINE_DARK);
-        table.setBackground(Theme.SURFACE_CARD);
+        table.setGridColor(Theme.HAIRLINE);
+        table.setBackground(Theme.SURFACE_SOFT);
         table.setForeground(Theme.BODY);
         table.setFont(Fonts.inter(Font.PLAIN, 13f));
-        table.setSelectionBackground(Theme.PRIMARY_DISABLED);
-        table.setSelectionForeground(Theme.BODY);
-        table.getTableHeader().setBackground(Theme.SURFACE_ELEVATED);
+        table.setSelectionBackground(Theme.TABLE_SELECTION);
+        table.setSelectionForeground(Theme.INK);
+        table.getTableHeader().setBackground(Theme.SURFACE_STRONG);
         table.getTableHeader().setForeground(Theme.MUTED);
         table.getTableHeader().setFont(Fonts.inter(Font.PLAIN, 11f));
         table.getTableHeader().setPreferredSize(new Dimension(0, 32));
         return table;
     }
 
-    private static final class LoteCellRenderer extends DefaultDarkCellRenderer {
+    private static final class LoteCellRenderer extends DefaultLightCellRenderer {
         private final LoteTableModel model;
 
         private LoteCellRenderer(LoteTableModel model) {
@@ -100,7 +100,7 @@ public final class TableFactory {
         }
     }
 
-    private static final class NumericCellRenderer extends DefaultDarkCellRenderer {
+    private static final class NumericCellRenderer extends DefaultLightCellRenderer {
         private final LoteTableModel model;
 
         private NumericCellRenderer(LoteTableModel model) {
@@ -113,13 +113,13 @@ public final class TableFactory {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, selected, focus, row, column);
             int modelRow = table.convertRowIndexToModel(row);
             label.setFont(Fonts.mono(Font.PLAIN, 14f));
-            label.setForeground(selected ? Theme.BODY : statusColor(model.getLoteAt(modelRow).getEstado()));
+            label.setForeground(selected ? Theme.INK : statusColor(model.getLoteAt(modelRow).getEstado()));
             label.setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_XS, 0, Theme.SP_SM));
             return label;
         }
     }
 
-    private static final class AlertNumericCellRenderer extends DefaultDarkCellRenderer {
+    private static final class AlertNumericCellRenderer extends DefaultLightCellRenderer {
         private AlertNumericCellRenderer() {
             setHorizontalAlignment(SwingConstants.RIGHT);
         }
@@ -128,7 +128,7 @@ public final class TableFactory {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, selected, focus, row, column);
             label.setFont(Fonts.mono(Font.PLAIN, 14f));
-            label.setForeground(selected ? Theme.BODY : Theme.WARNING);
+            label.setForeground(selected ? Theme.INK : Theme.WARNING);
             return label;
         }
     }
@@ -139,7 +139,7 @@ public final class TableFactory {
             if (value instanceof EstadoLote estado) {
                 StatusChip chip = new StatusChip(estado);
                 chip.setHorizontalAlignment(SwingConstants.CENTER);
-                chip.setBackground(selected ? Theme.PRIMARY_DISABLED : Theme.SURFACE_CARD);
+                chip.setBackground(selected ? Theme.TABLE_SELECTION : Theme.SURFACE_SOFT);
                 return chip;
             }
             return new JLabel(String.valueOf(value));
@@ -160,7 +160,7 @@ public final class TableFactory {
         }
     }
 
-    private static final class ActionCellRenderer extends DefaultDarkCellRenderer {
+    private static final class ActionCellRenderer extends DefaultLightCellRenderer {
         private final String labelText;
 
         private ActionCellRenderer(String labelText) {
@@ -178,13 +178,13 @@ public final class TableFactory {
         }
     }
 
-    private static class DefaultDarkCellRenderer extends DefaultTableCellRenderer {
+    private static class DefaultLightCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, selected, focus, row, column);
             label.setFont(Fonts.inter(Font.PLAIN, 13f));
-            label.setBackground(selected ? Theme.PRIMARY_DISABLED : Theme.SURFACE_CARD);
-            label.setForeground(selected ? Theme.BODY : Theme.BODY);
+            label.setBackground(selected ? Theme.TABLE_SELECTION : Theme.SURFACE_SOFT);
+            label.setForeground(selected ? Theme.INK : Theme.BODY);
             label.setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_XS, 0, Theme.SP_XS));
             return label;
         }

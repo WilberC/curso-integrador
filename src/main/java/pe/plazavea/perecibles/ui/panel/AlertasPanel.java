@@ -39,7 +39,7 @@ public final class AlertasPanel extends JPanel {
     public AlertasPanel(AlertaServicio alertaServicio) {
         this.alertaServicio = alertaServicio;
         setLayout(new BorderLayout());
-        setBackground(Theme.CANVAS_DARK);
+        setBackground(Theme.CANVAS);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
         add(buildToolbar(), BorderLayout.NORTH);
         add(TableFactory.scrollPane(table), BorderLayout.CENTER);
@@ -49,21 +49,21 @@ public final class AlertasPanel extends JPanel {
 
     private JPanel buildToolbar() {
         JPanel toolbar = new JPanel(new BorderLayout());
-        toolbar.setBackground(Theme.CANVAS_DARK);
+        toolbar.setBackground(Theme.CANVAS);
         toolbar.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_MD, 0));
 
         JLabel title = new JLabel("Alertas Pendientes");
         title.setFont(Fonts.inter(Font.BOLD, 15f));
-        title.setForeground(Theme.ON_DARK);
+        title.setForeground(Theme.INK);
         countBadge.setFont(Fonts.mono(Font.BOLD, 12f));
         countBadge.setForeground(Theme.WARNING);
         showAll.setFont(Fonts.inter(Font.PLAIN, 13f));
         showAll.setForeground(Theme.BODY);
-        showAll.setBackground(Theme.CANVAS_DARK);
+        showAll.setBackground(Theme.CANVAS);
         showAll.addActionListener(event -> refreshAlerts());
 
         JPanel left = new JPanel();
-        left.setBackground(Theme.CANVAS_DARK);
+        left.setBackground(Theme.CANVAS);
         left.add(title);
         left.add(countBadge);
         toolbar.add(left, BorderLayout.WEST);

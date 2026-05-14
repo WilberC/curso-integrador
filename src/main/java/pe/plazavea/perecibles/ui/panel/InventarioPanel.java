@@ -52,7 +52,7 @@ public final class InventarioPanel extends JPanel {
     public InventarioPanel(InventarioServicio inventarioServicio) {
         this.inventarioServicio = inventarioServicio;
         setLayout(new BorderLayout());
-        setBackground(Theme.CANVAS_DARK);
+        setBackground(Theme.CANVAS);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
 
         add(buildActions(), BorderLayout.NORTH);
@@ -64,7 +64,7 @@ public final class InventarioPanel extends JPanel {
     private JPanel buildActions() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        panel.setBackground(Theme.CANVAS_DARK);
+        panel.setBackground(Theme.CANVAS);
         panel.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_MD, 0));
 
         var nuevo = Buttons.primary("+  Nuevo Lote  [N]");

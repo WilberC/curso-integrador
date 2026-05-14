@@ -20,14 +20,14 @@ public final class ToolbarPanel extends JPanel {
     public ToolbarPanel() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(0, 40));
-        setBackground(Theme.SURFACE_ELEVATED);
+        setBackground(Theme.SURFACE_STRONG);
         setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.HAIRLINE_DARK),
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.HAIRLINE),
                 BorderFactory.createEmptyBorder(0, Theme.SP_MD, 0, Theme.SP_MD)
         ));
 
         title.setFont(Fonts.inter(Font.BOLD, 15f));
-        title.setForeground(Theme.ON_DARK);
+        title.setForeground(Theme.INK);
         timestamp.setFont(Fonts.mono(Font.PLAIN, 12f));
         timestamp.setForeground(Theme.MUTED_STRONG);
 

@@ -30,7 +30,7 @@ public final class SidebarPanel extends JPanel {
     public SidebarPanel(Navigator navigator) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setPreferredSize(new Dimension(200, 0));
-        setBackground(Theme.SURFACE_CARD);
+        setBackground(Theme.SURFACE_SOFT);
 
         add(wordmark());
         add(separator());
@@ -64,7 +64,7 @@ public final class SidebarPanel extends JPanel {
 
     private JPanel wordmark() {
         JPanel panel = new JPanel();
-        panel.setBackground(Theme.SURFACE_CARD);
+        panel.setBackground(Theme.SURFACE_SOFT);
         panel.setPreferredSize(new Dimension(200, 56));
         panel.setMaximumSize(new Dimension(200, 56));
         panel.setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_MD, 0, Theme.SP_MD));
@@ -79,7 +79,7 @@ public final class SidebarPanel extends JPanel {
 
     private JSeparator separator() {
         JSeparator separator = new JSeparator();
-        separator.setForeground(Theme.HAIRLINE_DARK);
+        separator.setForeground(Theme.HAIRLINE);
         separator.setMaximumSize(new Dimension(200, 1));
         return separator;
     }
@@ -99,7 +99,7 @@ public final class SidebarPanel extends JPanel {
     private JPanel userFooter() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(Theme.SURFACE_CARD);
+        panel.setBackground(Theme.SURFACE_SOFT);
         panel.setBorder(BorderFactory.createEmptyBorder(Theme.SP_MD, Theme.SP_MD, Theme.SP_MD, Theme.SP_MD));
         panel.setMaximumSize(new Dimension(200, 96));
 
@@ -122,7 +122,7 @@ public final class SidebarPanel extends JPanel {
             setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
             setPreferredSize(new Dimension(200, 48));
             setMaximumSize(new Dimension(200, 48));
-            setBackground(Theme.SURFACE_CARD);
+            setBackground(Theme.SURFACE_SOFT);
             setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_MD, 0, Theme.SP_MD));
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -134,20 +134,20 @@ public final class SidebarPanel extends JPanel {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent event) {
-                    setBackground(Theme.SURFACE_ELEVATED);
+                    setBackground(Theme.SURFACE_STRONG);
                 }
 
                 @Override
                 public void mouseExited(MouseEvent event) {
-                    setBackground(active ? Theme.SURFACE_ELEVATED : Theme.SURFACE_CARD);
+                    setBackground(active ? Theme.SURFACE_STRONG : Theme.SURFACE_SOFT);
                 }
             });
         }
 
         private void setActive(boolean active) {
             this.active = active;
-            setBackground(active ? Theme.SURFACE_ELEVATED : Theme.SURFACE_CARD);
-            label.setForeground(active ? Theme.ON_DARK : Theme.MUTED);
+            setBackground(active ? Theme.SURFACE_STRONG : Theme.SURFACE_SOFT);
+            label.setForeground(active ? Theme.INK : Theme.MUTED);
             repaint();
         }
 

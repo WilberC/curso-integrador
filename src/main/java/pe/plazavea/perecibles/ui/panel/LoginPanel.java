@@ -40,10 +40,10 @@ public final class LoginPanel extends JPanel {
         this.navigator = navigator;
         this.usuarioServicio = usuarioServicio;
         setLayout(new BorderLayout());
-        setBackground(Theme.CANVAS_DARK);
+        setBackground(Theme.CANVAS);
 
         JPanel center = new JPanel(new GridBagLayout());
-        center.setBackground(Theme.CANVAS_DARK);
+        center.setBackground(Theme.CANVAS);
         center.add(buildCard(), new GridBagConstraints());
 
         add(center, BorderLayout.CENTER);
@@ -63,7 +63,7 @@ public final class LoginPanel extends JPanel {
 
         JLabel title = new JLabel("Control de Perecibles");
         title.setFont(Fonts.inter(Font.BOLD, 20f));
-        title.setForeground(Theme.ON_DARK);
+        title.setForeground(Theme.INK);
 
         errorLabel.setFont(Fonts.inter(Font.PLAIN, 12f));
         errorLabel.setForeground(Theme.DANGER);
@@ -90,7 +90,7 @@ public final class LoginPanel extends JPanel {
 
     private JPanel field(String labelText, JTextField field) {
         JPanel row = new JPanel(new BorderLayout(0, Theme.SP_XS));
-        row.setBackground(Theme.SURFACE_CARD);
+        row.setBackground(Theme.SURFACE_SOFT);
         row.setAlignmentX(LEFT_ALIGNMENT);
 
         JLabel label = new JLabel(labelText);
@@ -100,7 +100,7 @@ public final class LoginPanel extends JPanel {
         field.setFont(Fonts.inter(Font.PLAIN, 13f));
         field.setPreferredSize(new Dimension(0, 36));
         field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Theme.HAIRLINE_DARK, 1, true),
+                BorderFactory.createLineBorder(Theme.HAIRLINE, 1, true),
                 BorderFactory.createEmptyBorder(Theme.SP_XS, Theme.SP_SM, Theme.SP_XS, Theme.SP_SM)
         ));
 
@@ -147,7 +147,7 @@ public final class LoginPanel extends JPanel {
 
     private static final class RoundedCard extends JPanel {
         private RoundedCard() {
-            setBackground(Theme.SURFACE_CARD);
+            setBackground(Theme.SURFACE_SOFT);
         }
 
         @Override
@@ -163,7 +163,7 @@ public final class LoginPanel extends JPanel {
     private static final class LoginShortcutBar extends JPanel {
         private LoginShortcutBar() {
             setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-            setBackground(Theme.SURFACE_ELEVATED);
+            setBackground(Theme.SURFACE_STRONG);
             setPreferredSize(new Dimension(0, 28));
             setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_MD, 0, Theme.SP_MD));
             addHint("Enter", "Ingresar");

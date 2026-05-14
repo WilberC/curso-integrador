@@ -36,7 +36,7 @@ public final class StatusChip extends JLabel {
             }
             case RETIRADO -> {
                 setForeground(Theme.MUTED_STRONG);
-                yield Theme.SURFACE_ELEVATED;
+                yield Theme.SURFACE_STRONG;
             }
         };
     }

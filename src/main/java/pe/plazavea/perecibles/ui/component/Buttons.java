@@ -23,10 +23,10 @@ public final class Buttons {
 
     public static JButton secondary(String text) {
         JButton button = base(text);
-        button.setBackground(Theme.SURFACE_ELEVATED);
-        button.setForeground(Theme.BODY);
+        button.setBackground(Theme.CANVAS);
+        button.setForeground(Theme.INK);
         button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Theme.HAIRLINE_DARK, 1, true),
+                BorderFactory.createLineBorder(Theme.HAIRLINE, 1, true),
                 BorderFactory.createEmptyBorder(Theme.SP_XS, Theme.SP_MD, Theme.SP_XS, Theme.SP_MD)
         ));
         return button;
@@ -48,6 +48,7 @@ public final class Buttons {
         button.setFont(Fonts.inter(Font.BOLD, 13f));
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.setOpaque(true);
+        button.setFocusPainted(false);
         return button;
     }
 }

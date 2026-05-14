@@ -59,25 +59,25 @@ public final class NuevoLoteDialog extends JDialog {
 
     private JPanel buildLayout() {
         JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(Theme.SURFACE_CARD);
+        root.setBackground(Theme.SURFACE_SOFT);
 
         JLabel title = new JLabel("Nuevo Lote");
         title.setFont(Fonts.inter(Font.BOLD, 18f));
-        title.setForeground(Theme.ON_DARK);
+        title.setForeground(Theme.INK);
         JButton close = Buttons.secondary("x");
         close.addActionListener(event -> dispose());
 
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(Theme.SURFACE_CARD);
+        header.setBackground(Theme.SURFACE_SOFT);
         header.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.HAIRLINE_DARK),
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.HAIRLINE),
                 BorderFactory.createEmptyBorder(20, Theme.SP_LG, Theme.SP_MD, Theme.SP_LG)
         ));
         header.add(title, BorderLayout.WEST);
         header.add(close, BorderLayout.EAST);
 
         JPanel body = new JPanel(new MigLayout("insets 24, gapy 12", "[right][grow, fill]"));
-        body.setBackground(Theme.SURFACE_CARD);
+        body.setBackground(Theme.SURFACE_SOFT);
         addFormRow(body, "Producto", productoField);
         addFormRow(body, "Nro. Lote", numeroField);
         addFormRow(body, "Cantidad inicial", cantidadField);
@@ -85,8 +85,8 @@ public final class NuevoLoteDialog extends JDialog {
         addFormRow(body, "Vencimiento", buildDateInput());
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, Theme.SP_XS, Theme.SP_MD));
-        footer.setBackground(Theme.SURFACE_CARD);
-        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE_DARK));
+        footer.setBackground(Theme.SURFACE_SOFT);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE));
         JButton cancel = Buttons.secondary("Cancelar");
         cancel.addActionListener(event -> dispose());
         JButton save = Buttons.primary("Registrar");
@@ -102,7 +102,7 @@ public final class NuevoLoteDialog extends JDialog {
 
     private JPanel buildDateInput() {
         JPanel panel = new JPanel(new BorderLayout(0, Theme.SP_XXS));
-        panel.setBackground(Theme.SURFACE_CARD);
+        panel.setBackground(Theme.SURFACE_SOFT);
         datePreview.setFont(Fonts.mono(Font.PLAIN, 12f));
         vencimientoField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
@@ -244,7 +244,7 @@ public final class NuevoLoteDialog extends JDialog {
 
     private javax.swing.border.Border defaultBorder() {
         return BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Theme.HAIRLINE_DARK, 1, true),
+                BorderFactory.createLineBorder(Theme.HAIRLINE, 1, true),
                 BorderFactory.createEmptyBorder(Theme.SP_XS, Theme.SP_SM, Theme.SP_XS, Theme.SP_SM)
         );
     }

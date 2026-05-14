@@ -24,7 +24,7 @@ public final class GaugeCard extends JPanel {
 
     public GaugeCard(String title, int value, int total, int trend, GaugeState state) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Theme.SURFACE_CARD);
+        setBackground(Theme.SURFACE_SOFT);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
 
         titleLabel.setFont(Fonts.inter(Font.BOLD, 14f));
@@ -36,7 +36,7 @@ public final class GaugeCard extends JPanel {
         progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 6));
         progressBar.setStringPainted(false);
         progressBar.setBorderPainted(false);
-        progressBar.setBackground(Theme.SURFACE_ELEVATED);
+        progressBar.setBackground(Theme.SURFACE_STRONG);
 
         trendLabel.setFont(Fonts.inter(Font.PLAIN, 11f));
         trendLabel.setForeground(Theme.MUTED);
