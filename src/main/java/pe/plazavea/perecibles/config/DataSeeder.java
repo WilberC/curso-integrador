@@ -59,7 +59,9 @@ public class DataSeeder implements ApplicationListener<ContextRefreshedEvent> {
         Categoria carnes = categoria("Carnes", "Carnes frescas y marinadas");
         Categoria embutidos = categoria("Embutidos", "Embutidos y fiambres");
         Categoria panaderia = categoria("Panaderia", "Productos de panaderia perecible");
-        categoriaRepository.saveAll(List.of(lacteos, carnes, embutidos, panaderia));
+        Categoria frutasVerduras = categoria("Frutas y Verduras", "Productos frescos de sala");
+        Categoria otros = categoria("Otros", "Categoria general");
+        categoriaRepository.saveAll(List.of(lacteos, carnes, embutidos, panaderia, frutasVerduras, otros));
 
         ProductoPerecible leche = producto("Leche fresca", lacteos, "litro");
         ProductoPerecible yogurt = producto("Yogurt natural", lacteos, "unidad");
@@ -79,8 +81,9 @@ public class DataSeeder implements ApplicationListener<ContextRefreshedEvent> {
         ));
 
         ConfiguracionAlerta config = new ConfiguracionAlerta();
-        config.setDiasAlertaAmarilla(7);
-        config.setDiasAlertaRoja(2);
+        config.setDiasCriticos(1);
+        config.setDiasAdvertencia(3);
+        config.setDiasAvisoAnticipado(7);
         config.setActivo(true);
         config.setUsuarioConfig(supervisor);
         configRepository.save(config);

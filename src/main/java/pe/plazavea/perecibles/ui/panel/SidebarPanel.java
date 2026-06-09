@@ -38,6 +38,7 @@ public final class SidebarPanel extends JPanel {
         addItem("inventario", "Inventario", navigator);
         addItem("alertas", "Alertas", navigator);
         addItem("reportes", "Reportes", navigator);
+        addItem("configuracion", "Configuracion", navigator);
         add(Box.createVerticalGlue());
         add(userFooter());
         refreshSession();
@@ -57,6 +58,10 @@ public final class SidebarPanel extends JPanel {
         NavItem reportes = items.get("reportes");
         if (reportes != null) {
             reportes.setVisible(user.getRol() == RolUsuario.SUPERVISOR);
+        }
+        NavItem configuracion = items.get("configuracion");
+        if (configuracion != null) {
+            configuracion.setVisible(user.getRol() == RolUsuario.SUPERVISOR);
         }
         revalidate();
         repaint();

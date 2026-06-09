@@ -49,6 +49,12 @@ public final class TableFactory {
         return table;
     }
 
+    public static JTable simpleTable(javax.swing.table.TableModel model) {
+        JTable table = baseTable(model);
+        table.setDefaultRenderer(Object.class, new DefaultLightCellRenderer());
+        return table;
+    }
+
     public static JScrollPane scrollPane(JTable table) {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -150,13 +156,24 @@ public final class TableFactory {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
             if (value instanceof TipoAlerta tipo) {
-                EstadoLote estado = tipo == TipoAlerta.VENCIDO ? EstadoLote.VENCIDO : EstadoLote.PROXIMO_VENCER;
+                EstadoLote estado = tipo == TipoAlerta.VENCIDO || tipo == TipoAlerta.CRITICA
+                        ? EstadoLote.VENCIDO
+                        : EstadoLote.PROXIMO_VENCER;
                 StatusChip chip = new StatusChip(estado);
-                chip.setText(tipo == TipoAlerta.VENCIDO ? "VENCIDO" : "PROXIMO A VENCER");
+                chip.setText(labelFor(tipo));
                 chip.setHorizontalAlignment(SwingConstants.CENTER);
                 return chip;
             }
             return new JLabel(String.valueOf(value));
+        }
+
+        private String labelFor(TipoAlerta tipo) {
+            return switch (tipo) {
+                case VENCIDO -> "VENCIDO";
+                case CRITICA -> "CRITICA";
+                case PROXIMO_VENCER -> "ADVERTENCIA";
+                case AVISO_ANTICIPADO -> "AVISO";
+            };
         }
     }
 

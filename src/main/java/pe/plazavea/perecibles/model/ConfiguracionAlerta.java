@@ -10,7 +10,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "configuracion_alerta")
+@Table(name = "configuracion")
 public class ConfiguracionAlerta {
 
     @Id
@@ -18,10 +18,13 @@ public class ConfiguracionAlerta {
     private Integer idConfig;
 
     @Column(nullable = false)
-    private int diasAlertaAmarilla = 7;
+    private int diasCriticos = 1;
 
     @Column(nullable = false)
-    private int diasAlertaRoja = 2;
+    private int diasAdvertencia = 3;
+
+    @Column(nullable = false)
+    private int diasAvisoAnticipado = 7;
 
     @Column(nullable = false)
     private boolean activo = true;
@@ -42,19 +45,43 @@ public class ConfiguracionAlerta {
     }
 
     public int getDiasAlertaAmarilla() {
-        return diasAlertaAmarilla;
+        return diasAdvertencia;
     }
 
     public void setDiasAlertaAmarilla(int diasAlertaAmarilla) {
-        this.diasAlertaAmarilla = diasAlertaAmarilla;
+        this.diasAdvertencia = diasAlertaAmarilla;
     }
 
     public int getDiasAlertaRoja() {
-        return diasAlertaRoja;
+        return diasCriticos;
     }
 
     public void setDiasAlertaRoja(int diasAlertaRoja) {
-        this.diasAlertaRoja = diasAlertaRoja;
+        this.diasCriticos = diasAlertaRoja;
+    }
+
+    public int getDiasCriticos() {
+        return diasCriticos;
+    }
+
+    public void setDiasCriticos(int diasCriticos) {
+        this.diasCriticos = diasCriticos;
+    }
+
+    public int getDiasAdvertencia() {
+        return diasAdvertencia;
+    }
+
+    public void setDiasAdvertencia(int diasAdvertencia) {
+        this.diasAdvertencia = diasAdvertencia;
+    }
+
+    public int getDiasAvisoAnticipado() {
+        return diasAvisoAnticipado;
+    }
+
+    public void setDiasAvisoAnticipado(int diasAvisoAnticipado) {
+        this.diasAvisoAnticipado = diasAvisoAnticipado;
     }
 
     public boolean isActivo() {

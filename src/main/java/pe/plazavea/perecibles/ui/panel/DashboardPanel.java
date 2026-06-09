@@ -22,7 +22,9 @@ import javax.swing.Timer;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import pe.plazavea.perecibles.enums.EstadoLote;
+import pe.plazavea.perecibles.model.ConfiguracionAlerta;
 import pe.plazavea.perecibles.model.Lote;
+import pe.plazavea.perecibles.service.ConfiguracionServicio;
 import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
@@ -44,9 +46,11 @@ public final class DashboardPanel extends JPanel {
     private final Timer timer = new Timer(60_000, event -> refreshDashboard());
     private final Map<String, Integer> snapshotAnterior = new HashMap<>();
     private final InventarioServicio inventarioServicio;
+    private final ConfiguracionServicio configuracionServicio;
 
-    public DashboardPanel(InventarioServicio inventarioServicio) {
+    public DashboardPanel(InventarioServicio inventarioServicio, ConfiguracionServicio configuracionServicio) {
         this.inventarioServicio = inventarioServicio;
+        this.configuracionServicio = configuracionServicio;
         setLayout(new BorderLayout(0, Theme.SP_LG));
         setBackground(Theme.CANVAS);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
@@ -80,16 +84,20 @@ public final class DashboardPanel extends JPanel {
     }
 
     public void refreshDashboard() {
-        new SwingWorker<List<Lote>, Void>() {
+        new SwingWorker<DashboardData, Void>() {
             @Override
-            protected List<Lote> doInBackground() {
-                return inventarioServicio.consultarStock();
+            protected DashboardData doInBackground() {
+                return new DashboardData(
+                        inventarioServicio.consultarStock(),
+                        configuracionServicio.obtenerConfiguracionActiva()
+                );
             }
 
             @Override
             protected void done() {
                 try {
-                    updateGauges(get());
+                    DashboardData data = get();
+                    updateGauges(data.lotes(), data.config());
                 } catch (Exception exception) {
                     timestampLabel.setText("Error al actualizar: " + exception.getMessage());
                 }
@@ -97,24 +105,27 @@ public final class DashboardPanel extends JPanel {
         }.execute();
     }
 
-    private void updateGauges(List<Lote> lotes) {
+    private void updateGauges(List<Lote> lotes, ConfiguracionAlerta config) {
         int activeTotal = (int) lotes.stream().filter(lote -> lote.getEstado() != EstadoLote.RETIRADO).count();
-        int proximos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.PROXIMO_VENCER).count();
         int vencidos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.VENCIDO).count();
-        int proximosPct = percent(proximos, activeTotal);
+        int criticos = countInRange(lotes, 0, config.getDiasCriticos());
+        int advertencias = countInRange(lotes, config.getDiasCriticos() + 1L, config.getDiasAdvertencia());
+        int avisos = countInRange(lotes, config.getDiasAdvertencia() + 1L, config.getDiasAvisoAnticipado());
+        int alertasPct = percent(criticos + advertencias + avisos + vencidos, activeTotal);
         int vencidosPct = percent(vencidos, activeTotal);
-        int mermasDia = 3;
-        GaugeState state = vencidos > 0 ? GaugeState.DANGER : proximosPct >= 15 ? GaugeState.WARNING : GaugeState.SAFE;
+        GaugeState state = vencidos > 0 || criticos > 0
+                ? GaugeState.DANGER
+                : advertencias > 0 ? GaugeState.WARNING : GaugeState.SAFE;
 
         gauges.removeAll();
         gauges.add(new GaugeCard("Total lotes activos", activeTotal, Math.max(activeTotal, 1), trend("total", activeTotal), state));
-        gauges.add(new GaugeCard("% Próximos a vencer", proximosPct, 100, trend("proximos", proximosPct), proximosPct >= 15 ? GaugeState.WARNING : GaugeState.SAFE));
+        gauges.add(new GaugeCard("% En alerta", alertasPct, 100, trend("alertas", alertasPct), state));
         gauges.add(new GaugeCard("% Vencidos", vencidosPct, 100, trend("vencidos", vencidosPct), vencidos > 0 ? GaugeState.DANGER : GaugeState.SAFE));
-        gauges.add(new GaugeCard("Mermas del día", mermasDia, 10, trend("mermas", mermasDia), GaugeState.WARNING));
+        gauges.add(new GaugeCard("Avisos anticipados", avisos, Math.max(activeTotal, 1), trend("avisos", avisos), GaugeState.SAFE));
         snapshotAnterior.put("total", activeTotal);
-        snapshotAnterior.put("proximos", proximosPct);
+        snapshotAnterior.put("alertas", alertasPct);
         snapshotAnterior.put("vencidos", vencidosPct);
-        snapshotAnterior.put("mermas", mermasDia);
+        snapshotAnterior.put("avisos", avisos);
         urgentModel.setData(lotes.stream()
                 .filter(lote -> lote.getEstado() != EstadoLote.RETIRADO)
                 .sorted(Comparator.comparingLong(Lote::getDiasParaVencer))
@@ -148,11 +159,21 @@ public final class DashboardPanel extends JPanel {
         return toolbar;
     }
 
+    private int countInRange(List<Lote> lotes, long minDays, long maxDays) {
+        return (int) lotes.stream()
+                .filter(lote -> lote.getEstado() != EstadoLote.RETIRADO)
+                .filter(lote -> lote.getDiasParaVencer() >= minDays && lote.getDiasParaVencer() <= maxDays)
+                .count();
+    }
+
     private int percent(int value, int total) {
         return total > 0 ? (int) Math.round(value * 100.0 / total) : 0;
     }
 
     private int trend(String key, int value) {
         return value - snapshotAnterior.getOrDefault(key, value);
+    }
+
+    private record DashboardData(List<Lote> lotes, ConfiguracionAlerta config) {
     }
 }

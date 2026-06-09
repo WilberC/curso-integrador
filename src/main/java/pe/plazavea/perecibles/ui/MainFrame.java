@@ -17,6 +17,7 @@ import pe.plazavea.perecibles.service.AlertaServicio;
 import pe.plazavea.perecibles.service.UsuarioServicio;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.panel.AlertasPanel;
+import pe.plazavea.perecibles.ui.panel.ConfiguracionPanel;
 import pe.plazavea.perecibles.ui.panel.DashboardPanel;
 import pe.plazavea.perecibles.ui.panel.InventarioPanel;
 import pe.plazavea.perecibles.ui.panel.LoginPanel;
@@ -42,6 +43,7 @@ public final class MainFrame extends JFrame implements Navigator {
     private final InventarioPanel inventarioPanel;
     private final AlertasPanel alertasPanel;
     private final ReportesPanel reportesPanel;
+    private final ConfiguracionPanel configuracionPanel;
     private final UsuarioServicio usuarioServicio;
     private String currentScreen = "login";
 
@@ -50,6 +52,7 @@ public final class MainFrame extends JFrame implements Navigator {
             InventarioPanel inventarioPanel,
             AlertasPanel alertasPanel,
             ReportesPanel reportesPanel,
+            ConfiguracionPanel configuracionPanel,
             UsuarioServicio usuarioServicio
     ) {
         super("Plaza Vea - Control de Perecibles");
@@ -57,6 +60,7 @@ public final class MainFrame extends JFrame implements Navigator {
         this.inventarioPanel = inventarioPanel;
         this.alertasPanel = alertasPanel;
         this.reportesPanel = reportesPanel;
+        this.configuracionPanel = configuracionPanel;
         this.usuarioServicio = usuarioServicio;
         setMinimumSize(new Dimension(1024, 700));
         setSize(1180, 760);
@@ -78,10 +82,12 @@ public final class MainFrame extends JFrame implements Navigator {
             rootLayout.show(rootCards, "login");
             return;
         }
-        if ("reportes".equals(screen)
+        if (("reportes".equals(screen) || "configuracion".equals(screen))
                 && (SessionManager.getCurrentUser() == null
                 || SessionManager.getCurrentUser().getRol() != RolUsuario.SUPERVISOR)) {
-            screen = "dashboard";
+            if ("reportes".equals(screen)) {
+                screen = "dashboard";
+            }
         }
 
         sidebar.refreshSession();
@@ -107,6 +113,7 @@ public final class MainFrame extends JFrame implements Navigator {
         contentCards.add(inventarioPanel, "inventario");
         contentCards.add(alertasPanel, "alertas");
         contentCards.add(reportesPanel, "reportes");
+        contentCards.add(configuracionPanel, "configuracion");
 
         shell.add(sidebar, BorderLayout.WEST);
         shell.add(center, BorderLayout.CENTER);
@@ -140,6 +147,7 @@ public final class MainFrame extends JFrame implements Navigator {
             case "inventario" -> inventarioPanel.refreshTable();
             case "alertas" -> alertasPanel.refreshAlerts();
             case "reportes" -> reportesPanel.generateReport();
+            case "configuracion" -> configuracionPanel.refreshConfiguracion();
             default -> {
             }
         }
@@ -157,6 +165,7 @@ public final class MainFrame extends JFrame implements Navigator {
             case "inventario" -> "Inventario";
             case "alertas" -> "Alertas";
             case "reportes" -> "Reportes";
+            case "configuracion" -> "Configuracion";
             default -> "Control de Perecibles";
         };
     }
@@ -182,10 +191,15 @@ public final class MainFrame extends JFrame implements Navigator {
                     new ShortcutBar.ShortcutHint("Ctrl+A", "Alertas"),
                     new ShortcutBar.ShortcutHint("F5", "Refrescar")
             );
+            case "configuracion" -> List.of(
+                    new ShortcutBar.ShortcutHint("Ctrl+,", "Configuracion"),
+                    new ShortcutBar.ShortcutHint("F5", "Refrescar")
+            );
             default -> List.of(
                     new ShortcutBar.ShortcutHint("Ctrl+G", "Dashboard"),
                     new ShortcutBar.ShortcutHint("Ctrl+I", "Inventario"),
                     new ShortcutBar.ShortcutHint("Ctrl+A", "Alertas"),
+                    new ShortcutBar.ShortcutHint("Ctrl+,", "Configuracion"),
                     new ShortcutBar.ShortcutHint("F5", "Refrescar"),
                     new ShortcutBar.ShortcutHint("?", "Atajos")
             );

@@ -9,6 +9,8 @@ import pe.plazavea.perecibles.model.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     Optional<Usuario> findByEmail(String email);
 
+    boolean existsByEmail(String email);
+
     List<Usuario> findByRol(RolUsuario rol);
 
     List<Usuario> findByRolAndActivo(RolUsuario rol, boolean activo);

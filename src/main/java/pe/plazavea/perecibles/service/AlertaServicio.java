@@ -55,9 +55,15 @@ public class AlertaServicio {
             if (dias < 0) {
                 lote.setEstado(EstadoLote.VENCIDO);
                 upsertAlerta(lote, TipoAlerta.VENCIDO, (int) dias);
-            } else if (dias <= config.getDiasAlertaAmarilla()) {
+            } else if (dias <= config.getDiasCriticos()) {
+                lote.setEstado(EstadoLote.PROXIMO_VENCER);
+                upsertAlerta(lote, TipoAlerta.CRITICA, (int) dias);
+            } else if (dias <= config.getDiasAdvertencia()) {
                 lote.setEstado(EstadoLote.PROXIMO_VENCER);
                 upsertAlerta(lote, TipoAlerta.PROXIMO_VENCER, (int) dias);
+            } else if (dias <= config.getDiasAvisoAnticipado()) {
+                lote.setEstado(EstadoLote.DISPONIBLE);
+                upsertAlerta(lote, TipoAlerta.AVISO_ANTICIPADO, (int) dias);
             }
         }
     }
@@ -111,8 +117,9 @@ public class AlertaServicio {
 
     private ConfiguracionAlerta configPorDefecto() {
         ConfiguracionAlerta config = new ConfiguracionAlerta();
-        config.setDiasAlertaAmarilla(7);
-        config.setDiasAlertaRoja(2);
+        config.setDiasCriticos(1);
+        config.setDiasAdvertencia(3);
+        config.setDiasAvisoAnticipado(7);
         return config;
     }
 }

@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "categoria")
+@Table(name = "categorias")
 public class Categoria {
 
     @Id
@@ -20,6 +20,9 @@ public class Categoria {
 
     @Column(length = 255)
     private String descripcion;
+
+    @Column(nullable = false)
+    private boolean activo = true;
 
     public Categoria() {
     }
@@ -50,5 +53,13 @@ public class Categoria {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

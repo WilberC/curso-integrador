@@ -60,6 +60,10 @@ public final class KeyboardHandler {
                 navigator.show("reportes");
                 yield true;
             }
+            case KeyEvent.VK_COMMA -> {
+                navigator.show("configuracion");
+                yield true;
+            }
             default -> false;
         };
     }

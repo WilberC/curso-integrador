@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import pe.plazavea.perecibles.enums.RolUsuario;
 
 @Entity
-@Table(name = "usuario")
+@Table(name = "usuarios")
 public class Usuario {
 
     @Id

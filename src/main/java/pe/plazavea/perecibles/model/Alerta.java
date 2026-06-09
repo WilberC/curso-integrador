@@ -140,6 +140,6 @@ public class Alerta {
     }
 
     public boolean esCritica() {
-        return tipoAlerta == TipoAlerta.VENCIDO || diasParaVencer <= 2;
+        return tipoAlerta == TipoAlerta.VENCIDO || tipoAlerta == TipoAlerta.CRITICA;
     }
 }
