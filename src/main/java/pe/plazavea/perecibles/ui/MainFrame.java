@@ -39,6 +39,7 @@ public final class MainFrame extends JFrame implements Navigator {
     private final ToolbarPanel toolbar = new ToolbarPanel();
     private final ShortcutBar shortcutBar = new ShortcutBar();
     private final SidebarPanel sidebar = new SidebarPanel(this);
+    private final LoginPanel loginPanel;
     private final DashboardPanel dashboardPanel;
     private final InventarioPanel inventarioPanel;
     private final AlertasPanel alertasPanel;
@@ -67,7 +68,8 @@ public final class MainFrame extends JFrame implements Navigator {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        rootCards.add(new LoginPanel(this, usuarioServicio), "login");
+        loginPanel = new LoginPanel(this, usuarioServicio);
+        rootCards.add(loginPanel, "login");
         rootCards.add(buildShell(), "shell");
         setContentPane(rootCards);
         registerShortcuts();
@@ -79,6 +81,7 @@ public final class MainFrame extends JFrame implements Navigator {
     public void show(String screen) {
         if ("login".equals(screen)) {
             currentScreen = "login";
+            loginPanel.resetForm();
             rootLayout.show(rootCards, "login");
             return;
         }

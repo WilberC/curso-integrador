@@ -1,6 +1,7 @@
 package pe.plazavea.perecibles.ui.panel;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -13,10 +14,13 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingWorker;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -30,8 +34,10 @@ import pe.plazavea.perecibles.util.SessionManager;
 
 public final class LoginPanel extends JPanel {
 
-    private final JTextField emailField = new JTextField("supervisor@plazavea.com");
-    private final JPasswordField passwordField = new JPasswordField("admin");
+    private static final String DEFAULT_PASSWORD = "admin";
+
+    private final JTextField emailField = new JTextField();
+    private final JPasswordField passwordField = new JPasswordField();
     private final JLabel errorLabel = new JLabel("Credenciales incorrectas");
     private final Navigator navigator;
     private final UsuarioServicio usuarioServicio;
@@ -51,15 +57,27 @@ public final class LoginPanel extends JPanel {
         registerLoginShortcut();
     }
 
+    public void resetForm() {
+        emailField.setText("");
+        passwordField.setText("");
+        errorLabel.setVisible(false);
+    }
+
     private JPanel buildCard() {
         JPanel card = new RoundedCard();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setPreferredSize(new Dimension(400, 380));
         card.setBorder(BorderFactory.createEmptyBorder(Theme.SP_XL, Theme.SP_XL, Theme.SP_XL, Theme.SP_XL));
 
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Theme.SURFACE_SOFT);
+        header.setAlignmentX(LEFT_ALIGNMENT);
+
         JLabel wordmark = new JLabel("Plaza Vea");
         wordmark.setFont(Fonts.inter(Font.BOLD, 22f));
         wordmark.setForeground(Theme.PRIMARY);
+        header.add(wordmark, BorderLayout.WEST);
+        header.add(accountInfoButton(), BorderLayout.EAST);
 
         JLabel title = new JLabel("Control de Perecibles");
         title.setFont(Fonts.inter(Font.BOLD, 20f));
@@ -69,7 +87,7 @@ public final class LoginPanel extends JPanel {
         errorLabel.setForeground(Theme.DANGER);
         errorLabel.setVisible(false);
 
-        card.add(wordmark);
+        card.add(header);
         card.add(Box.createVerticalStrut(Theme.SP_XXS));
         card.add(title);
         card.add(Box.createVerticalStrut(Theme.SP_LG));
@@ -86,6 +104,45 @@ public final class LoginPanel extends JPanel {
         login.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         card.add(login);
         return card;
+    }
+
+    private JButton accountInfoButton() {
+        JButton button = new CircleInfoButton();
+        button.setFont(Fonts.inter(Font.BOLD, 12f));
+        button.setToolTipText("Usuarios de prueba");
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setOpaque(false);
+        button.setBackground(Theme.CANVAS);
+        button.setForeground(Theme.PRIMARY);
+        button.setPreferredSize(new Dimension(26, 26));
+        button.setMaximumSize(new Dimension(26, 26));
+        button.addActionListener(event -> {
+            JPopupMenu menu = new JPopupMenu();
+            menu.add(accountItem(menu, "Supervisor", "supervisor@plazavea.com"));
+            menu.add(accountItem(menu, "Operario", "operario@plazavea.com"));
+            menu.show(button, 0, button.getHeight());
+        });
+        return button;
+    }
+
+    private JMenuItem accountItem(JPopupMenu menu, String role, String email) {
+        JMenuItem item = new JMenuItem(role + " - " + email);
+        item.setFont(Fonts.inter(Font.PLAIN, 13f));
+        item.addActionListener(event -> {
+            menu.setVisible(false);
+            fillLogin(email);
+        });
+        return item;
+    }
+
+    private void fillLogin(String email) {
+        emailField.setText(email);
+        passwordField.setText(DEFAULT_PASSWORD);
+        errorLabel.setVisible(false);
+        passwordField.requestFocusInWindow();
     }
 
     private JPanel field(String labelText, JTextField field) {
@@ -157,6 +214,34 @@ public final class LoginPanel extends JPanel {
             graphics2D.setColor(getBackground());
             graphics2D.fillRoundRect(0, 0, getWidth(), getHeight(), Theme.RADIUS_XL * 2, Theme.RADIUS_XL * 2);
             graphics2D.dispose();
+        }
+    }
+
+    private static final class CircleInfoButton extends JButton {
+        private CircleInfoButton() {
+            super("i");
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            Graphics2D graphics2D = (Graphics2D) graphics.create();
+            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics2D.setColor(getModel().isRollover() ? Theme.SURFACE_STRONG : getBackground());
+            graphics2D.fillOval(1, 1, getWidth() - 2, getHeight() - 2);
+            graphics2D.setColor(Theme.HAIRLINE);
+            graphics2D.drawOval(1, 1, getWidth() - 3, getHeight() - 3);
+            graphics2D.dispose();
+            super.paintComponent(graphics);
+        }
+
+        @Override
+        public boolean contains(int x, int y) {
+            int radius = Math.min(getWidth(), getHeight()) / 2;
+            int centerX = getWidth() / 2;
+            int centerY = getHeight() / 2;
+            int dx = x - centerX;
+            int dy = y - centerY;
+            return dx * dx + dy * dy <= radius * radius;
         }
     }
 
