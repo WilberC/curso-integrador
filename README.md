@@ -26,7 +26,7 @@ El proyecto esta iniciando la Fase A: una version UI-first con datos simulados a
 - [x] Compilacion verificada
 - [ ] Parser de fechas en lenguaje natural
 - [x] Dashboard con gauges
-- [ ] Persistencia real con PostgreSQL
+- [x] Persistencia real con PostgreSQL
 
 El checklist detallado esta en `docs/implementation_plan/phase-a/01_setup.md`.
 
@@ -34,7 +34,7 @@ El checklist detallado esta en `docs/implementation_plan/phase-a/01_setup.md`.
 
 | Herramienta | Version | Uso |
 |-------------|---------|-----|
-| Java | 26 | Lenguaje principal |
+| Java | 21 | Lenguaje principal |
 | Gradle | 9.5.0 | Build y ejecucion |
 | Swing | (incluido en JDK) | Interfaz de escritorio nativa |
 | FlatLaf | 3.6 | Look & Feel moderno oscuro |
@@ -83,7 +83,7 @@ Ejecutar tests cuando existan:
 mise exec -- ./gradlew test
 ```
 
-En sistemas donde Java 26 ya este disponible en el entorno, tambien se puede usar directamente:
+En sistemas donde Java 21 ya este disponible en el entorno, tambien se puede usar directamente:
 
 ```bash
 ./gradlew run
