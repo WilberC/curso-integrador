@@ -15,7 +15,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
@@ -58,13 +57,14 @@ public final class DashboardPanel extends JPanel {
         gauges.setBackground(Theme.CANVAS);
         JTable table = TableFactory.loteTable(urgentModel);
         JScrollPane scrollPane = TableFactory.scrollPane(table);
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, gauges, scrollPane);
-        splitPane.setResizeWeight(0.68);
-        splitPane.setBorder(BorderFactory.createEmptyBorder());
-        splitPane.setDividerSize(8);
+
+        JPanel center = new JPanel(new BorderLayout(0, Theme.SP_LG));
+        center.setBackground(Theme.CANVAS);
+        center.add(gauges, BorderLayout.NORTH);
+        center.add(scrollPane, BorderLayout.CENTER);
 
         add(buildToolbar(), BorderLayout.NORTH);
-        add(splitPane, BorderLayout.CENTER);
+        add(center, BorderLayout.CENTER);
         refreshDashboard();
         timer.setRepeats(true);
         timer.start();

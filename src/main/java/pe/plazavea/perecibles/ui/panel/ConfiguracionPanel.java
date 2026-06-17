@@ -77,7 +77,11 @@ public final class ConfiguracionPanel extends JPanel {
             repaint();
             return;
         }
-        add(buildContent(), BorderLayout.CENTER);
+        JScrollPane contentScroll = new JScrollPane(buildContent());
+        contentScroll.setBorder(BorderFactory.createEmptyBorder());
+        contentScroll.getVerticalScrollBar().setUnitIncrement(16);
+        contentScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        add(contentScroll, BorderLayout.CENTER);
         loadData();
         revalidate();
         repaint();
