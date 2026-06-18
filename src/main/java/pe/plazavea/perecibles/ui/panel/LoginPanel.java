@@ -91,7 +91,7 @@ public final class LoginPanel extends JPanel {
         card.add(Box.createVerticalStrut(Theme.SP_XXS));
         card.add(title);
         card.add(Box.createVerticalStrut(Theme.SP_LG));
-        card.add(field("Usuario", emailField));
+        card.add(field("Correo electrónico", emailField));
         card.add(Box.createVerticalStrut(Theme.SP_SM));
         card.add(field("Contraseña", passwordField));
         card.add(Box.createVerticalStrut(Theme.SP_SM));

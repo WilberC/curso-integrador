@@ -39,7 +39,7 @@ public final class SidebarPanel extends JPanel {
     addItem("inventario", "Inventario", navigator);
     addItem("alertas", "Alertas", navigator);
     addItem("reportes", "Reportes", navigator);
-    addItem("configuracion", "Configuracion", navigator);
+    addItem("configuracion", "Configuración", navigator);
     add(Box.createVerticalGlue());
     add(userFooter(navigator));
     refreshSession();
@@ -153,7 +153,7 @@ public final class SidebarPanel extends JPanel {
     button.setAlignmentX(LEFT_ALIGNMENT);
     button.setPreferredSize(new Dimension(168, 34));
 
-    JLabel label = new JLabel("Cerrar sesion");
+    JLabel label = new JLabel("Cerrar sesión");
     label.setFont(Fonts.inter(Font.BOLD, 12f));
     label.setForeground(Theme.INK);
     button.add(label, BorderLayout.CENTER);

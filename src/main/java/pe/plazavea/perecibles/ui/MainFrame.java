@@ -168,7 +168,7 @@ public final class MainFrame extends JFrame implements Navigator {
             case "inventario" -> "Inventario";
             case "alertas" -> "Alertas";
             case "reportes" -> "Reportes";
-            case "configuracion" -> "Configuracion";
+            case "configuracion" -> "Configuración";
             default -> "Control de Perecibles";
         };
     }
@@ -176,15 +176,15 @@ public final class MainFrame extends JFrame implements Navigator {
     private List<ShortcutBar.ShortcutHint> hintsForScreen(String screen) {
         return switch (screen) {
             case "inventario" -> List.of(
-                    new ShortcutBar.ShortcutHint("N", "Nuevo"),
-                    new ShortcutBar.ShortcutHint("V", "Vencido"),
-                    new ShortcutBar.ShortcutHint("R", "Remate"),
+                    new ShortcutBar.ShortcutHint("N", "Nuevo lote"),
+                    new ShortcutBar.ShortcutHint("V", "Marcar vencido"),
+                    new ShortcutBar.ShortcutHint("R", "Marcar remate"),
                     new ShortcutBar.ShortcutHint("F5", "Refrescar"),
                     new ShortcutBar.ShortcutHint("?", "Atajos")
             );
             case "alertas" -> List.of(
-                    new ShortcutBar.ShortcutHint("V", "Atender"),
-                    new ShortcutBar.ShortcutHint("I", "Ignorar"),
+                    new ShortcutBar.ShortcutHint("V", "Atender alerta"),
+                    new ShortcutBar.ShortcutHint("I", "Ignorar alerta"),
                     new ShortcutBar.ShortcutHint("F5", "Refrescar"),
                     new ShortcutBar.ShortcutHint("?", "Atajos")
             );

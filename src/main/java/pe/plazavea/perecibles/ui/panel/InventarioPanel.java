@@ -44,7 +44,7 @@ public final class InventarioPanel extends JPanel {
     private final JTable table = TableFactory.loteTable(model);
     private final JTextField search = new JTextField();
     private final JComboBox<String> categoria = new JComboBox<>(new String[]{"Todas", "Lacteos", "Carnes", "Embutidos", "Panaderia"});
-    private final JComboBox<String> estado = new JComboBox<>(new String[]{"Todos", "Disponible", "Proximo vencer", "Vencido", "Retirado"});
+    private final JComboBox<String> estado = new JComboBox<>(new String[]{"Todos", "Disponible", "Próximo a vencer", "Vencido", "Retirado"});
     private final InventarioServicio inventarioServicio;
     private List<Lote> currentLotes = List.of();
     private List<ProductoPerecible> productos = List.of();
@@ -242,7 +242,7 @@ public final class InventarioPanel extends JPanel {
     private String stateLabel(EstadoLote estado) {
         return switch (estado) {
             case DISPONIBLE -> "Disponible";
-            case PROXIMO_VENCER -> "Proximo vencer";
+            case PROXIMO_VENCER -> "Próximo a vencer";
             case VENCIDO -> "Vencido";
             case RETIRADO -> "Retirado";
         };

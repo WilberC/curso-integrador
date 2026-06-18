@@ -33,7 +33,7 @@ public final class AlertasPanel extends JPanel {
     private final AlertaTableModel model = new AlertaTableModel(List.of());
     private final JTable table = TableFactory.alertaTable(model);
     private final JLabel countBadge = new JLabel();
-    private final JCheckBox showAll = new JCheckBox("Mostrar todas");
+    private final JCheckBox showAll = new JCheckBox("Ver historial completo");
     private final AlertaServicio alertaServicio;
 
     public AlertasPanel(AlertaServicio alertaServicio) {
@@ -52,7 +52,7 @@ public final class AlertasPanel extends JPanel {
         toolbar.setBackground(Theme.CANVAS);
         toolbar.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_MD, 0));
 
-        JLabel title = new JLabel("Alertas Pendientes");
+        JLabel title = new JLabel("Alertas");
         title.setFont(Fonts.inter(Font.BOLD, 15f));
         title.setForeground(Theme.INK);
         countBadge.setFont(Fonts.mono(Font.BOLD, 12f));

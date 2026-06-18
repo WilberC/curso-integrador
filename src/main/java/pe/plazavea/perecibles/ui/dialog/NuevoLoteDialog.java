@@ -81,7 +81,7 @@ public final class NuevoLoteDialog extends JDialog {
         addFormRow(body, "Producto", productoField);
         addFormRow(body, "Nro. Lote", numeroField);
         addFormRow(body, "Cantidad inicial", cantidadField);
-        addFormRow(body, "Ubicacion", ubicacionField);
+        addFormRow(body, "Ubicación", ubicacionField);
         addFormRow(body, "Vencimiento", buildDateInput());
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, Theme.SP_XS, Theme.SP_MD));

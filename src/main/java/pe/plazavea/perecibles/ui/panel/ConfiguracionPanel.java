@@ -94,18 +94,18 @@ public final class ConfiguracionPanel extends JPanel {
         content.add(sectionTitle("Umbrales de alertas"));
         content.add(thresholdsPanel());
         content.add(Box.createVerticalStrut(Theme.SP_LG));
-        content.add(sectionTitle("Gestion de usuarios"));
+        content.add(sectionTitle("Gestión de usuarios"));
         content.add(usersPanel());
         content.add(Box.createVerticalStrut(Theme.SP_LG));
-        content.add(sectionTitle("Categorias de productos"));
+        content.add(sectionTitle("Categorías de productos"));
         content.add(categoriesPanel());
         return content;
     }
 
     private JPanel thresholdsPanel() {
         JPanel panel = sectionPanel(new GridLayout(1, 4, Theme.SP_MD, 0));
-        panel.add(spinnerField("Dias criticos", criticos));
-        panel.add(spinnerField("Dias de advertencia", advertencia));
+        panel.add(spinnerField("Días críticos", criticos));
+        panel.add(spinnerField("Días de advertencia", advertencia));
         panel.add(spinnerField("Aviso anticipado", aviso));
         var save = Buttons.primary("Guardar umbrales");
         save.addActionListener(event -> saveThresholds());
@@ -121,7 +121,7 @@ public final class ConfiguracionPanel extends JPanel {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, Theme.SP_XS, 0));
         actions.setBackground(Theme.SURFACE_SOFT);
         var nuevo = Buttons.primary("Nuevo usuario");
-        var editar = Buttons.secondary("Editar");
+        var editar = Buttons.secondary("Editar usuario");
         var estado = Buttons.secondary("Activar / Desactivar");
         nuevo.addActionListener(event -> openNewUserDialog());
         editar.addActionListener(event -> openEditUserDialog());
@@ -140,7 +140,7 @@ public final class ConfiguracionPanel extends JPanel {
         JPanel panel = sectionPanel(new BorderLayout(0, Theme.SP_SM));
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, Theme.SP_XS, 0));
         actions.setBackground(Theme.SURFACE_SOFT);
-        var nueva = Buttons.primary("Nueva categoria");
+        var nueva = Buttons.primary("Nueva categoría");
         var estado = Buttons.secondary("Activar / Desactivar");
         nueva.addActionListener(event -> openNewCategoryDialog());
         estado.addActionListener(event -> toggleSelectedCategory());
@@ -202,7 +202,7 @@ public final class ConfiguracionPanel extends JPanel {
         form.add(usuario);
         form.add(label("Nombre completo"));
         form.add(nombre);
-        form.add(label("Contrasena"));
+        form.add(label("Contraseña"));
         form.add(password);
         form.add(label("Rol"));
         form.add(rol);
@@ -268,7 +268,7 @@ public final class ConfiguracionPanel extends JPanel {
     }
 
     private void openNewCategoryDialog() {
-        String nombre = JOptionPane.showInputDialog(this, "Nombre de la categoria", "Nueva categoria", JOptionPane.PLAIN_MESSAGE);
+        String nombre = JOptionPane.showInputDialog(this, "Nombre de la categoría", "Nueva categoría", JOptionPane.PLAIN_MESSAGE);
         if (nombre == null) {
             return;
         }

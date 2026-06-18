@@ -58,10 +58,20 @@ public final class DashboardPanel extends JPanel {
         JTable table = TableFactory.loteTable(urgentModel);
         JScrollPane scrollPane = TableFactory.scrollPane(table);
 
+        JLabel urgentTitle = new JLabel("Lotes más urgentes");
+        urgentTitle.setFont(Fonts.inter(Font.BOLD, 13f));
+        urgentTitle.setForeground(Theme.INK);
+        urgentTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_XS, 0));
+
+        JPanel tableSection = new JPanel(new BorderLayout());
+        tableSection.setBackground(Theme.CANVAS);
+        tableSection.add(urgentTitle, BorderLayout.NORTH);
+        tableSection.add(scrollPane, BorderLayout.CENTER);
+
         JPanel center = new JPanel(new BorderLayout(0, Theme.SP_LG));
         center.setBackground(Theme.CANVAS);
         center.add(gauges, BorderLayout.NORTH);
-        center.add(scrollPane, BorderLayout.CENTER);
+        center.add(tableSection, BorderLayout.CENTER);
 
         add(buildToolbar(), BorderLayout.NORTH);
         add(center, BorderLayout.CENTER);
