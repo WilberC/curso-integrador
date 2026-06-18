@@ -9,6 +9,8 @@ import pe.plazavea.perecibles.enums.EstadoLote;
 import pe.plazavea.perecibles.model.Lote;
 
 public interface LoteRepository extends JpaRepository<Lote, Integer> {
+    List<Lote> findAllByOrderByFechaIngresoDesc();
+
     List<Lote> findByEstado(EstadoLote estado);
 
     List<Lote> findByEstadoNot(EstadoLote estado);

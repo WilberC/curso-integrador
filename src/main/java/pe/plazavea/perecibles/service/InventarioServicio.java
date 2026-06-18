@@ -110,6 +110,10 @@ public class InventarioServicio {
         return loteRepository.findByEstadoNot(EstadoLote.RETIRADO);
     }
 
+    public List<Lote> consultarInventario() {
+        return loteRepository.findAllByOrderByFechaIngresoDesc();
+    }
+
     public List<Lote> buscarPorProducto(Integer idProducto) {
         return loteRepository.findByProductoIdProductoAndEstadoNot(idProducto, EstadoLote.RETIRADO);
     }
@@ -141,6 +145,9 @@ public class InventarioServicio {
         }
         Lote lote = loteRepository.findById(idLote)
                 .orElseThrow(() -> new RuntimeException("Lote no encontrado"));
+        if (lote.getEstado() == EstadoLote.RETIRADO) {
+            throw new RuntimeException("No se puede editar un lote retirado");
+        }
         ProductoPerecible producto = productoRepository.findById(idProducto)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
         lote.setProducto(producto);
@@ -148,9 +155,6 @@ public class InventarioServicio {
         lote.setCantidadActual(cantidad);
         lote.setFechaVencimiento(fechaVencimiento);
         lote.setUbicacion(limpiarUbicacion(ubicacion));
-        if (lote.getEstado() == EstadoLote.RETIRADO) {
-            lote.setEstado(EstadoLote.DISPONIBLE);
-        }
         return loteRepository.save(lote);
     }
 
