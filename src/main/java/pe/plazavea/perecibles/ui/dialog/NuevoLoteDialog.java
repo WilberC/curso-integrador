@@ -48,14 +48,19 @@ public final class NuevoLoteDialog extends JDialog {
         this.inventarioServicio = inventarioServicio;
         productoField = new JComboBox<>(productos.toArray(ProductoPerecible[]::new));
         productoField.setRenderer((list, value, index, selected, focused) -> new JLabel(value == null ? "" : value.getNombre()));
+        productoField.addActionListener(event -> updateNumeroLotePreview());
+        numeroField.setEditable(false);
+        numeroField.setFocusable(false);
+        numeroField.setBackground(Theme.CANVAS);
         setSize(480, 520);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setContentPane(buildLayout());
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(owner);
         registerKeys();
         installDigitFilter();
         updateDatePreview();
+        updateNumeroLotePreview();
     }
 
     private JPanel buildLayout() {
@@ -143,7 +148,6 @@ public final class NuevoLoteDialog extends JDialog {
 
     private void save() {
         boolean valid = true;
-        valid &= requireText(numeroField);
         valid &= requireText(cantidadField);
         valid &= requireText(ubicacionField);
         var parsedDate = DateParser.parse(vencimientoField.getText());
@@ -158,7 +162,7 @@ public final class NuevoLoteDialog extends JDialog {
 
         Lote lote = new Lote();
         int cantidad = Integer.parseInt(cantidadField.getText());
-        lote.setNumeroLote(numeroField.getText().trim());
+        lote.setNumeroLote(null);
         lote.setProducto(producto);
         lote.setCantidadInicial((double) cantidad);
         lote.setCantidadActual((double) cantidad);
@@ -184,6 +188,35 @@ public final class NuevoLoteDialog extends JDialog {
                             "Error",
                             JOptionPane.ERROR_MESSAGE
                     );
+                }
+            }
+        }.execute();
+    }
+
+    private void updateNumeroLotePreview() {
+        Object selected = productoField.getSelectedItem();
+        if (!(selected instanceof ProductoPerecible producto)) {
+            numeroField.setText("");
+            return;
+        }
+        numeroField.setText("Generando...");
+        new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() {
+                return inventarioServicio.generarNumeroLote(producto);
+            }
+
+            @Override
+            protected void done() {
+                if (producto != productoField.getSelectedItem()) {
+                    return;
+                }
+                try {
+                    numeroField.setText(get());
+                    numeroField.setBorder(defaultBorder());
+                } catch (Exception exception) {
+                    numeroField.setText("No disponible");
+                    numeroField.setBorder(BorderFactory.createLineBorder(Theme.DANGER, 1, true));
                 }
             }
         }.execute();

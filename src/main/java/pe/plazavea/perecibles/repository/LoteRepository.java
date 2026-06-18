@@ -13,6 +13,8 @@ public interface LoteRepository extends JpaRepository<Lote, Integer> {
 
     List<Lote> findByEstadoNot(EstadoLote estado);
 
+    List<Lote> findByNumeroLoteStartingWith(String prefix);
+
     List<Lote> findByFechaVencimientoBeforeAndEstadoNot(LocalDate fecha, EstadoLote estado);
 
     List<Lote> findByProductoIdProductoAndEstadoNot(Integer idProducto, EstadoLote estado);

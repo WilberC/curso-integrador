@@ -22,6 +22,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
@@ -51,6 +52,17 @@ import pe.plazavea.perecibles.util.SessionManager;
 public final class ConfiguracionPanel extends JPanel {
 
     private static final int DIALOG_FORM_MIN_WIDTH = 420;
+    private static final String DEFAULT_UNIDAD_MEDIDA = "unidad";
+    private static final String[] UNIDADES_MEDIDA = {
+            "unidad",
+            "kg",
+            "g",
+            "litro",
+            "ml",
+            "paquete",
+            "bandeja",
+            "caja"
+    };
 
     private final JSpinner criticos = new JSpinner(new SpinnerNumberModel(1, 0, 365, 1));
     private final JSpinner advertencia = new JSpinner(new SpinnerNumberModel(3, 0, 365, 1));
@@ -63,6 +75,7 @@ public final class ConfiguracionPanel extends JPanel {
     private final JTable productoTable = TableFactory.simpleTable(productoModel);
     private final ConfiguracionServicio configuracionServicio;
     private final UsuarioServicio usuarioServicio;
+    private int catalogTabIndex;
 
     public ConfiguracionPanel(ConfiguracionServicio configuracionServicio, UsuarioServicio usuarioServicio) {
         this.configuracionServicio = configuracionServicio;
@@ -110,10 +123,8 @@ public final class ConfiguracionPanel extends JPanel {
         addContentRow(content, thresholdsPanel(), row++, 0.0, Theme.SP_LG);
         addContentRow(content, sectionTitle("Gestión de usuarios"), row++, 0.0, Theme.SP_SM);
         addContentRow(content, usersPanel(), row++, 1.0, Theme.SP_LG);
-        addContentRow(content, sectionTitle("Categorías de productos"), row++, 0.0, Theme.SP_SM);
-        addContentRow(content, categoriesPanel(), row++, 1.0, Theme.SP_LG);
-        addContentRow(content, sectionTitle("Productos perecibles"), row++, 0.0, Theme.SP_SM);
-        addContentRow(content, productsPanel(), row, 1.0, 0);
+        addContentRow(content, sectionTitle("Configuración de catálogo"), row++, 0.0, Theme.SP_SM);
+        addContentRow(content, catalogTabs(), row, 1.0, 0);
         return content;
     }
 
@@ -177,6 +188,17 @@ public final class ConfiguracionPanel extends JPanel {
         panel.add(actions, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
         return panel;
+    }
+
+    private JTabbedPane catalogTabs() {
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(Fonts.inter(Font.BOLD, 13f));
+        tabs.setBackground(Theme.CANVAS);
+        tabs.addTab("Categorías", categoriesPanel());
+        tabs.addTab("Productos", productsPanel());
+        tabs.setSelectedIndex(Math.min(catalogTabIndex, tabs.getTabCount() - 1));
+        tabs.addChangeListener(event -> catalogTabIndex = tabs.getSelectedIndex());
+        return tabs;
     }
 
     private JPanel productsPanel() {
@@ -341,7 +363,7 @@ public final class ConfiguracionPanel extends JPanel {
     private void openNewProductDialog() {
         JTextField nombre = new JTextField();
         JTextField descripcion = new JTextField();
-        JTextField unidad = new JTextField("unidad");
+        JComboBox<String> unidad = unitCombo(DEFAULT_UNIDAD_MEDIDA);
         JComboBox<Categoria> categoria = categoryCombo(null);
         if (categoria.getItemCount() == 0) {
             Dialogs.showMessage(
@@ -361,7 +383,7 @@ public final class ConfiguracionPanel extends JPanel {
         runAsync(() -> configuracionServicio.crearProducto(
                 nombre.getText(),
                 descripcion.getText(),
-                unidad.getText(),
+                selectedUnit(unidad),
                 selectedCategoria == null ? null : selectedCategoria.getIdCategoria()
         ), "Producto creado");
     }
@@ -373,7 +395,7 @@ public final class ConfiguracionPanel extends JPanel {
         }
         JTextField nombre = new JTextField(selected.getNombre());
         JTextField descripcion = new JTextField(selected.getDescripcion());
-        JTextField unidad = new JTextField(selected.getUnidadMedida());
+        JComboBox<String> unidad = unitCombo(selected.getUnidadMedida());
         JComboBox<Categoria> categoria = categoryCombo(selected.getCategoriaEntity());
         JPanel form = productForm(nombre, descripcion, unidad, categoria);
         int result = Dialogs.showConfirm(this, form, "Editar producto", JOptionPane.OK_CANCEL_OPTION);
@@ -385,7 +407,7 @@ public final class ConfiguracionPanel extends JPanel {
                 selected.getIdProducto(),
                 nombre.getText(),
                 descripcion.getText(),
-                unidad.getText(),
+                selectedUnit(unidad),
                 selectedCategoria == null ? null : selectedCategoria.getIdCategoria()
         ), "Producto actualizado");
     }
@@ -509,7 +531,7 @@ public final class ConfiguracionPanel extends JPanel {
     private JPanel productForm(
             JTextField nombre,
             JTextField descripcion,
-            JTextField unidad,
+            JComboBox<String> unidad,
             JComboBox<Categoria> categoria
     ) {
         JPanel form = dialogForm();
@@ -522,6 +544,22 @@ public final class ConfiguracionPanel extends JPanel {
         form.add(label("Categoria"));
         form.add(categoria);
         return form;
+    }
+
+    private JComboBox<String> unitCombo(String selected) {
+        List<String> unidades = new ArrayList<>(List.of(UNIDADES_MEDIDA));
+        String selectedUnit = selected == null || selected.isBlank() ? DEFAULT_UNIDAD_MEDIDA : selected.trim();
+        if (!unidades.contains(selectedUnit)) {
+            unidades.add(selectedUnit);
+        }
+        JComboBox<String> combo = new JComboBox<>(unidades.toArray(String[]::new));
+        combo.setSelectedItem(selectedUnit);
+        return combo;
+    }
+
+    private String selectedUnit(JComboBox<String> unidad) {
+        Object selected = unidad.getSelectedItem();
+        return selected == null ? "" : selected.toString();
     }
 
     private JComboBox<Categoria> categoryCombo(Categoria selected) {

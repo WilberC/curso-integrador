@@ -53,7 +53,8 @@ public final class Dialogs {
     }
 
     private static JDialog createCenteredDialog(JOptionPane optionPane, Component parent, String title) {
-        JDialog dialog = new JDialog(ownerWindow(parent), title, Dialog.ModalityType.APPLICATION_MODAL);
+        Window owner = ownerWindow(parent);
+        JDialog dialog = new JDialog(owner, title, Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.setContentPane(optionPane);
         dialog.setLocationByPlatform(false);
@@ -64,11 +65,11 @@ public final class Dialogs {
             }
         });
         dialog.pack();
-        center(dialog);
+        center(dialog, owner);
         dialog.addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent event) {
-                center(dialog);
+                center(dialog, owner);
             }
         });
         return dialog;
@@ -78,18 +79,24 @@ public final class Dialogs {
         return parent == null ? null : javax.swing.SwingUtilities.getWindowAncestor(parent);
     }
 
-    private static void center(JDialog dialog) {
-        dialog.setLocation(centerLocation(dialog.getSize()));
+    private static void center(JDialog dialog, Window owner) {
+        dialog.setLocation(centerLocation(dialog.getSize(), owner));
     }
 
-    private static Point centerLocation(Dimension dialogSize) {
-        GraphicsConfiguration configuration = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getDefaultScreenDevice()
-                .getDefaultConfiguration();
+    private static Point centerLocation(Dimension dialogSize, Window owner) {
+        GraphicsConfiguration configuration = owner == null
+                ? GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
+                : owner.getGraphicsConfiguration();
         Rectangle bounds = configuration.getBounds();
-        int x = bounds.x + (bounds.width - dialogSize.width) / 2;
-        int y = bounds.y + (bounds.height - dialogSize.height) / 2;
-        return new Point(Math.max(bounds.x, x), Math.max(bounds.y, y));
+        Rectangle target = owner != null && owner.isShowing() ? owner.getBounds() : bounds;
+        int x = target.x + (target.width - dialogSize.width) / 2;
+        int y = target.y + (target.height - dialogSize.height) / 2;
+        int maxX = Math.max(bounds.x, bounds.x + bounds.width - dialogSize.width);
+        int maxY = Math.max(bounds.y, bounds.y + bounds.height - dialogSize.height);
+        return new Point(clamp(x, bounds.x, maxX), clamp(y, bounds.y, maxY));
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(value, max));
     }
 }

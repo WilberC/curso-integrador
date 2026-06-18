@@ -29,6 +29,7 @@ public final class SchemaMigration implements ApplicationListener<ContextRefresh
         }
         migrated = true;
         addProductoActivoColumn();
+        fixProductoCategoriaForeignKey();
     }
 
     private void addProductoActivoColumn() {
@@ -55,6 +56,54 @@ public final class SchemaMigration implements ApplicationListener<ContextRefresh
                     """);
         } catch (Exception exception) {
             throw new IllegalStateException("No se pudo actualizar el esquema de productos", exception);
+        }
+    }
+
+    private void fixProductoCategoriaForeignKey() {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute("""
+                    do $$
+                    declare
+                        constraint_record record;
+                    begin
+                        if to_regclass('public.producto_perecible') is not null
+                                and to_regclass('public.categorias') is not null then
+                            for constraint_record in
+                                select constraint_name
+                                from information_schema.key_column_usage
+                                where table_schema = 'public'
+                                  and table_name = 'producto_perecible'
+                                  and column_name = 'id_categoria'
+                            loop
+                                if exists (
+                                    select 1
+                                    from information_schema.table_constraints
+                                    where table_schema = 'public'
+                                      and table_name = 'producto_perecible'
+                                      and constraint_name = constraint_record.constraint_name
+                                      and constraint_type = 'FOREIGN KEY'
+                                ) then
+                                    execute format(
+                                        'alter table producto_perecible drop constraint if exists %I',
+                                        constraint_record.constraint_name
+                                    );
+                                end if;
+                            end loop;
+
+                            alter table producto_perecible
+                            drop constraint if exists fk_producto_perecible_categoria;
+
+                            alter table producto_perecible
+                            add constraint fk_producto_perecible_categoria
+                            foreign key (id_categoria)
+                            references categorias(id_categoria)
+                            not valid;
+                        end if;
+                    end $$;
+                    """);
+        } catch (Exception exception) {
+            throw new IllegalStateException("No se pudo actualizar la relacion de productos y categorias", exception);
         }
     }
 }

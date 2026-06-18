@@ -1,7 +1,9 @@
 package pe.plazavea.perecibles.service;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,9 @@ import pe.plazavea.perecibles.repository.ProductoPerecibleRepository;
 
 @Service
 public class InventarioServicio {
+
+    private static final String LOTE_PREFIX = "PV";
+    private static final int CATEGORY_CODE_LENGTH = 3;
 
     private final LoteRepository loteRepository;
     private final MovimientoInventarioRepository movimientoRepository;
@@ -39,6 +44,11 @@ public class InventarioServicio {
 
     @Transactional
     public Lote registrarIngreso(Lote lote, Usuario usuario) {
+        if (lote.getNumeroLote() == null || lote.getNumeroLote().isBlank()) {
+            lote.setNumeroLote(generarNumeroLote(lote.getProductoEntity()));
+        } else {
+            lote.setNumeroLote(lote.getNumeroLote().trim());
+        }
         lote.setFechaIngreso(LocalDate.now());
         lote.setEstado(EstadoLote.DISPONIBLE);
         lote.setCantidadActual(lote.getCantidadInicialValue());
@@ -110,5 +120,47 @@ public class InventarioServicio {
 
     public List<ProductoPerecible> listarProductos() {
         return productoRepository.findByActivoTrueOrderByNombreAsc();
+    }
+
+    public String generarNumeroLote(ProductoPerecible producto) {
+        String prefix = prefixFor(producto);
+        int nextSequence = loteRepository.findByNumeroLoteStartingWith(prefix).stream()
+                .map(Lote::getNumeroLote)
+                .mapToInt(numero -> sequenceFrom(numero, prefix))
+                .max()
+                .orElse(0) + 1;
+        return prefix + String.format(Locale.ROOT, "%03d", nextSequence);
+    }
+
+    private String prefixFor(ProductoPerecible producto) {
+        if (producto == null || producto.getCategoriaEntity() == null) {
+            throw new RuntimeException("Seleccione un producto con categoria");
+        }
+        String categoryCode = categoryCode(producto.getCategoriaEntity().getNombre());
+        return LOTE_PREFIX + "-" + categoryCode + "-";
+    }
+
+    private String categoryCode(String categoria) {
+        String normalized = Normalizer.normalize(categoria == null ? "" : categoria, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^A-Za-z0-9]", "")
+                .toUpperCase(Locale.ROOT);
+        if (normalized.isBlank()) {
+            throw new RuntimeException("La categoria del producto no permite generar el lote");
+        }
+        return normalized.length() <= CATEGORY_CODE_LENGTH
+                ? normalized
+                : normalized.substring(0, CATEGORY_CODE_LENGTH);
+    }
+
+    private int sequenceFrom(String numeroLote, String prefix) {
+        if (numeroLote == null || !numeroLote.startsWith(prefix)) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(numeroLote.substring(prefix.length()));
+        } catch (NumberFormatException exception) {
+            return 0;
+        }
     }
 }
