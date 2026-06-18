@@ -3,13 +3,18 @@ package pe.plazavea.perecibles.ui.table;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowSorter;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import pe.plazavea.perecibles.enums.EstadoLote;
 import pe.plazavea.perecibles.enums.TipoAlerta;
 import pe.plazavea.perecibles.theme.Fonts;
@@ -23,9 +28,10 @@ public final class TableFactory {
 
     public static JTable loteTable(LoteTableModel model) {
         JTable table = baseTable(model);
+        installLoteSorter(table, model);
         table.setDefaultRenderer(Object.class, new LoteCellRenderer(model));
         table.getColumnModel().getColumn(3).setCellRenderer(new NumericCellRenderer(model));
-        table.getColumnModel().getColumn(4).setCellRenderer(new NumericCellRenderer(model));
+        table.getColumnModel().getColumn(4).setCellRenderer(new DateCellRenderer(model));
         table.getColumnModel().getColumn(5).setCellRenderer(new NumericCellRenderer(model));
         table.getColumnModel().getColumn(6).setCellRenderer(new StatusCellRenderer());
         table.getColumnModel().getColumn(7).setCellRenderer(new ActionCellRenderer("Editar | Vencido | Remate"));
@@ -38,6 +44,19 @@ public final class TableFactory {
         table.getColumnModel().getColumn(6).setPreferredWidth(130);
         table.getColumnModel().getColumn(7).setPreferredWidth(220);
         return table;
+    }
+
+    private static void installLoteSorter(JTable table, LoteTableModel model) {
+        TableRowSorter<LoteTableModel> sorter = new TableRowSorter<>(model);
+        sorter.setComparator(4, Comparator.nullsLast(Comparator.<LocalDate>naturalOrder()));
+        sorter.setComparator(6, Comparator.comparingInt(value -> statusRank((EstadoLote) value)));
+        sorter.setSortable(7, false);
+        sorter.setSortKeys(List.of(
+                new RowSorter.SortKey(6, javax.swing.SortOrder.ASCENDING),
+                new RowSorter.SortKey(4, javax.swing.SortOrder.ASCENDING),
+                new RowSorter.SortKey(0, javax.swing.SortOrder.ASCENDING)
+        ));
+        table.setRowSorter(sorter);
     }
 
     public static JTable alertaTable(AlertaTableModel model) {
@@ -120,6 +139,26 @@ public final class TableFactory {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, selected, focus, row, column);
             int modelRow = table.convertRowIndexToModel(row);
+            label.setFont(Fonts.mono(Font.PLAIN, 14f));
+            label.setForeground(selected ? Theme.INK : statusColor(model.getLoteAt(modelRow).getEstado()));
+            label.setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_XS, 0, Theme.SP_SM));
+            return label;
+        }
+    }
+
+    private static final class DateCellRenderer extends DefaultLightCellRenderer {
+        private final LoteTableModel model;
+
+        private DateCellRenderer(LoteTableModel model) {
+            this.model = model;
+            setHorizontalAlignment(SwingConstants.RIGHT);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
+            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, selected, focus, row, column);
+            int modelRow = table.convertRowIndexToModel(row);
+            label.setText(value instanceof LocalDate date ? LoteTableModel.formatDate(date) : "");
             label.setFont(Fonts.mono(Font.PLAIN, 14f));
             label.setForeground(selected ? Theme.INK : statusColor(model.getLoteAt(modelRow).getEstado()));
             label.setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_XS, 0, Theme.SP_SM));
@@ -215,6 +254,15 @@ public final class TableFactory {
             case PROXIMO_VENCER -> Theme.WARNING;
             case VENCIDO -> Theme.DANGER;
             case RETIRADO -> Theme.MUTED_STRONG;
+        };
+    }
+
+    private static int statusRank(EstadoLote estado) {
+        return switch (estado) {
+            case VENCIDO -> 0;
+            case PROXIMO_VENCER -> 1;
+            case DISPONIBLE -> 2;
+            case RETIRADO -> 3;
         };
     }
 }

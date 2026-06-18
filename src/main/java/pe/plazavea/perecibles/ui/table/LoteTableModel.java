@@ -1,5 +1,6 @@
 package pe.plazavea.perecibles.ui.table;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,11 +53,26 @@ public final class LoteTableModel extends AbstractTableModel {
             case 1 -> lote.getNumeroLote();
             case 2 -> lote.getCategoria();
             case 3 -> lote.getCantidadActual();
-            case 4 -> DATE_FORMAT.format(lote.getFechaVencimiento());
+            case 4 -> lote.getFechaVencimiento();
             case 5 -> lote.getDiasParaVencer();
             case 6 -> lote.getEstado();
             case 7 -> "Editar | Vencido | Remate";
             default -> "";
         };
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return switch (columnIndex) {
+            case 3 -> Integer.class;
+            case 4 -> LocalDate.class;
+            case 5 -> Long.class;
+            case 6 -> pe.plazavea.perecibles.enums.EstadoLote.class;
+            default -> String.class;
+        };
+    }
+
+    public static String formatDate(LocalDate date) {
+        return date == null ? "" : DATE_FORMAT.format(date);
     }
 }
