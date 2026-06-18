@@ -12,6 +12,8 @@ import pe.plazavea.perecibles.repository.UsuarioRepository;
 @Service
 public class UsuarioServicio {
 
+    private static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
     private final UsuarioRepository usuarioRepository;
 
     public UsuarioServicio(UsuarioRepository usuarioRepository) {
@@ -36,12 +38,20 @@ public class UsuarioServicio {
 
     @Transactional
     public void registrar(Usuario nuevo, String passwordPlano) {
-        validarNombreAcceso(nuevo.getEmail());
-        String email = nuevo.getEmail().trim().toLowerCase();
+        String email = normalizarEmail(nuevo.getEmail());
         if (usuarioRepository.existsByEmail(email)) {
             throw new RuntimeException("El usuario ya existe");
         }
+        if (passwordPlano == null || passwordPlano.isBlank()) {
+            throw new RuntimeException("La contrasena es obligatoria");
+        }
+        if (nuevo.getRol() == null) {
+            throw new RuntimeException("El rol es obligatorio");
+        }
+        String[] nombres = splitNombreCompleto(joinNombreCompleto(nuevo.getNombre(), nuevo.getApellido()));
         nuevo.setEmail(email);
+        nuevo.setNombre(nombres[0]);
+        nuevo.setApellido(nombres[1]);
         nuevo.setContrasena(BCrypt.hashpw(passwordPlano, BCrypt.gensalt()));
         nuevo.setFechaCreacion(LocalDate.now());
         usuarioRepository.save(nuevo);
@@ -76,10 +86,15 @@ public class UsuarioServicio {
         usuarioRepository.save(target);
     }
 
-    private void validarNombreAcceso(String usuario) {
-        if (usuario == null || !usuario.matches("^[A-Za-z0-9._-]+$")) {
-            throw new RuntimeException("El usuario no acepta espacios ni caracteres especiales");
+    private String normalizarEmail(String email) {
+        if (email == null) {
+            throw new RuntimeException("El correo electronico es obligatorio");
         }
+        String value = email.trim().toLowerCase();
+        if (!value.matches(EMAIL_PATTERN)) {
+            throw new RuntimeException("Ingrese un correo electronico valido");
+        }
+        return value;
     }
 
     private void validarCambioEstado(Usuario target, boolean activo, Usuario solicitante) {
@@ -109,5 +124,11 @@ public class UsuarioServicio {
             return new String[]{value, ""};
         }
         return new String[]{value.substring(0, separator), value.substring(separator + 1)};
+    }
+
+    private String joinNombreCompleto(String nombre, String apellido) {
+        String safeNombre = nombre == null ? "" : nombre;
+        String safeApellido = apellido == null ? "" : apellido;
+        return (safeNombre + " " + safeApellido).trim();
     }
 }

@@ -22,6 +22,7 @@ import pe.plazavea.perecibles.model.Alerta;
 import pe.plazavea.perecibles.service.AlertaServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
+import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.ui.table.AlertaTableModel;
 import pe.plazavea.perecibles.ui.table.TableFactory;
 import pe.plazavea.perecibles.util.SessionManager;
@@ -88,7 +89,7 @@ public final class AlertasPanel extends JPanel {
                             .count();
                     countBadge.setText("[" + pendientes + "]");
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(
+                    Dialogs.showMessage(
                             AlertasPanel.this,
                             "No se pudieron cargar las alertas: " + exception.getMessage(),
                             "Error",
@@ -170,7 +171,7 @@ public final class AlertasPanel extends JPanel {
                     get();
                     refreshAlerts();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(
+                    Dialogs.showMessage(
                             AlertasPanel.this,
                             "No se pudo actualizar la alerta: " + exception.getMessage(),
                             "Error",

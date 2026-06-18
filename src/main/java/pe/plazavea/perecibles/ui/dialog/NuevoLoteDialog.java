@@ -29,6 +29,7 @@ import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
+import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.util.DateParser;
 import pe.plazavea.perecibles.util.SessionManager;
 
@@ -49,9 +50,9 @@ public final class NuevoLoteDialog extends JDialog {
         productoField.setRenderer((list, value, index, selected, focused) -> new JLabel(value == null ? "" : value.getNombre()));
         setSize(480, 520);
         setResizable(false);
-        setLocationRelativeTo(owner);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setContentPane(buildLayout());
+        setLocationRelativeTo(null);
         registerKeys();
         installDigitFilter();
         updateDatePreview();
@@ -177,7 +178,7 @@ public final class NuevoLoteDialog extends JDialog {
                     get();
                     dispose();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(
+                    Dialogs.showMessage(
                             NuevoLoteDialog.this,
                             "No se pudo registrar el lote: " + exception.getMessage(),
                             "Error",

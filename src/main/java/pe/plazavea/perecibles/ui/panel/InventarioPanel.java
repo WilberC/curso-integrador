@@ -31,6 +31,7 @@ import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
+import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.ui.dialog.NuevoLoteDialog;
 import pe.plazavea.perecibles.ui.table.LoteTableModel;
 import pe.plazavea.perecibles.ui.table.TableFactory;
@@ -108,7 +109,7 @@ public final class InventarioPanel extends JPanel {
                     currentLotes = get();
                     applyFilters();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(
+                    Dialogs.showMessage(
                             InventarioPanel.this,
                             "No se pudo cargar el inventario: " + exception.getMessage(),
                             "Error",
@@ -213,7 +214,7 @@ public final class InventarioPanel extends JPanel {
                     get();
                     refreshTable();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(
+                    Dialogs.showMessage(
                             InventarioPanel.this,
                             "No se pudo actualizar el lote: " + exception.getMessage(),
                             "Error",

@@ -8,6 +8,7 @@ import pe.plazavea.perecibles.config.SpringContext;
 import pe.plazavea.perecibles.service.AlertaServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
+import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.ui.MainFrame;
 
 public final class App {
@@ -23,7 +24,7 @@ public final class App {
             SpringContext.getBean(AlertaServicio.class).iniciarScheduler();
         } catch (Exception exception) {
             SwingUtilities.invokeLater(() -> {
-                JOptionPane.showMessageDialog(
+                Dialogs.showMessage(
                         null,
                         "No se pudo conectar a la base de datos.\nVerifique que PostgreSQL este corriendo.",
                         "Error de conexion",

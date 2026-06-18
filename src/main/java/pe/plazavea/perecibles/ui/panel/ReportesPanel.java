@@ -27,6 +27,7 @@ import pe.plazavea.perecibles.service.ReporteServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
+import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.util.SessionManager;
 
 @Component
@@ -157,7 +158,7 @@ public final class ReportesPanel extends JPanel {
                     currentReporte = get();
                     preview.setText(reporteServicio.resumen(currentReporte));
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(
+                    Dialogs.showMessage(
                             ReportesPanel.this,
                             "No se pudo generar el reporte: " + exception.getMessage(),
                             "Error",
@@ -184,7 +185,7 @@ public final class ReportesPanel extends JPanel {
                 try {
                     get();
                 } catch (Exception exception) {
-                    JOptionPane.showMessageDialog(
+                    Dialogs.showMessage(
                             ReportesPanel.this,
                             "No se pudo exportar el CSV: " + exception.getMessage(),
                             "Error",

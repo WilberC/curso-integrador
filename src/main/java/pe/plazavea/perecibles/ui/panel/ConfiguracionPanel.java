@@ -32,6 +32,7 @@ import pe.plazavea.perecibles.service.UsuarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
+import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.ui.table.CategoriaTableModel;
 import pe.plazavea.perecibles.ui.table.TableFactory;
 import pe.plazavea.perecibles.ui.table.UsuarioTableModel;
@@ -40,6 +41,8 @@ import pe.plazavea.perecibles.util.SessionManager;
 @Component
 @Lazy
 public final class ConfiguracionPanel extends JPanel {
+
+    private static final int DIALOG_FORM_MIN_WIDTH = 420;
 
     private final JSpinner criticos = new JSpinner(new SpinnerNumberModel(1, 0, 365, 1));
     private final JSpinner advertencia = new JSpinner(new SpinnerNumberModel(3, 0, 365, 1));
@@ -193,25 +196,25 @@ public final class ConfiguracionPanel extends JPanel {
     }
 
     private void openNewUserDialog() {
-        JTextField usuario = new JTextField();
+        JTextField email = new JTextField();
         JTextField nombre = new JTextField();
         JPasswordField password = new JPasswordField();
         JComboBox<RolUsuario> rol = new JComboBox<>(RolUsuario.values());
         JPanel form = dialogForm();
-        form.add(label("Usuario"));
-        form.add(usuario);
+        form.add(label("Correo electrónico"));
+        form.add(email);
         form.add(label("Nombre completo"));
         form.add(nombre);
         form.add(label("Contraseña"));
         form.add(password);
         form.add(label("Rol"));
         form.add(rol);
-        int result = JOptionPane.showConfirmDialog(this, form, "Nuevo usuario", JOptionPane.OK_CANCEL_OPTION);
+        int result = Dialogs.showConfirm(this, form, "Nuevo usuario", JOptionPane.OK_CANCEL_OPTION);
         if (result != JOptionPane.OK_OPTION) {
             return;
         }
         Usuario nuevo = new Usuario();
-        nuevo.setEmail(usuario.getText());
+        nuevo.setEmail(email.getText());
         setNombreCompleto(nuevo, nombre.getText());
         nuevo.setRol((RolUsuario) rol.getSelectedItem());
         nuevo.setActivo(true);
@@ -232,7 +235,7 @@ public final class ConfiguracionPanel extends JPanel {
         JComboBox<String> estado = new JComboBox<>(new String[]{"Activo", "Inactivo"});
         estado.setSelectedItem(selected.isActivo() ? "Activo" : "Inactivo");
         JPanel form = dialogForm();
-        form.add(label("Usuario"));
+        form.add(label("Correo electrónico"));
         form.add(new JLabel(selected.getEmail()));
         form.add(label("Nombre completo"));
         form.add(nombre);
@@ -240,7 +243,7 @@ public final class ConfiguracionPanel extends JPanel {
         form.add(rol);
         form.add(label("Estado"));
         form.add(estado);
-        int result = JOptionPane.showConfirmDialog(this, form, "Editar usuario", JOptionPane.OK_CANCEL_OPTION);
+        int result = Dialogs.showConfirm(this, form, "Editar usuario", JOptionPane.OK_CANCEL_OPTION);
         if (result != JOptionPane.OK_OPTION) {
             return;
         }
@@ -268,7 +271,7 @@ public final class ConfiguracionPanel extends JPanel {
     }
 
     private void openNewCategoryDialog() {
-        String nombre = JOptionPane.showInputDialog(this, "Nombre de la categoría", "Nueva categoría", JOptionPane.PLAIN_MESSAGE);
+        String nombre = Dialogs.showInput(this, "Nombre de la categoría", "Nueva categoría", JOptionPane.PLAIN_MESSAGE);
         if (nombre == null) {
             return;
         }
@@ -292,6 +295,12 @@ public final class ConfiguracionPanel extends JPanel {
     private Usuario selectedUser() {
         int row = usuarioTable.getSelectedRow();
         if (row < 0) {
+            Dialogs.showMessage(
+                    this,
+                    "Seleccione un usuario de la tabla",
+                    "Usuario requerido",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
             return null;
         }
         return usuarioModel.getUsuarioAt(usuarioTable.convertRowIndexToModel(row));
@@ -317,7 +326,12 @@ public final class ConfiguracionPanel extends JPanel {
             protected void done() {
                 try {
                     get();
-                    JOptionPane.showMessageDialog(ConfiguracionPanel.this, successMessage);
+                    Dialogs.showMessage(
+                            ConfiguracionPanel.this,
+                            successMessage,
+                            "Operacion completada",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
                     refreshConfiguracion();
                 } catch (Exception exception) {
                     showError("No se pudo completar la operacion", exception);
@@ -368,9 +382,13 @@ public final class ConfiguracionPanel extends JPanel {
     }
 
     private JPanel dialogForm() {
-        JPanel panel = new JPanel(new GridLayout(0, 2, Theme.SP_SM, Theme.SP_SM));
-        panel.setPreferredSize(new Dimension(420, 0));
-        return panel;
+        return new JPanel(new GridLayout(0, 2, Theme.SP_SM, Theme.SP_SM)) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension preferred = super.getPreferredSize();
+                return new Dimension(Math.max(DIALOG_FORM_MIN_WIDTH, preferred.width), preferred.height);
+            }
+        };
     }
 
     private JLabel label(String text) {
@@ -394,7 +412,7 @@ public final class ConfiguracionPanel extends JPanel {
 
     private void showError(String prefix, Exception exception) {
         Throwable cause = exception.getCause() == null ? exception : exception.getCause();
-        JOptionPane.showMessageDialog(this, prefix + ": " + cause.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        Dialogs.showMessage(this, prefix + ": " + cause.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     @FunctionalInterface
