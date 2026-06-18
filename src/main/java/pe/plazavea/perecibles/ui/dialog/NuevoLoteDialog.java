@@ -5,6 +5,9 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -30,6 +33,7 @@ import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
+import pe.plazavea.perecibles.ui.component.CalendarPopup;
 import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.util.DateParser;
 import pe.plazavea.perecibles.util.SessionManager;
@@ -42,7 +46,7 @@ public final class NuevoLoteDialog extends JDialog {
     private final JTextField numeroField = textField("");
     private final JTextField cantidadField = textField("");
     private final JTextField ubicacionField = textField("");
-    private final JTextField vencimientoField = textField("Hoy + 15");
+    private final JTextField vencimientoField = textField("Hoy + 10");
     private final JLabel datePreview = new JLabel(" ");
     private final InventarioServicio inventarioServicio;
     private final Lote loteToEdit;
@@ -73,6 +77,7 @@ public final class NuevoLoteDialog extends JDialog {
         setLocationRelativeTo(owner);
         registerKeys();
         installDigitFilter();
+        installVencimientoPicker();
         updateDatePreview();
         if (!isEditMode()) {
             updateNumeroLotePreview();
@@ -160,6 +165,24 @@ public final class NuevoLoteDialog extends JDialog {
         field.setFont(Fonts.inter(Font.PLAIN, 13f));
         field.setBorder(defaultBorder());
         return field;
+    }
+
+    private void installVencimientoPicker() {
+        vencimientoField.setToolTipText("Escriba Hoy + 10, +7, 3 dias, 2 meses o seleccione una fecha");
+        vencimientoField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                showVencimientoPicker();
+            }
+        });
+    }
+
+    private void showVencimientoPicker() {
+        LocalDate selectedDate = DateParser.parse(vencimientoField.getText()).orElse(LocalDate.now().plusDays(10));
+        new CalendarPopup(vencimientoField, selectedDate, date -> {
+            vencimientoField.setText(DATE_FORMAT.format(date));
+            updateDatePreview();
+        }).show();
     }
 
     private void save() {

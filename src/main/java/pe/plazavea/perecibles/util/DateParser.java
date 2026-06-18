@@ -14,7 +14,12 @@ import java.util.regex.Pattern;
 public final class DateParser {
 
     private static final Locale ES = Locale.forLanguageTag("es-PE");
+    private static final Pattern PLUS_DAYS = Pattern.compile("\\+\\s*(\\d+)(?:\\s*dias?)?");
+    private static final Pattern PLUS_MONTHS = Pattern.compile("\\+\\s*(\\d+)\\s+mes(?:es)?");
+    private static final Pattern DAYS_ONLY = Pattern.compile("(\\d+)(?:\\s*dias?)?");
+    private static final Pattern MONTHS_ONLY = Pattern.compile("(\\d+)\\s+mes(?:es)?");
     private static final Pattern HOY_MAS = Pattern.compile("hoy\\s*\\+\\s*(\\d+)(?:\\s*dias?)?");
+    private static final Pattern HOY_MAS_MESES = Pattern.compile("hoy\\s*\\+\\s*(\\d+)\\s+mes(?:es)?");
     private static final Pattern HOY_MAS_SEMANA = Pattern.compile("hoy\\s*\\+\\s*(\\d+)\\s+semanas?");
     private static final Pattern EN_SEMANAS = Pattern.compile("en\\s+(\\d+)\\s+semanas?");
     private static final Pattern EN_MESES = Pattern.compile("en\\s+(\\d+)\\s+meses?");
@@ -35,14 +40,49 @@ public final class DateParser {
         }
         String normalized = normalize(input);
 
+        if ("hoy".equals(normalized)) {
+            return Optional.of(LocalDate.now());
+        }
+        if ("manana".equals(normalized)) {
+            return Optional.of(LocalDate.now().plusDays(1));
+        }
+        if ("pasado manana".equals(normalized)) {
+            return Optional.of(LocalDate.now().plusDays(2));
+        }
+
         var todayPlusWeeks = HOY_MAS_SEMANA.matcher(normalized);
         if (todayPlusWeeks.matches()) {
             return Optional.of(LocalDate.now().plusWeeks(Integer.parseInt(todayPlusWeeks.group(1))));
         }
 
+        var todayPlusMonths = HOY_MAS_MESES.matcher(normalized);
+        if (todayPlusMonths.matches()) {
+            return Optional.of(LocalDate.now().plusMonths(Integer.parseInt(todayPlusMonths.group(1))));
+        }
+
         var todayPlusDays = HOY_MAS.matcher(normalized);
         if (todayPlusDays.matches()) {
             return Optional.of(LocalDate.now().plusDays(Integer.parseInt(todayPlusDays.group(1))));
+        }
+
+        var plusMonths = PLUS_MONTHS.matcher(normalized);
+        if (plusMonths.matches()) {
+            return Optional.of(LocalDate.now().plusMonths(Integer.parseInt(plusMonths.group(1))));
+        }
+
+        var plusDays = PLUS_DAYS.matcher(normalized);
+        if (plusDays.matches()) {
+            return Optional.of(LocalDate.now().plusDays(Integer.parseInt(plusDays.group(1))));
+        }
+
+        var monthsOnly = MONTHS_ONLY.matcher(normalized);
+        if (monthsOnly.matches()) {
+            return Optional.of(LocalDate.now().plusMonths(Integer.parseInt(monthsOnly.group(1))));
+        }
+
+        var daysOnly = DAYS_ONLY.matcher(normalized);
+        if (daysOnly.matches()) {
+            return Optional.of(LocalDate.now().plusDays(Integer.parseInt(daysOnly.group(1))));
         }
 
         var weeks = EN_SEMANAS.matcher(normalized);
@@ -98,4 +138,3 @@ public final class DateParser {
         return decomposed.replaceAll("\\p{M}", "");
     }
 }
-
