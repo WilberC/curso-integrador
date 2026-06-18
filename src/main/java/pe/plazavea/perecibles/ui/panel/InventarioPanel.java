@@ -36,11 +36,11 @@ import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
+import pe.plazavea.perecibles.ui.component.DatePickerField;
 import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.ui.dialog.NuevoLoteDialog;
 import pe.plazavea.perecibles.ui.table.LoteTableModel;
 import pe.plazavea.perecibles.ui.table.TableFactory;
-import pe.plazavea.perecibles.util.DateParser;
 import pe.plazavea.perecibles.util.SessionManager;
 
 @org.springframework.context.annotation.Lazy
@@ -50,8 +50,8 @@ public final class InventarioPanel extends JPanel {
     private final LoteTableModel model = new LoteTableModel(List.of());
     private final JTable table = TableFactory.loteTable(model);
     private final JTextField search = new JTextField();
-    private final JTextField fechaDesde = new JTextField();
-    private final JTextField fechaHasta = new JTextField();
+    private final DatePickerField fechaDesde = new DatePickerField("Desde");
+    private final DatePickerField fechaHasta = new DatePickerField("Hasta");
     private final JComboBox<String> categoria = new JComboBox<>(new String[]{"Todas", "Lacteos", "Carnes", "Embutidos", "Panaderia"});
     private final JComboBox<String> estado = new JComboBox<>(new String[]{"Activos", "Todos", "Disponible", "Próximo a vencer", "Vencido", "Retirado"});
     private final InventarioServicio inventarioServicio;
@@ -85,8 +85,8 @@ public final class InventarioPanel extends JPanel {
         search.setMaximumSize(new Dimension(260, 36));
         search.putClientProperty("JTextField.placeholderText", "Buscar producto o lote");
         search.getDocument().addDocumentListener(new SimpleDocumentListener(this::applyFilters));
-        configureDateFilter(fechaDesde, "Desde");
-        configureDateFilter(fechaHasta, "Hasta");
+        fechaDesde.addChangeListener(this::applyFilters);
+        fechaHasta.addChangeListener(this::applyFilters);
         categoria.addActionListener(event -> applyFilters());
         estado.addActionListener(event -> applyFilters());
         var limpiarFechas = Buttons.secondary("Limpiar fechas");
@@ -111,21 +111,9 @@ public final class InventarioPanel extends JPanel {
         return panel;
     }
 
-    private void configureDateFilter(JTextField field, String placeholder) {
-        field.setFont(Fonts.inter(Font.PLAIN, 13f));
-        field.setPreferredSize(new Dimension(96, 36));
-        field.setMaximumSize(new Dimension(110, 36));
-        field.putClientProperty("JTextField.placeholderText", placeholder);
-        field.setToolTipText("dd/mm/aaaa o Hoy + 7");
-        field.getDocument().addDocumentListener(new SimpleDocumentListener(this::applyFilters));
-    }
-
     private void clearDateFilters() {
-        fechaDesde.setText("");
-        fechaHasta.setText("");
-        setDateFieldValid(fechaDesde, true, "dd/mm/aaaa o Hoy + 7");
-        setDateFieldValid(fechaHasta, true, "dd/mm/aaaa o Hoy + 7");
-        applyFilters();
+        fechaDesde.clear();
+        fechaHasta.clear();
     }
 
     private JLabel toolbarLabel(String text) {
@@ -195,9 +183,6 @@ public final class InventarioPanel extends JPanel {
         String selectedCategory = String.valueOf(categoria.getSelectedItem());
         String selectedState = String.valueOf(estado.getSelectedItem());
         DateRange dateRange = selectedDateRange();
-        if (!dateRange.valid()) {
-            return;
-        }
         model.setData(currentLotes.stream()
                 .filter(lote -> query.isBlank()
                         || lote.getProducto().toLowerCase().contains(query)
@@ -213,31 +198,12 @@ public final class InventarioPanel extends JPanel {
     }
 
     private DateRange selectedDateRange() {
-        ParsedDate from = parseDateFilter(fechaDesde);
-        ParsedDate to = parseDateFilter(fechaHasta);
-        if (from.valid() && to.valid() && from.date().isPresent() && to.date().isPresent()
-                && from.date().orElseThrow().isAfter(to.date().orElseThrow())) {
-            setDateFieldValid(fechaDesde, false, "Desde no puede ser mayor que Hasta");
-            setDateFieldValid(fechaHasta, false, "Hasta no puede ser menor que Desde");
-            return new DateRange(from.date(), to.date(), false);
+        Optional<LocalDate> from = fechaDesde.getDate();
+        Optional<LocalDate> to = fechaHasta.getDate();
+        if (from.isPresent() && to.isPresent() && from.orElseThrow().isAfter(to.orElseThrow())) {
+            return new DateRange(to, from);
         }
-        return new DateRange(from.date(), to.date(), from.valid() && to.valid());
-    }
-
-    private ParsedDate parseDateFilter(JTextField field) {
-        String text = field.getText().trim();
-        if (text.isBlank()) {
-            setDateFieldValid(field, true, "dd/mm/aaaa o Hoy + 7");
-            return new ParsedDate(Optional.empty(), true);
-        }
-        Optional<LocalDate> parsed = DateParser.parse(text);
-        setDateFieldValid(field, parsed.isPresent(), parsed.isPresent() ? "dd/mm/aaaa o Hoy + 7" : "Fecha no reconocida");
-        return new ParsedDate(parsed, parsed.isPresent());
-    }
-
-    private void setDateFieldValid(JTextField field, boolean valid, String tooltip) {
-        field.putClientProperty("JComponent.outline", valid ? null : "error");
-        field.setToolTipText(tooltip);
+        return new DateRange(from, to);
     }
 
     private boolean matchesDateRange(Lote lote, DateRange dateRange) {
@@ -478,10 +444,7 @@ public final class InventarioPanel extends JPanel {
         }
     }
 
-    private record ParsedDate(Optional<LocalDate> date, boolean valid) {
-    }
-
-    private record DateRange(Optional<LocalDate> from, Optional<LocalDate> to, boolean valid) {
+    private record DateRange(Optional<LocalDate> from, Optional<LocalDate> to) {
     }
 
     private enum LoteAction {
