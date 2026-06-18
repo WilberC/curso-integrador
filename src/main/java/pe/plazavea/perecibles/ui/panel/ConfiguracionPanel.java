@@ -8,6 +8,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Component;
 import pe.plazavea.perecibles.enums.RolUsuario;
 import pe.plazavea.perecibles.model.Categoria;
 import pe.plazavea.perecibles.model.ConfiguracionAlerta;
+import pe.plazavea.perecibles.model.ProductoPerecible;
 import pe.plazavea.perecibles.model.Usuario;
 import pe.plazavea.perecibles.service.ConfiguracionServicio;
 import pe.plazavea.perecibles.service.UsuarioServicio;
@@ -39,6 +41,7 @@ import pe.plazavea.perecibles.theme.Theme;
 import pe.plazavea.perecibles.ui.component.Buttons;
 import pe.plazavea.perecibles.ui.component.Dialogs;
 import pe.plazavea.perecibles.ui.table.CategoriaTableModel;
+import pe.plazavea.perecibles.ui.table.ProductoTableModel;
 import pe.plazavea.perecibles.ui.table.TableFactory;
 import pe.plazavea.perecibles.ui.table.UsuarioTableModel;
 import pe.plazavea.perecibles.util.SessionManager;
@@ -54,8 +57,10 @@ public final class ConfiguracionPanel extends JPanel {
     private final JSpinner aviso = new JSpinner(new SpinnerNumberModel(7, 0, 365, 1));
     private final UsuarioTableModel usuarioModel = new UsuarioTableModel();
     private final CategoriaTableModel categoriaModel = new CategoriaTableModel();
+    private final ProductoTableModel productoModel = new ProductoTableModel();
     private final JTable usuarioTable = TableFactory.simpleTable(usuarioModel);
     private final JTable categoriaTable = TableFactory.simpleTable(categoriaModel);
+    private final JTable productoTable = TableFactory.simpleTable(productoModel);
     private final ConfiguracionServicio configuracionServicio;
     private final UsuarioServicio usuarioServicio;
 
@@ -106,7 +111,9 @@ public final class ConfiguracionPanel extends JPanel {
         addContentRow(content, sectionTitle("Gestión de usuarios"), row++, 0.0, Theme.SP_SM);
         addContentRow(content, usersPanel(), row++, 1.0, Theme.SP_LG);
         addContentRow(content, sectionTitle("Categorías de productos"), row++, 0.0, Theme.SP_SM);
-        addContentRow(content, categoriesPanel(), row, 1.0, 0);
+        addContentRow(content, categoriesPanel(), row++, 1.0, Theme.SP_LG);
+        addContentRow(content, sectionTitle("Productos perecibles"), row++, 0.0, Theme.SP_SM);
+        addContentRow(content, productsPanel(), row, 1.0, 0);
         return content;
     }
 
@@ -172,17 +179,39 @@ public final class ConfiguracionPanel extends JPanel {
         return panel;
     }
 
+    private JPanel productsPanel() {
+        JPanel panel = sectionPanel(new BorderLayout(0, Theme.SP_SM));
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, Theme.SP_XS, 0));
+        actions.setBackground(Theme.SURFACE_SOFT);
+        var nuevo = Buttons.primary("Nuevo producto");
+        var editar = Buttons.secondary("Editar producto");
+        var estado = Buttons.secondary("Activar / Desactivar");
+        nuevo.addActionListener(event -> openNewProductDialog());
+        editar.addActionListener(event -> openEditProductDialog());
+        estado.addActionListener(event -> toggleSelectedProduct());
+        actions.add(nuevo);
+        actions.add(editar);
+        actions.add(estado);
+        JScrollPane scrollPane = TableFactory.scrollPane(productoTable);
+        scrollPane.setPreferredSize(new Dimension(0, 160));
+        panel.add(actions, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        return panel;
+    }
+
     private void loadData() {
         new SwingWorker<Void, Void>() {
             private ConfiguracionAlerta config;
             private List<Usuario> usuarios;
             private List<Categoria> categorias;
+            private List<ProductoPerecible> productos;
 
             @Override
             protected Void doInBackground() {
                 config = configuracionServicio.obtenerConfiguracionActiva();
                 usuarios = usuarioServicio.listarUsuarios();
                 categorias = configuracionServicio.listarCategorias();
+                productos = configuracionServicio.listarProductos();
                 return null;
             }
 
@@ -195,6 +224,7 @@ public final class ConfiguracionPanel extends JPanel {
                     aviso.setValue(config.getDiasAvisoAnticipado());
                     usuarioModel.setData(usuarios);
                     categoriaModel.setData(categorias);
+                    productoModel.setData(productos);
                 } catch (Exception exception) {
                     showError("No se pudo cargar configuracion", exception);
                 }
@@ -308,6 +338,69 @@ public final class ConfiguracionPanel extends JPanel {
         }, "Estado de categoria actualizado");
     }
 
+    private void openNewProductDialog() {
+        JTextField nombre = new JTextField();
+        JTextField descripcion = new JTextField();
+        JTextField unidad = new JTextField("unidad");
+        JComboBox<Categoria> categoria = categoryCombo(null);
+        if (categoria.getItemCount() == 0) {
+            Dialogs.showMessage(
+                    this,
+                    "Cree o active una categoria antes de registrar productos",
+                    "Categoria requerida",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            return;
+        }
+        JPanel form = productForm(nombre, descripcion, unidad, categoria);
+        int result = Dialogs.showConfirm(this, form, "Nuevo producto", JOptionPane.OK_CANCEL_OPTION);
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+        Categoria selectedCategoria = (Categoria) categoria.getSelectedItem();
+        runAsync(() -> configuracionServicio.crearProducto(
+                nombre.getText(),
+                descripcion.getText(),
+                unidad.getText(),
+                selectedCategoria == null ? null : selectedCategoria.getIdCategoria()
+        ), "Producto creado");
+    }
+
+    private void openEditProductDialog() {
+        ProductoPerecible selected = selectedProduct();
+        if (selected == null) {
+            return;
+        }
+        JTextField nombre = new JTextField(selected.getNombre());
+        JTextField descripcion = new JTextField(selected.getDescripcion());
+        JTextField unidad = new JTextField(selected.getUnidadMedida());
+        JComboBox<Categoria> categoria = categoryCombo(selected.getCategoriaEntity());
+        JPanel form = productForm(nombre, descripcion, unidad, categoria);
+        int result = Dialogs.showConfirm(this, form, "Editar producto", JOptionPane.OK_CANCEL_OPTION);
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+        Categoria selectedCategoria = (Categoria) categoria.getSelectedItem();
+        runAsync(() -> configuracionServicio.editarProducto(
+                selected.getIdProducto(),
+                nombre.getText(),
+                descripcion.getText(),
+                unidad.getText(),
+                selectedCategoria == null ? null : selectedCategoria.getIdCategoria()
+        ), "Producto actualizado");
+    }
+
+    private void toggleSelectedProduct() {
+        ProductoPerecible selected = selectedProduct();
+        if (selected == null) {
+            return;
+        }
+        runAsync(() -> {
+            configuracionServicio.cambiarEstadoProducto(selected.getIdProducto(), !selected.isActivo());
+            return null;
+        }, "Estado de producto actualizado");
+    }
+
     private Usuario selectedUser() {
         int row = usuarioTable.getSelectedRow();
         if (row < 0) {
@@ -328,6 +421,20 @@ public final class ConfiguracionPanel extends JPanel {
             return null;
         }
         return categoriaModel.getCategoriaAt(categoriaTable.convertRowIndexToModel(row));
+    }
+
+    private ProductoPerecible selectedProduct() {
+        int row = productoTable.getSelectedRow();
+        if (row < 0) {
+            Dialogs.showMessage(
+                    this,
+                    "Seleccione un producto de la tabla",
+                    "Producto requerido",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            return null;
+        }
+        return productoModel.getProductoAt(productoTable.convertRowIndexToModel(row));
     }
 
     private void runAsync(WorkerAction action, String successMessage) {
@@ -397,6 +504,41 @@ public final class ConfiguracionPanel extends JPanel {
         panel.add(Box.createVerticalStrut(Theme.SP_XS));
         panel.add(spinner);
         return panel;
+    }
+
+    private JPanel productForm(
+            JTextField nombre,
+            JTextField descripcion,
+            JTextField unidad,
+            JComboBox<Categoria> categoria
+    ) {
+        JPanel form = dialogForm();
+        form.add(label("Nombre"));
+        form.add(nombre);
+        form.add(label("Descripcion"));
+        form.add(descripcion);
+        form.add(label("Unidad de medida"));
+        form.add(unidad);
+        form.add(label("Categoria"));
+        form.add(categoria);
+        return form;
+    }
+
+    private JComboBox<Categoria> categoryCombo(Categoria selected) {
+        List<Categoria> categories = new ArrayList<>(configuracionServicio.listarCategoriasActivas());
+        if (selected != null && categories.stream().noneMatch(categoria -> sameCategory(categoria, selected))) {
+            categories.add(selected);
+        }
+        JComboBox<Categoria> combo = new JComboBox<>(categories.toArray(Categoria[]::new));
+        combo.setRenderer((list, value, index, selectedItem, focused) ->
+                new JLabel(value == null ? "" : value.getNombre())
+        );
+        combo.setSelectedItem(selected);
+        return combo;
+    }
+
+    private boolean sameCategory(Categoria first, Categoria second) {
+        return first.getIdCategoria() != null && first.getIdCategoria().equals(second.getIdCategoria());
     }
 
     private JPanel dialogForm() {

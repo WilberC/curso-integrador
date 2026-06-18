@@ -109,6 +109,6 @@ public class InventarioServicio {
     }
 
     public List<ProductoPerecible> listarProductos() {
-        return productoRepository.findAllByOrderByNombreAsc();
+        return productoRepository.findByActivoTrueOrderByNombreAsc();
     }
 }

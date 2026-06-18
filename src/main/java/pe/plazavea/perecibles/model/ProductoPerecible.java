@@ -30,6 +30,9 @@ public class ProductoPerecible {
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;
 
+    @Column(nullable = false)
+    private boolean activo = true;
+
     public ProductoPerecible() {
     }
 
@@ -77,5 +80,13 @@ public class ProductoPerecible {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }
