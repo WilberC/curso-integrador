@@ -4,7 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -16,9 +19,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingWorker;
 import org.springframework.context.annotation.Lazy;
@@ -91,18 +96,29 @@ public final class ConfiguracionPanel extends JPanel {
     }
 
     private JComponent buildContent() {
-        JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        JPanel content = new ViewportWidthPanel();
+        content.setLayout(new GridBagLayout());
         content.setBackground(Theme.CANVAS);
-        content.add(sectionTitle("Umbrales de alertas"));
-        content.add(thresholdsPanel());
-        content.add(Box.createVerticalStrut(Theme.SP_LG));
-        content.add(sectionTitle("Gestión de usuarios"));
-        content.add(usersPanel());
-        content.add(Box.createVerticalStrut(Theme.SP_LG));
-        content.add(sectionTitle("Categorías de productos"));
-        content.add(categoriesPanel());
+
+        int row = 0;
+        addContentRow(content, sectionTitle("Umbrales de alertas"), row++, 0.0, Theme.SP_SM);
+        addContentRow(content, thresholdsPanel(), row++, 0.0, Theme.SP_LG);
+        addContentRow(content, sectionTitle("Gestión de usuarios"), row++, 0.0, Theme.SP_SM);
+        addContentRow(content, usersPanel(), row++, 1.0, Theme.SP_LG);
+        addContentRow(content, sectionTitle("Categorías de productos"), row++, 0.0, Theme.SP_SM);
+        addContentRow(content, categoriesPanel(), row, 1.0, 0);
         return content;
+    }
+
+    private void addContentRow(JPanel content, JComponent component, int row, double weightY, int bottomInset) {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = row;
+        constraints.weightx = 1.0;
+        constraints.weighty = weightY;
+        constraints.fill = weightY > 0.0 ? GridBagConstraints.BOTH : GridBagConstraints.HORIZONTAL;
+        constraints.insets = new java.awt.Insets(0, 0, bottomInset, 0);
+        content.add(component, constraints);
     }
 
     private JPanel thresholdsPanel() {
@@ -352,6 +368,7 @@ public final class ConfiguracionPanel extends JPanel {
 
     private JPanel sectionPanel(java.awt.LayoutManager layout) {
         JPanel panel = new JPanel(layout);
+        panel.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
         panel.setBackground(Theme.SURFACE_SOFT);
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Theme.HAIRLINE, 1, true),
@@ -363,6 +380,7 @@ public final class ConfiguracionPanel extends JPanel {
 
     private JLabel sectionTitle(String text) {
         JLabel title = new JLabel(text);
+        title.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
         title.setFont(Fonts.inter(Font.BOLD, 15f));
         title.setForeground(Theme.INK);
         title.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_SM, 0));
@@ -418,5 +436,33 @@ public final class ConfiguracionPanel extends JPanel {
     @FunctionalInterface
     private interface WorkerAction {
         Object run() throws Exception;
+    }
+
+    private static final class ViewportWidthPanel extends JPanel implements Scrollable {
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return Math.max(16, visibleRect.height - 16);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return getParent() instanceof JViewport viewport
+                    && viewport.getHeight() > getPreferredSize().height;
+        }
     }
 }

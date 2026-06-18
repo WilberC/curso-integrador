@@ -64,6 +64,8 @@ public final class TableFactory {
 
     private static JTable baseTable(javax.swing.table.TableModel model) {
         JTable table = new JTable(model);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        table.setFillsViewportHeight(true);
         table.setRowHeight(40);
         table.setShowGrid(false);
         table.setShowHorizontalLines(true);

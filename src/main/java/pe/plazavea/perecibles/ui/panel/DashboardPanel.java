@@ -3,6 +3,8 @@ package pe.plazavea.perecibles.ui.panel;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -68,16 +70,27 @@ public final class DashboardPanel extends JPanel {
         tableSection.add(urgentTitle, BorderLayout.NORTH);
         tableSection.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel center = new JPanel(new BorderLayout(0, Theme.SP_LG));
+        JPanel center = new JPanel(new GridBagLayout());
         center.setBackground(Theme.CANVAS);
-        center.add(gauges, BorderLayout.NORTH);
-        center.add(tableSection, BorderLayout.CENTER);
+        addCenterRow(center, gauges, 0, 0.0, Theme.SP_LG);
+        addCenterRow(center, tableSection, 1, 1.0, 0);
 
         add(buildToolbar(), BorderLayout.NORTH);
         add(center, BorderLayout.CENTER);
         refreshDashboard();
         timer.setRepeats(true);
         timer.start();
+    }
+
+    private void addCenterRow(JPanel center, JPanel component, int row, double weightY, int bottomInset) {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = row;
+        constraints.weightx = 1.0;
+        constraints.weighty = weightY;
+        constraints.fill = weightY > 0.0 ? GridBagConstraints.BOTH : GridBagConstraints.HORIZONTAL;
+        constraints.insets = new java.awt.Insets(0, 0, bottomInset, 0);
+        center.add(component, constraints);
     }
 
     @Override
