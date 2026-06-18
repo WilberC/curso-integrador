@@ -55,7 +55,7 @@ public final class LoteTableModel extends AbstractTableModel {
             case 4 -> DATE_FORMAT.format(lote.getFechaVencimiento());
             case 5 -> lote.getDiasParaVencer();
             case 6 -> lote.getEstado();
-            case 7 -> "V  R";
+            case 7 -> "Editar | Vencido | Remate";
             default -> "";
         };
     }

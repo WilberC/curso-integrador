@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -58,6 +60,7 @@ public final class InventarioPanel extends JPanel {
 
         add(buildActions(), BorderLayout.NORTH);
         add(TableFactory.scrollPane(table), BorderLayout.CENTER);
+        installTableActions();
         registerShortcuts();
         refreshTable();
     }
@@ -92,6 +95,20 @@ public final class InventarioPanel extends JPanel {
     public void openNuevoLote() {
         java.awt.Frame owner = (java.awt.Frame) SwingUtilities.getWindowAncestor(this);
         new NuevoLoteDialog(owner, inventarioServicio, productos).setVisible(true);
+        refreshTable();
+    }
+
+    public void openEditarLote() {
+        Lote lote = selectedLote();
+        if (lote == null) {
+            return;
+        }
+        openEditarLote(lote);
+    }
+
+    private void openEditarLote(Lote lote) {
+        java.awt.Frame owner = (java.awt.Frame) SwingUtilities.getWindowAncestor(this);
+        new NuevoLoteDialog(owner, inventarioServicio, productos, lote).setVisible(true);
         refreshTable();
     }
 
@@ -135,6 +152,7 @@ public final class InventarioPanel extends JPanel {
 
     private void registerShortcuts() {
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_N, 0), "nuevoLote");
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0), "editarLote");
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_V, 0), "marcarVencido");
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "marcarRemate");
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "filaAnterior");
@@ -144,6 +162,14 @@ public final class InventarioPanel extends JPanel {
             public void actionPerformed(java.awt.event.ActionEvent event) {
                 if (!isTextEditing()) {
                     openNuevoLote();
+                }
+            }
+        });
+        getActionMap().put("editarLote", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent event) {
+                if (!isTextEditing()) {
+                    openEditarLote();
                 }
             }
         });
@@ -189,12 +215,47 @@ public final class InventarioPanel extends JPanel {
         updateSelected(TipoMovimiento.REMATE, "Remate preventivo");
     }
 
+    private void installTableActions() {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                int row = table.rowAtPoint(event.getPoint());
+                int column = table.columnAtPoint(event.getPoint());
+                if (row < 0 || column != 7) {
+                    return;
+                }
+                table.setRowSelectionInterval(row, row);
+                Lote lote = model.getLoteAt(table.convertRowIndexToModel(row));
+                switch (actionAt(event, row, column)) {
+                    case EDITAR -> openEditarLote(lote);
+                    case VENCIDO -> updateLote(lote, TipoMovimiento.RETIRO, "Retiro por vencimiento");
+                    case REMATE -> updateLote(lote, TipoMovimiento.REMATE, "Remate preventivo");
+                }
+            }
+        });
+    }
+
+    private LoteAction actionAt(MouseEvent event, int row, int column) {
+        int x = event.getX() - table.getCellRect(row, column, true).x;
+        int segmentWidth = Math.max(1, table.getColumnModel().getColumn(column).getWidth() / 3);
+        if (x < segmentWidth) {
+            return LoteAction.EDITAR;
+        }
+        if (x < segmentWidth * 2) {
+            return LoteAction.VENCIDO;
+        }
+        return LoteAction.REMATE;
+    }
+
     private void updateSelected(TipoMovimiento tipo, String motivo) {
-        int selected = table.getSelectedRow();
-        if (selected < 0) {
+        Lote lote = selectedLote();
+        if (lote == null) {
             return;
         }
-        Lote lote = model.getLoteAt(table.convertRowIndexToModel(selected));
+        updateLote(lote, tipo, motivo);
+    }
+
+    private void updateLote(Lote lote, TipoMovimiento tipo, String motivo) {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
@@ -223,6 +284,20 @@ public final class InventarioPanel extends JPanel {
                 }
             }
         }.execute();
+    }
+
+    private Lote selectedLote() {
+        int selected = table.getSelectedRow();
+        if (selected < 0) {
+            Dialogs.showMessage(
+                    this,
+                    "Seleccione un lote de la tabla",
+                    "Lote requerido",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            return null;
+        }
+        return model.getLoteAt(table.convertRowIndexToModel(selected));
     }
 
     private void moveSelection(int delta) {
@@ -264,5 +339,11 @@ public final class InventarioPanel extends JPanel {
         public void changedUpdate(DocumentEvent event) {
             callback.run();
         }
+    }
+
+    private enum LoteAction {
+        EDITAR,
+        VENCIDO,
+        REMATE
     }
 }

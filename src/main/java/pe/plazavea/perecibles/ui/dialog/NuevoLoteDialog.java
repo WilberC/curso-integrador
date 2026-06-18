@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.KeyEvent;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -35,6 +36,8 @@ import pe.plazavea.perecibles.util.SessionManager;
 
 public final class NuevoLoteDialog extends JDialog {
 
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private final JComboBox<ProductoPerecible> productoField;
     private final JTextField numeroField = textField("");
     private final JTextField cantidadField = textField("");
@@ -42,16 +45,27 @@ public final class NuevoLoteDialog extends JDialog {
     private final JTextField vencimientoField = textField("Hoy + 15");
     private final JLabel datePreview = new JLabel(" ");
     private final InventarioServicio inventarioServicio;
+    private final Lote loteToEdit;
 
     public NuevoLoteDialog(Frame owner, InventarioServicio inventarioServicio, List<ProductoPerecible> productos) {
-        super(owner, "Nuevo Lote", true);
+        this(owner, inventarioServicio, productos, null);
+    }
+
+    public NuevoLoteDialog(Frame owner, InventarioServicio inventarioServicio, List<ProductoPerecible> productos, Lote loteToEdit) {
+        super(owner, loteToEdit == null ? "Nuevo Lote" : "Editar Lote", true);
         this.inventarioServicio = inventarioServicio;
+        this.loteToEdit = loteToEdit;
         productoField = new JComboBox<>(productos.toArray(ProductoPerecible[]::new));
         productoField.setRenderer((list, value, index, selected, focused) -> new JLabel(value == null ? "" : value.getNombre()));
-        productoField.addActionListener(event -> updateNumeroLotePreview());
+        productoField.addActionListener(event -> {
+            if (!isEditMode()) {
+                updateNumeroLotePreview();
+            }
+        });
         numeroField.setEditable(false);
         numeroField.setFocusable(false);
         numeroField.setBackground(Theme.CANVAS);
+        hydrateEditData();
         setSize(480, 520);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -60,14 +74,16 @@ public final class NuevoLoteDialog extends JDialog {
         registerKeys();
         installDigitFilter();
         updateDatePreview();
-        updateNumeroLotePreview();
+        if (!isEditMode()) {
+            updateNumeroLotePreview();
+        }
     }
 
     private JPanel buildLayout() {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(Theme.SURFACE_SOFT);
 
-        JLabel title = new JLabel("Nuevo Lote");
+        JLabel title = new JLabel(isEditMode() ? "Editar Lote" : "Nuevo Lote");
         title.setFont(Fonts.inter(Font.BOLD, 18f));
         title.setForeground(Theme.INK);
         JButton close = Buttons.secondary("x");
@@ -95,7 +111,7 @@ public final class NuevoLoteDialog extends JDialog {
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.HAIRLINE));
         JButton cancel = Buttons.secondary("Cancelar");
         cancel.addActionListener(event -> dispose());
-        JButton save = Buttons.primary("Registrar");
+        JButton save = Buttons.primary(isEditMode() ? "Guardar" : "Registrar");
         save.addActionListener(event -> save());
         footer.add(cancel);
         footer.add(save);
@@ -162,7 +178,6 @@ public final class NuevoLoteDialog extends JDialog {
 
         Lote lote = new Lote();
         int cantidad = Integer.parseInt(cantidadField.getText());
-        lote.setNumeroLote(null);
         lote.setProducto(producto);
         lote.setCantidadInicial((double) cantidad);
         lote.setCantidadActual((double) cantidad);
@@ -172,7 +187,18 @@ public final class NuevoLoteDialog extends JDialog {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
-                inventarioServicio.registrarIngreso(lote, SessionManager.getCurrentUser());
+                if (isEditMode()) {
+                    inventarioServicio.editarLote(
+                            loteToEdit.getIdLote(),
+                            producto.getIdProducto(),
+                            (double) cantidad,
+                            parsedDate.orElseThrow(),
+                            ubicacionField.getText()
+                    );
+                } else {
+                    lote.setNumeroLote(null);
+                    inventarioServicio.registrarIngreso(lote, SessionManager.getCurrentUser());
+                }
                 return null;
             }
 
@@ -184,13 +210,45 @@ public final class NuevoLoteDialog extends JDialog {
                 } catch (Exception exception) {
                     Dialogs.showMessage(
                             NuevoLoteDialog.this,
-                            "No se pudo registrar el lote: " + exception.getMessage(),
+                            "No se pudo guardar el lote: " + exception.getMessage(),
                             "Error",
                             JOptionPane.ERROR_MESSAGE
                     );
                 }
             }
         }.execute();
+    }
+
+    private void hydrateEditData() {
+        if (!isEditMode()) {
+            return;
+        }
+        numeroField.setText(loteToEdit.getNumeroLote());
+        cantidadField.setText(String.valueOf(loteToEdit.getCantidadActual()));
+        ubicacionField.setText(loteToEdit.getUbicacion());
+        if (loteToEdit.getFechaVencimiento() != null) {
+            vencimientoField.setText(DATE_FORMAT.format(loteToEdit.getFechaVencimiento()));
+        }
+        selectProduct(loteToEdit.getProductoEntity());
+    }
+
+    private void selectProduct(ProductoPerecible selectedProduct) {
+        if (selectedProduct == null || selectedProduct.getIdProducto() == null) {
+            return;
+        }
+        for (int index = 0; index < productoField.getItemCount(); index++) {
+            ProductoPerecible product = productoField.getItemAt(index);
+            if (selectedProduct.getIdProducto().equals(product.getIdProducto())) {
+                productoField.setSelectedIndex(index);
+                return;
+            }
+        }
+        productoField.addItem(selectedProduct);
+        productoField.setSelectedItem(selectedProduct);
+    }
+
+    private boolean isEditMode() {
+        return loteToEdit != null;
     }
 
     private void updateNumeroLotePreview() {

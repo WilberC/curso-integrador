@@ -122,6 +122,38 @@ public class InventarioServicio {
         return productoRepository.findByActivoTrueOrderByNombreAsc();
     }
 
+    @Transactional
+    public Lote editarLote(
+            Integer idLote,
+            Integer idProducto,
+            Double cantidad,
+            LocalDate fechaVencimiento,
+            String ubicacion
+    ) {
+        if (cantidad == null || cantidad <= 0) {
+            throw new RuntimeException("La cantidad debe ser mayor a cero");
+        }
+        if (fechaVencimiento == null) {
+            throw new RuntimeException("La fecha de vencimiento es obligatoria");
+        }
+        if (idProducto == null) {
+            throw new RuntimeException("El producto del lote es obligatorio");
+        }
+        Lote lote = loteRepository.findById(idLote)
+                .orElseThrow(() -> new RuntimeException("Lote no encontrado"));
+        ProductoPerecible producto = productoRepository.findById(idProducto)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        lote.setProducto(producto);
+        lote.setCantidadInicial(cantidad);
+        lote.setCantidadActual(cantidad);
+        lote.setFechaVencimiento(fechaVencimiento);
+        lote.setUbicacion(limpiarUbicacion(ubicacion));
+        if (lote.getEstado() == EstadoLote.RETIRADO) {
+            lote.setEstado(EstadoLote.DISPONIBLE);
+        }
+        return loteRepository.save(lote);
+    }
+
     public String generarNumeroLote(ProductoPerecible producto) {
         String prefix = prefixFor(producto);
         int nextSequence = loteRepository.findByNumeroLoteStartingWith(prefix).stream()
@@ -162,5 +194,13 @@ public class InventarioServicio {
         } catch (NumberFormatException exception) {
             return 0;
         }
+    }
+
+    private String limpiarUbicacion(String ubicacion) {
+        String value = ubicacion == null ? "" : ubicacion.trim().replaceAll("\\s+", " ");
+        if (value.isBlank()) {
+            throw new RuntimeException("La ubicacion es obligatoria");
+        }
+        return value;
     }
 }

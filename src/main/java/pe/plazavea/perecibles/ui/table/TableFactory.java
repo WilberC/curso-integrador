@@ -28,7 +28,7 @@ public final class TableFactory {
         table.getColumnModel().getColumn(4).setCellRenderer(new NumericCellRenderer(model));
         table.getColumnModel().getColumn(5).setCellRenderer(new NumericCellRenderer(model));
         table.getColumnModel().getColumn(6).setCellRenderer(new StatusCellRenderer());
-        table.getColumnModel().getColumn(7).setCellRenderer(new ActionCellRenderer("V  R"));
+        table.getColumnModel().getColumn(7).setCellRenderer(new ActionCellRenderer("Editar | Vencido | Remate"));
         table.getColumnModel().getColumn(0).setPreferredWidth(190);
         table.getColumnModel().getColumn(1).setPreferredWidth(100);
         table.getColumnModel().getColumn(2).setPreferredWidth(120);
@@ -36,7 +36,7 @@ public final class TableFactory {
         table.getColumnModel().getColumn(4).setPreferredWidth(120);
         table.getColumnModel().getColumn(5).setPreferredWidth(80);
         table.getColumnModel().getColumn(6).setPreferredWidth(130);
-        table.getColumnModel().getColumn(7).setPreferredWidth(90);
+        table.getColumnModel().getColumn(7).setPreferredWidth(220);
         return table;
     }
 
