@@ -6,9 +6,12 @@ import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import pe.plazavea.perecibles.enums.RolUsuario;
@@ -40,20 +43,21 @@ public final class MainFrame extends JFrame implements Navigator {
     private final ShortcutBar shortcutBar = new ShortcutBar();
     private final SidebarPanel sidebar = new SidebarPanel(this);
     private final LoginPanel loginPanel;
-    private final DashboardPanel dashboardPanel;
-    private final InventarioPanel inventarioPanel;
-    private final AlertasPanel alertasPanel;
-    private final ReportesPanel reportesPanel;
-    private final ConfiguracionPanel configuracionPanel;
+    private final ObjectProvider<DashboardPanel> dashboardPanel;
+    private final ObjectProvider<InventarioPanel> inventarioPanel;
+    private final ObjectProvider<AlertasPanel> alertasPanel;
+    private final ObjectProvider<ReportesPanel> reportesPanel;
+    private final ObjectProvider<ConfiguracionPanel> configuracionPanel;
     private final UsuarioServicio usuarioServicio;
+    private final Set<String> loadedScreens = new HashSet<>();
     private String currentScreen = "login";
 
     public MainFrame(
-            DashboardPanel dashboardPanel,
-            InventarioPanel inventarioPanel,
-            AlertasPanel alertasPanel,
-            ReportesPanel reportesPanel,
-            ConfiguracionPanel configuracionPanel,
+            ObjectProvider<DashboardPanel> dashboardPanel,
+            ObjectProvider<InventarioPanel> inventarioPanel,
+            ObjectProvider<AlertasPanel> alertasPanel,
+            ObjectProvider<ReportesPanel> reportesPanel,
+            ObjectProvider<ConfiguracionPanel> configuracionPanel,
             UsuarioServicio usuarioServicio
     ) {
         super("Plaza Vea - Control de Perecibles");
@@ -95,6 +99,7 @@ public final class MainFrame extends JFrame implements Navigator {
 
         sidebar.refreshSession();
         rootLayout.show(rootCards, "shell");
+        ensureScreenLoaded(screen);
         contentLayout.show(contentCards, screen);
         currentScreen = screen;
         sidebar.setActive(screen);
@@ -112,16 +117,41 @@ public final class MainFrame extends JFrame implements Navigator {
         center.add(contentCards, BorderLayout.CENTER);
 
         contentCards.setBackground(Theme.CANVAS);
-        contentCards.add(dashboardPanel, "dashboard");
-        contentCards.add(inventarioPanel, "inventario");
-        contentCards.add(alertasPanel, "alertas");
-        contentCards.add(reportesPanel, "reportes");
-        contentCards.add(configuracionPanel, "configuracion");
 
         shell.add(sidebar, BorderLayout.WEST);
         shell.add(center, BorderLayout.CENTER);
         shell.add(shortcutBar, BorderLayout.SOUTH);
         return shell;
+    }
+
+    private void ensureScreenLoaded(String screen) {
+        if (!loadedScreens.add(screen)) {
+            return;
+        }
+        JPanel panel = switch (screen) {
+            case "dashboard" -> dashboardPanel.getObject();
+            case "inventario" -> inventarioPanel.getObject();
+            case "alertas" -> alertasPanel.getObject();
+            case "reportes" -> reportesPanel.getObject();
+            case "configuracion" -> configuracionPanel.getObject();
+            default -> null;
+        };
+        if (panel != null) {
+            contentCards.add(panel, screen);
+            triggerInitialLoad(screen);
+        }
+    }
+
+    private void triggerInitialLoad(String screen) {
+        switch (screen) {
+            case "dashboard" -> dashboardPanel.getObject().refreshDashboard();
+            case "inventario" -> inventarioPanel.getObject().refreshTable();
+            case "alertas" -> alertasPanel.getObject().refreshAlerts();
+            case "reportes" -> reportesPanel.getObject().generateReport();
+            case "configuracion" -> configuracionPanel.getObject().refreshConfiguracion();
+            default -> {
+            }
+        }
     }
 
     private void registerShortcuts() {
@@ -146,11 +176,11 @@ public final class MainFrame extends JFrame implements Navigator {
     @Override
     public void refreshCurrentScreen() {
         switch (currentScreen) {
-            case "dashboard" -> dashboardPanel.refreshDashboard();
-            case "inventario" -> inventarioPanel.refreshTable();
-            case "alertas" -> alertasPanel.refreshAlerts();
-            case "reportes" -> reportesPanel.generateReport();
-            case "configuracion" -> configuracionPanel.refreshConfiguracion();
+            case "dashboard" -> dashboardPanel.getObject().refreshDashboard();
+            case "inventario" -> inventarioPanel.getObject().refreshTable();
+            case "alertas" -> alertasPanel.getObject().refreshAlerts();
+            case "reportes" -> reportesPanel.getObject().generateReport();
+            case "configuracion" -> configuracionPanel.getObject().refreshConfiguracion();
             default -> {
             }
         }

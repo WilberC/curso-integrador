@@ -21,7 +21,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -50,9 +52,15 @@ public final class NuevoLoteDialog extends JDialog {
     private final JLabel datePreview = new JLabel(" ");
     private final InventarioServicio inventarioServicio;
     private final Lote loteToEdit;
+    private final Timer lotePreviewTimer = new Timer(120, event -> updateNumeroLotePreview());
+    private boolean saved;
 
     public NuevoLoteDialog(Frame owner, InventarioServicio inventarioServicio, List<ProductoPerecible> productos) {
         this(owner, inventarioServicio, productos, null);
+    }
+
+    public boolean wasSaved() {
+        return saved;
     }
 
     public NuevoLoteDialog(Frame owner, InventarioServicio inventarioServicio, List<ProductoPerecible> productos, Lote loteToEdit) {
@@ -63,9 +71,10 @@ public final class NuevoLoteDialog extends JDialog {
         productoField.setRenderer((list, value, index, selected, focused) -> new JLabel(value == null ? "" : value.getNombre()));
         productoField.addActionListener(event -> {
             if (!isEditMode()) {
-                updateNumeroLotePreview();
+                SwingUtilities.invokeLater(lotePreviewTimer::restart);
             }
         });
+        lotePreviewTimer.setRepeats(false);
         numeroField.setEditable(false);
         numeroField.setFocusable(false);
         numeroField.setBackground(Theme.CANVAS);
@@ -229,6 +238,7 @@ public final class NuevoLoteDialog extends JDialog {
             protected void done() {
                 try {
                     get();
+                    saved = true;
                     dispose();
                 } catch (Exception exception) {
                     Dialogs.showMessage(

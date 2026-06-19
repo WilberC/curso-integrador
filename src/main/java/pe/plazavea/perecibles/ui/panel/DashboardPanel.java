@@ -61,6 +61,8 @@ public final class DashboardPanel extends JPanel {
     private final Map<String, Integer> snapshotAnterior = new HashMap<>();
     private final InventarioServicio inventarioServicio;
     private final ConfiguracionServicio configuracionServicio;
+    private boolean loaded;
+    private boolean refreshInFlight;
 
     public DashboardPanel(InventarioServicio inventarioServicio, ConfiguracionServicio configuracionServicio) {
         this.inventarioServicio = inventarioServicio;
@@ -99,9 +101,7 @@ public final class DashboardPanel extends JPanel {
         contentScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         contentScroll.getVerticalScrollBar().setUnitIncrement(16);
         add(contentScroll, BorderLayout.CENTER);
-        refreshDashboard();
         timer.setRepeats(true);
-        timer.start();
     }
 
     private void addCenterRow(JPanel center, JPanel component, int row, double weightY, int bottomInset) {
@@ -121,7 +121,9 @@ public final class DashboardPanel extends JPanel {
         if (timer != null) {
             if (visible) {
                 timer.start();
-                refreshDashboard();
+                if (!loaded) {
+                    refreshDashboard();
+                }
             } else {
                 timer.stop();
             }
@@ -129,6 +131,10 @@ public final class DashboardPanel extends JPanel {
     }
 
     public void refreshDashboard() {
+        if (refreshInFlight) {
+            return;
+        }
+        refreshInFlight = true;
         new SwingWorker<DashboardData, Void>() {
             @Override
             protected DashboardData doInBackground() {
@@ -143,8 +149,11 @@ public final class DashboardPanel extends JPanel {
                 try {
                     DashboardData data = get();
                     updateGauges(data.lotes(), data.config());
+                    loaded = true;
                 } catch (Exception exception) {
                     timestampLabel.setText("Error al actualizar: " + exception.getMessage());
+                } finally {
+                    refreshInFlight = false;
                 }
             }
         }.execute();

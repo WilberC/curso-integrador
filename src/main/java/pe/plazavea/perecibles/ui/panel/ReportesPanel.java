@@ -88,6 +88,7 @@ public final class ReportesPanel extends JPanel {
     private final ReporteServicio reporteServicio;
     private Reporte currentReporte;
     private ReporteResultado currentResultado;
+    private boolean reportInFlight;
 
     public ReportesPanel(ReporteServicio reporteServicio) {
         this.reporteServicio = reporteServicio;
@@ -101,9 +102,6 @@ public final class ReportesPanel extends JPanel {
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        if (visible) {
-            rebuild();
-        }
     }
 
     private void configureControls() {
@@ -390,6 +388,9 @@ public final class ReportesPanel extends JPanel {
     }
 
     public void generateReport() {
+        if (reportInFlight) {
+            return;
+        }
         Usuario currentUser = SessionManager.getCurrentUser();
         if (currentUser == null || currentUser.getRol() != RolUsuario.SUPERVISOR) {
             tableModel.clear();
@@ -409,6 +410,7 @@ public final class ReportesPanel extends JPanel {
         }
 
         setBusy(true, "Generando reporte...");
+        reportInFlight = true;
         new SwingWorker<ReportViewData, Void>() {
             @Override
             protected ReportViewData doInBackground() {
@@ -445,6 +447,7 @@ public final class ReportesPanel extends JPanel {
                             JOptionPane.ERROR_MESSAGE
                     );
                 } finally {
+                    reportInFlight = false;
                     setBusy(false, status.getText());
                 }
             }

@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
@@ -54,9 +55,11 @@ public final class InventarioPanel extends JPanel {
     private final DatePickerField fechaHasta = new DatePickerField("Hasta");
     private final JComboBox<String> categoria = new JComboBox<>(new String[]{"Todas", "Lacteos", "Carnes", "Embutidos", "Panaderia"});
     private final JComboBox<String> estado = new JComboBox<>(new String[]{"Activos", "Todos", "Disponible", "Próximo a vencer", "Vencido", "Retirado"});
+    private final Timer filterTimer = new Timer(120, event -> applyFilters());
     private final InventarioServicio inventarioServicio;
     private List<Lote> currentLotes = List.of();
     private List<ProductoPerecible> productos = List.of();
+    private boolean refreshInFlight;
 
     public InventarioPanel(InventarioServicio inventarioServicio) {
         this.inventarioServicio = inventarioServicio;
@@ -68,6 +71,7 @@ public final class InventarioPanel extends JPanel {
         add(TableFactory.scrollPane(table), BorderLayout.CENTER);
         installTableActions();
         registerShortcuts();
+        filterTimer.setRepeats(false);
         refreshTable();
     }
 
@@ -84,11 +88,11 @@ public final class InventarioPanel extends JPanel {
         search.setPreferredSize(new Dimension(220, 36));
         search.setMaximumSize(new Dimension(260, 36));
         search.putClientProperty("JTextField.placeholderText", "Buscar producto o lote");
-        search.getDocument().addDocumentListener(new SimpleDocumentListener(this::applyFilters));
-        fechaDesde.addChangeListener(this::applyFilters);
-        fechaHasta.addChangeListener(this::applyFilters);
-        categoria.addActionListener(event -> applyFilters());
-        estado.addActionListener(event -> applyFilters());
+        search.getDocument().addDocumentListener(new SimpleDocumentListener(this::scheduleFilters));
+        fechaDesde.addChangeListener(this::scheduleFilters);
+        fechaHasta.addChangeListener(this::scheduleFilters);
+        categoria.addActionListener(event -> scheduleFiltersAfterPopup());
+        estado.addActionListener(event -> scheduleFiltersAfterPopup());
         var limpiarFechas = Buttons.secondary("Limpiar fechas");
         limpiarFechas.addActionListener(event -> clearDateFilters());
 
@@ -126,8 +130,11 @@ public final class InventarioPanel extends JPanel {
 
     public void openNuevoLote() {
         java.awt.Frame owner = (java.awt.Frame) SwingUtilities.getWindowAncestor(this);
-        new NuevoLoteDialog(owner, inventarioServicio, productos).setVisible(true);
-        refreshTable();
+        NuevoLoteDialog dialog = new NuevoLoteDialog(owner, inventarioServicio, productos);
+        dialog.setVisible(true);
+        if (dialog.wasSaved()) {
+            refreshTable();
+        }
     }
 
     public void openEditarLote() {
@@ -149,23 +156,34 @@ public final class InventarioPanel extends JPanel {
             return;
         }
         java.awt.Frame owner = (java.awt.Frame) SwingUtilities.getWindowAncestor(this);
-        new NuevoLoteDialog(owner, inventarioServicio, productos, lote).setVisible(true);
-        refreshTable();
+        NuevoLoteDialog dialog = new NuevoLoteDialog(owner, inventarioServicio, productos, lote);
+        dialog.setVisible(true);
+        if (dialog.wasSaved()) {
+            refreshTable();
+        }
     }
 
     public void refreshTable() {
-        new SwingWorker<List<Lote>, Void>() {
+        if (refreshInFlight) {
+            return;
+        }
+        refreshInFlight = true;
+        new SwingWorker<InventoryData, Void>() {
             @Override
-            protected List<Lote> doInBackground() {
-                productos = inventarioServicio.listarProductos();
-                return inventarioServicio.consultarInventario();
+            protected InventoryData doInBackground() {
+                return new InventoryData(
+                        inventarioServicio.listarProductos(),
+                        inventarioServicio.consultarInventario()
+                );
             }
 
             @Override
             protected void done() {
                 try {
-                    currentLotes = get();
-                    applyFilters();
+                    InventoryData data = get();
+                    productos = data.productos();
+                    currentLotes = data.lotes();
+                    scheduleFilters();
                 } catch (Exception exception) {
                     Dialogs.showMessage(
                             InventarioPanel.this,
@@ -173,9 +191,19 @@ public final class InventarioPanel extends JPanel {
                             "Error",
                             JOptionPane.ERROR_MESSAGE
                     );
+                } finally {
+                    refreshInFlight = false;
                 }
             }
         }.execute();
+    }
+
+    private void scheduleFilters() {
+        filterTimer.restart();
+    }
+
+    private void scheduleFiltersAfterPopup() {
+        SwingUtilities.invokeLater(this::scheduleFilters);
     }
 
     private void applyFilters() {
@@ -445,6 +473,9 @@ public final class InventarioPanel extends JPanel {
     }
 
     private record DateRange(Optional<LocalDate> from, Optional<LocalDate> to) {
+    }
+
+    private record InventoryData(List<ProductoPerecible> productos, List<Lote> lotes) {
     }
 
     private enum LoteAction {

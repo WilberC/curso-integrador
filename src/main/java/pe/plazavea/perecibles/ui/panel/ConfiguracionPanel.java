@@ -76,6 +76,9 @@ public final class ConfiguracionPanel extends JPanel {
     private final ConfiguracionServicio configuracionServicio;
     private final UsuarioServicio usuarioServicio;
     private int catalogTabIndex;
+    private boolean contentBuilt;
+    private boolean loaded;
+    private boolean refreshInFlight;
 
     public ConfiguracionPanel(ConfiguracionServicio configuracionServicio, UsuarioServicio usuarioServicio) {
         this.configuracionServicio = configuracionServicio;
@@ -83,31 +86,36 @@ public final class ConfiguracionPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Theme.CANVAS);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
-        refreshConfiguracion();
     }
 
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        if (visible) {
+        if (visible && !loaded) {
             refreshConfiguracion();
         }
     }
 
     public void refreshConfiguracion() {
-        removeAll();
         Usuario current = SessionManager.getCurrentUser();
         if (current == null || !current.esSupervisor()) {
+            removeAll();
+            contentBuilt = false;
+            loaded = false;
             add(accessDenied(), BorderLayout.CENTER);
             revalidate();
             repaint();
             return;
         }
-        JScrollPane contentScroll = new JScrollPane(buildContent());
-        contentScroll.setBorder(BorderFactory.createEmptyBorder());
-        contentScroll.getVerticalScrollBar().setUnitIncrement(16);
-        contentScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        add(contentScroll, BorderLayout.CENTER);
+        if (!contentBuilt) {
+            removeAll();
+            JScrollPane contentScroll = new JScrollPane(buildContent());
+            contentScroll.setBorder(BorderFactory.createEmptyBorder());
+            contentScroll.getVerticalScrollBar().setUnitIncrement(16);
+            contentScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            add(contentScroll, BorderLayout.CENTER);
+            contentBuilt = true;
+        }
         loadData();
         revalidate();
         repaint();
@@ -222,6 +230,10 @@ public final class ConfiguracionPanel extends JPanel {
     }
 
     private void loadData() {
+        if (refreshInFlight) {
+            return;
+        }
+        refreshInFlight = true;
         new SwingWorker<Void, Void>() {
             private ConfiguracionAlerta config;
             private List<Usuario> usuarios;
@@ -247,8 +259,11 @@ public final class ConfiguracionPanel extends JPanel {
                     usuarioModel.setData(usuarios);
                     categoriaModel.setData(categorias);
                     productoModel.setData(productos);
+                    loaded = true;
                 } catch (Exception exception) {
                     showError("No se pudo cargar configuracion", exception);
+                } finally {
+                    refreshInFlight = false;
                 }
             }
         }.execute();

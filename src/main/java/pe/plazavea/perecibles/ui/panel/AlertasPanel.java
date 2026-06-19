@@ -38,6 +38,8 @@ public final class AlertasPanel extends JPanel {
     private final JLabel countBadge = new JLabel();
     private final JCheckBox showAll = new JCheckBox("Ver historial completo");
     private final AlertaServicio alertaServicio;
+    private boolean loaded;
+    private boolean refreshInFlight;
 
     public AlertasPanel(AlertaServicio alertaServicio) {
         this.alertaServicio = alertaServicio;
@@ -48,7 +50,14 @@ public final class AlertasPanel extends JPanel {
         add(TableFactory.scrollPane(table), BorderLayout.CENTER);
         installTableActions();
         registerShortcuts();
-        refreshAlerts();
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible && !loaded) {
+            refreshAlerts();
+        }
     }
 
     private JPanel buildHeader() {
@@ -98,6 +107,10 @@ public final class AlertasPanel extends JPanel {
     }
 
     public void refreshAlerts() {
+        if (refreshInFlight) {
+            return;
+        }
+        refreshInFlight = true;
         new SwingWorker<List<Alerta>, Void>() {
             @Override
             protected List<Alerta> doInBackground() {
@@ -113,6 +126,7 @@ public final class AlertasPanel extends JPanel {
                             .filter(alerta -> alerta.getEstado() == EstadoAlerta.PENDIENTE)
                             .count();
                     countBadge.setText("[" + pendientes + "]");
+                    loaded = true;
                 } catch (Exception exception) {
                     Dialogs.showMessage(
                             AlertasPanel.this,
@@ -120,6 +134,8 @@ public final class AlertasPanel extends JPanel {
                             "Error",
                             JOptionPane.ERROR_MESSAGE
                     );
+                } finally {
+                    refreshInFlight = false;
                 }
             }
         }.execute();

@@ -121,7 +121,7 @@ public final class CalendarPopup {
             if (popup != null) {
                 popup.setVisible(false);
             }
-            onSelected.accept(date);
+            SwingUtilities.invokeLater(() -> onSelected.accept(date));
         });
         return button;
     }
