@@ -83,7 +83,8 @@ public final class ReportesPanel extends JPanel {
     private final JLabel metricFourLabel = metricLabel("Vencidos");
     private final JLabel metricFourValue = metricValue();
     private final JButton generar = Buttons.primary("Generar");
-    private final JButton exportar = Buttons.secondary("Exportar CSV");
+    private final JButton exportarCsv = Buttons.secondary("Exportar CSV");
+    private final JButton exportarXlsx = Buttons.secondary("Exportar XLSX");
     private final ReporteServicio reporteServicio;
     private Reporte currentReporte;
     private ReporteResultado currentResultado;
@@ -113,8 +114,10 @@ public final class ReportesPanel extends JPanel {
         configureTable();
 
         generar.addActionListener(event -> generateReport());
-        exportar.addActionListener(event -> exportCurrentReport());
-        exportar.setEnabled(false);
+        exportarCsv.addActionListener(event -> exportCurrentReport(ExportFormat.CSV));
+        exportarXlsx.addActionListener(event -> exportCurrentReport(ExportFormat.XLSX));
+        exportarCsv.setEnabled(false);
+        exportarXlsx.setEnabled(false);
 
         search.setFont(Fonts.inter(Font.PLAIN, 13f));
         search.putClientProperty("JTextField.placeholderText", "Buscar producto, lote, estado o usuario");
@@ -204,10 +207,13 @@ public final class ReportesPanel extends JPanel {
         filters.add(Box.createVerticalStrut(Theme.SP_LG));
 
         generar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
-        exportar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        exportarCsv.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        exportarXlsx.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         filters.add(generar);
         filters.add(Box.createVerticalStrut(Theme.SP_XS));
-        filters.add(exportar);
+        filters.add(exportarXlsx);
+        filters.add(Box.createVerticalStrut(Theme.SP_XS));
+        filters.add(exportarCsv);
         filters.add(Box.createVerticalGlue());
 
         status.setFont(Fonts.inter(Font.PLAIN, 12f));
@@ -423,12 +429,14 @@ public final class ReportesPanel extends JPanel {
                     currentResultado = data.resultado();
                     renderResult(tipo, data.resultado());
                     status.setText("Generado " + DISPLAY_DATE_TIME.format(currentReporte.getFechaGeneracion()));
-                    exportar.setEnabled(true);
+                    exportarCsv.setEnabled(true);
+                    exportarXlsx.setEnabled(true);
                 } catch (Exception exception) {
                     tableModel.clear();
                     currentReporte = null;
                     currentResultado = null;
-                    exportar.setEnabled(false);
+                    exportarCsv.setEnabled(false);
+                    exportarXlsx.setEnabled(false);
                     status.setText("No se pudo generar");
                     Dialogs.showMessage(
                             ReportesPanel.this,
@@ -562,43 +570,46 @@ public final class ReportesPanel extends JPanel {
         });
     }
 
-    private void exportCurrentReport() {
+    private void exportCurrentReport(ExportFormat format) {
         if (currentReporte == null || currentResultado == null) {
             Dialogs.showMessage(this, "Primero genere un reporte.", "Sin reporte", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Guardar reporte CSV");
-        chooser.setFileFilter(new FileNameExtensionFilter("CSV", "csv"));
-        chooser.setSelectedFile(new File(defaultCsvName()));
+        chooser.setDialogTitle("Guardar reporte " + format.extension().toUpperCase(Locale.ROOT));
+        chooser.setFileFilter(new FileNameExtensionFilter(format.description(), format.extension()));
+        chooser.setSelectedFile(new File(defaultExportName(format.extension())));
         if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
         }
 
-        Path destino = ensureCsvExtension(chooser.getSelectedFile()).toPath();
-        setBusy(true, "Exportando CSV...");
+        Path destino = ensureExtension(chooser.getSelectedFile(), format.extension()).toPath();
+        setBusy(true, "Exportando " + format.extension().toUpperCase(Locale.ROOT) + "...");
         new SwingWorker<Path, Void>() {
             @Override
             protected Path doInBackground() throws Exception {
-                return reporteServicio.exportarCSV(currentReporte, destino);
+                return switch (format) {
+                    case CSV -> reporteServicio.exportarCSV(currentReporte, destino);
+                    case XLSX -> reporteServicio.exportarXLSX(currentReporte, destino);
+                };
             }
 
             @Override
             protected void done() {
                 try {
                     Path exported = get();
-                    status.setText("CSV guardado en " + exported.getFileName());
+                    status.setText(format.extension().toUpperCase(Locale.ROOT) + " guardado en " + exported.getFileName());
                     Dialogs.showMessage(
                             ReportesPanel.this,
                             "Reporte exportado en:\n" + exported,
-                            "CSV exportado",
+                            format.extension().toUpperCase(Locale.ROOT) + " exportado",
                             JOptionPane.INFORMATION_MESSAGE
                     );
                 } catch (Exception exception) {
                     Dialogs.showMessage(
                             ReportesPanel.this,
-                            "No se pudo exportar el CSV: " + rootMessage(exception),
+                            "No se pudo exportar el " + format.extension().toUpperCase(Locale.ROOT) + ": " + rootMessage(exception),
                             "Error",
                             JOptionPane.ERROR_MESSAGE
                     );
@@ -609,14 +620,14 @@ public final class ReportesPanel extends JPanel {
         }.execute();
     }
 
-    private String defaultCsvName() {
+    private String defaultExportName(String extension) {
         return "reporte_" + currentReporte.getTipo().name().toLowerCase(Locale.ROOT) + "_"
-                + currentReporte.getFechaGeneracion().toLocalDate() + ".csv";
+                + currentReporte.getFechaGeneracion().toLocalDate() + "." + extension;
     }
 
-    private File ensureCsvExtension(File file) {
+    private File ensureExtension(File file, String extension) {
         String path = file.getAbsolutePath();
-        return path.toLowerCase(Locale.ROOT).endsWith(".csv") ? file : new File(path + ".csv");
+        return path.toLowerCase(Locale.ROOT).endsWith("." + extension) ? file : new File(path + "." + extension);
     }
 
     private void setBusy(boolean busy, String message) {
@@ -625,7 +636,8 @@ public final class ReportesPanel extends JPanel {
         hasta.setEnabled(!busy);
         search.setEnabled(!busy);
         generar.setEnabled(!busy);
-        exportar.setEnabled(!busy && currentReporte != null);
+        exportarCsv.setEnabled(!busy && currentReporte != null);
+        exportarXlsx.setEnabled(!busy && currentReporte != null);
         status.setText(message);
     }
 
@@ -648,6 +660,27 @@ public final class ReportesPanel extends JPanel {
     }
 
     private record ReportViewData(Reporte reporte, ReporteResultado resultado) {
+    }
+
+    private enum ExportFormat {
+        CSV("csv", "CSV"),
+        XLSX("xlsx", "Excel XLSX");
+
+        private final String extension;
+        private final String description;
+
+        ExportFormat(String extension, String description) {
+            this.extension = extension;
+            this.description = description;
+        }
+
+        private String extension() {
+            return extension;
+        }
+
+        private String description() {
+            return description;
+        }
     }
 
     private record ReportRow(List<Object> values, String searchable) {

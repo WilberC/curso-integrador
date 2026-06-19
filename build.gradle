@@ -29,6 +29,7 @@ dependencies {
     implementation 'com.formdev:flatlaf:3.6'
     implementation 'com.formdev:flatlaf-extras:3.6'
     implementation 'com.miglayout:miglayout-swing:11.4.2'
+    implementation 'org.apache.poi:poi-ooxml:5.4.1'
 
     // JPA + Hibernate
     implementation 'org.springframework.data:spring-data-jpa:3.2.5'
