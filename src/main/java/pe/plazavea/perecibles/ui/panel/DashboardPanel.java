@@ -1,6 +1,8 @@
 package pe.plazavea.perecibles.ui.panel;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -8,8 +10,10 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.BorderFactory;
@@ -29,6 +33,7 @@ import pe.plazavea.perecibles.service.ConfiguracionServicio;
 import pe.plazavea.perecibles.service.InventarioServicio;
 import pe.plazavea.perecibles.theme.Fonts;
 import pe.plazavea.perecibles.theme.Theme;
+import pe.plazavea.perecibles.ui.component.BarChartPanel;
 import pe.plazavea.perecibles.ui.component.Buttons;
 import pe.plazavea.perecibles.ui.component.GaugeCard;
 import pe.plazavea.perecibles.ui.component.GaugeState;
@@ -40,9 +45,17 @@ import pe.plazavea.perecibles.ui.table.TableFactory;
 public final class DashboardPanel extends JPanel {
 
     private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final Color CRITICAL_COLOR = Color.decode("#b91c1c");
+    private static final Color DANGER_COLOR = Color.decode("#ef4444");
+    private static final Color WARNING_COLOR = Color.decode("#f59e0b");
+    private static final Color NOTICE_COLOR = Color.decode("#eab308");
+    private static final Color SAFE_COLOR = Color.decode("#16a34a");
 
-    private final JPanel gauges = new JPanel(new GridLayout(2, 2, Theme.SP_LG, Theme.SP_LG));
-    private final LoteTableModel urgentModel = new LoteTableModel(List.of());
+    private final JPanel gauges = new JPanel(new GridLayout(1, 4, Theme.SP_MD, Theme.SP_MD));
+    private final JPanel charts = new JPanel(new GridLayout(1, 2, Theme.SP_LG, 0));
+    private final BarChartPanel expiryChart = new BarChartPanel("Distribución por vencimiento");
+    private final BarChartPanel categoryRiskChart = new BarChartPanel("Riesgo por categoría");
+    private final LoteTableModel urgentModel = new LoteTableModel(List.of(), false);
     private final JLabel timestampLabel = new JLabel();
     private final Timer timer = new Timer(60_000, event -> refreshDashboard());
     private final Map<String, Integer> snapshotAnterior = new HashMap<>();
@@ -57,6 +70,9 @@ public final class DashboardPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
 
         gauges.setBackground(Theme.CANVAS);
+        charts.setBackground(Theme.CANVAS);
+        charts.add(expiryChart);
+        charts.add(categoryRiskChart);
         JTable table = TableFactory.loteTable(urgentModel);
         JScrollPane scrollPane = TableFactory.scrollPane(table);
 
@@ -67,16 +83,22 @@ public final class DashboardPanel extends JPanel {
 
         JPanel tableSection = new JPanel(new BorderLayout());
         tableSection.setBackground(Theme.CANVAS);
+        tableSection.setPreferredSize(new Dimension(0, 280));
         tableSection.add(urgentTitle, BorderLayout.NORTH);
         tableSection.add(scrollPane, BorderLayout.CENTER);
 
         JPanel center = new JPanel(new GridBagLayout());
         center.setBackground(Theme.CANVAS);
         addCenterRow(center, gauges, 0, 0.0, Theme.SP_LG);
-        addCenterRow(center, tableSection, 1, 1.0, 0);
+        addCenterRow(center, charts, 1, 0.0, Theme.SP_LG);
+        addCenterRow(center, tableSection, 2, 1.0, 0);
 
         add(buildToolbar(), BorderLayout.NORTH);
-        add(center, BorderLayout.CENTER);
+        JScrollPane contentScroll = new JScrollPane(center);
+        contentScroll.setBorder(BorderFactory.createEmptyBorder());
+        contentScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        contentScroll.getVerticalScrollBar().setUnitIncrement(16);
+        add(contentScroll, BorderLayout.CENTER);
         refreshDashboard();
         timer.setRepeats(true);
         timer.start();
@@ -111,7 +133,7 @@ public final class DashboardPanel extends JPanel {
             @Override
             protected DashboardData doInBackground() {
                 return new DashboardData(
-                        inventarioServicio.consultarStock(),
+                        inventarioServicio.consultarInventario(),
                         configuracionServicio.obtenerConfiguracionActiva()
                 );
             }
@@ -129,13 +151,16 @@ public final class DashboardPanel extends JPanel {
     }
 
     private void updateGauges(List<Lote> lotes, ConfiguracionAlerta config) {
-        int activeTotal = (int) lotes.stream().filter(lote -> lote.getEstado() != EstadoLote.RETIRADO).count();
-        int vencidos = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.VENCIDO).count();
-        int criticos = countInRange(lotes, 0, config.getDiasCriticos());
-        int advertencias = countInRange(lotes, config.getDiasCriticos() + 1L, config.getDiasAdvertencia());
-        int avisos = countInRange(lotes, config.getDiasAdvertencia() + 1L, config.getDiasAvisoAnticipado());
+        List<Lote> activos = lotes.stream()
+                .filter(lote -> lote.getEstado() != EstadoLote.RETIRADO)
+                .toList();
+        int activeTotal = activos.size();
+        int retirados = (int) lotes.stream().filter(lote -> lote.getEstado() == EstadoLote.RETIRADO).count();
+        int vencidos = (int) activos.stream().filter(lote -> lote.getEstado() == EstadoLote.VENCIDO || lote.estaVencido()).count();
+        int criticos = countInRange(activos, 0, config.getDiasCriticos());
+        int advertencias = countInRange(activos, config.getDiasCriticos() + 1L, config.getDiasAdvertencia());
+        int avisos = countInRange(activos, config.getDiasAdvertencia() + 1L, config.getDiasAvisoAnticipado());
         int alertasPct = percent(criticos + advertencias + avisos + vencidos, activeTotal);
-        int vencidosPct = percent(vencidos, activeTotal);
         GaugeState state = vencidos > 0 || criticos > 0
                 ? GaugeState.DANGER
                 : advertencias > 0 ? GaugeState.WARNING : GaugeState.SAFE;
@@ -143,20 +168,92 @@ public final class DashboardPanel extends JPanel {
         gauges.removeAll();
         gauges.add(new GaugeCard("Total lotes activos", activeTotal, Math.max(activeTotal, 1), trend("total", activeTotal), state));
         gauges.add(new GaugeCard("% En alerta", alertasPct, 100, trend("alertas", alertasPct), state));
-        gauges.add(new GaugeCard("% Vencidos", vencidosPct, 100, trend("vencidos", vencidosPct), vencidos > 0 ? GaugeState.DANGER : GaugeState.SAFE));
-        gauges.add(new GaugeCard("Avisos anticipados", avisos, Math.max(activeTotal, 1), trend("avisos", avisos), GaugeState.SAFE));
+        gauges.add(new GaugeCard("Lotes vencidos", vencidos, Math.max(activeTotal, 1), trend("vencidos", vencidos), vencidos > 0 ? GaugeState.DANGER : GaugeState.SAFE));
+        gauges.add(new GaugeCard("Lotes retirados", retirados, Math.max(lotes.size(), 1), trend("retirados", retirados), GaugeState.WARNING));
         snapshotAnterior.put("total", activeTotal);
         snapshotAnterior.put("alertas", alertasPct);
-        snapshotAnterior.put("vencidos", vencidosPct);
-        snapshotAnterior.put("avisos", avisos);
-        urgentModel.setData(lotes.stream()
-                .filter(lote -> lote.getEstado() != EstadoLote.RETIRADO)
+        snapshotAnterior.put("vencidos", vencidos);
+        snapshotAnterior.put("retirados", retirados);
+        expiryChart.setData(expiryDistribution(activos));
+        categoryRiskChart.setData(categoryRisk(activos, config));
+        urgentModel.setData(activos.stream()
                 .sorted(Comparator.comparingLong(Lote::getDiasParaVencer))
                 .limit(10)
                 .toList());
         timestampLabel.setText("Actualizado " + TIMESTAMP.format(LocalDateTime.now()));
         gauges.revalidate();
         gauges.repaint();
+        charts.revalidate();
+        charts.repaint();
+    }
+
+    private List<BarChartPanel.Entry> expiryDistribution(List<Lote> lotes) {
+        int vencidos = 0;
+        int dosDias = 0;
+        int sieteDias = 0;
+        int quinceDias = 0;
+        int saludables = 0;
+        for (Lote lote : lotes) {
+            long dias = lote.getDiasParaVencer();
+            if (dias < 0 || lote.getEstado() == EstadoLote.VENCIDO) {
+                vencidos++;
+            } else if (dias <= 2) {
+                dosDias++;
+            } else if (dias <= 7) {
+                sieteDias++;
+            } else if (dias <= 15) {
+                quinceDias++;
+            } else {
+                saludables++;
+            }
+        }
+        return List.of(
+                new BarChartPanel.Entry("Vencidos", vencidos, CRITICAL_COLOR),
+                new BarChartPanel.Entry("0-2 días", dosDias, DANGER_COLOR),
+                new BarChartPanel.Entry("3-7 días", sieteDias, WARNING_COLOR),
+                new BarChartPanel.Entry("8-15 días", quinceDias, NOTICE_COLOR),
+                new BarChartPanel.Entry("16+ días", saludables, SAFE_COLOR)
+        );
+    }
+
+    private List<BarChartPanel.Entry> categoryRisk(List<Lote> lotes, ConfiguracionAlerta config) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        Map<String, Integer> worstSeverity = new LinkedHashMap<>();
+        lotes.stream()
+                .filter(lote -> lote.estaVencido() || lote.getDiasParaVencer() <= config.getDiasAvisoAnticipado())
+                .forEach(lote -> {
+                    String category = lote.getCategoria().isBlank() ? "Sin categoría" : lote.getCategoria();
+                    counts.merge(category, 1, Integer::sum);
+                    worstSeverity.merge(category, severity(lote, config), Math::min);
+                });
+        return counts.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(6)
+                .map(entry -> new BarChartPanel.Entry(entry.getKey(), entry.getValue(), colorForSeverity(worstSeverity.get(entry.getKey()))))
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    }
+
+    private int severity(Lote lote, ConfiguracionAlerta config) {
+        long dias = lote.getDiasParaVencer();
+        if (lote.getEstado() == EstadoLote.VENCIDO || dias < 0) {
+            return 0;
+        }
+        if (dias <= config.getDiasCriticos()) {
+            return 1;
+        }
+        if (dias <= config.getDiasAdvertencia()) {
+            return 2;
+        }
+        return 3;
+    }
+
+    private Color colorForSeverity(Integer severity) {
+        return switch (severity == null ? 3 : severity) {
+            case 0 -> CRITICAL_COLOR;
+            case 1 -> DANGER_COLOR;
+            case 2 -> WARNING_COLOR;
+            default -> NOTICE_COLOR;
+        };
     }
 
     private JPanel buildToolbar() {

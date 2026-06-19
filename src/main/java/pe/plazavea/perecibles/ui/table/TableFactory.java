@@ -34,7 +34,6 @@ public final class TableFactory {
         table.getColumnModel().getColumn(4).setCellRenderer(new DateCellRenderer(model));
         table.getColumnModel().getColumn(5).setCellRenderer(new NumericCellRenderer(model));
         table.getColumnModel().getColumn(6).setCellRenderer(new StatusCellRenderer());
-        table.getColumnModel().getColumn(7).setCellRenderer(new ActionCellRenderer("Editar | Vencido | Remate"));
         table.getColumnModel().getColumn(0).setPreferredWidth(190);
         table.getColumnModel().getColumn(1).setPreferredWidth(100);
         table.getColumnModel().getColumn(2).setPreferredWidth(120);
@@ -42,7 +41,10 @@ public final class TableFactory {
         table.getColumnModel().getColumn(4).setPreferredWidth(120);
         table.getColumnModel().getColumn(5).setPreferredWidth(80);
         table.getColumnModel().getColumn(6).setPreferredWidth(130);
-        table.getColumnModel().getColumn(7).setPreferredWidth(220);
+        if (model.getColumnCount() > 7) {
+            table.getColumnModel().getColumn(7).setCellRenderer(new ActionCellRenderer("Editar | Vencido | Remate"));
+            table.getColumnModel().getColumn(7).setPreferredWidth(220);
+        }
         return table;
     }
 
@@ -50,7 +52,9 @@ public final class TableFactory {
         TableRowSorter<LoteTableModel> sorter = new TableRowSorter<>(model);
         sorter.setComparator(4, Comparator.nullsLast(Comparator.<LocalDate>naturalOrder()));
         sorter.setComparator(6, Comparator.comparingInt(value -> statusRank((EstadoLote) value)));
-        sorter.setSortable(7, false);
+        if (model.getColumnCount() > 7) {
+            sorter.setSortable(7, false);
+        }
         sorter.setSortKeys(List.of(
                 new RowSorter.SortKey(6, javax.swing.SortOrder.ASCENDING),
                 new RowSorter.SortKey(4, javax.swing.SortOrder.ASCENDING),

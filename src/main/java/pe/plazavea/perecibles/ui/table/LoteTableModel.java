@@ -15,8 +15,14 @@ public final class LoteTableModel extends AbstractTableModel {
     };
 
     private final List<Lote> lotes = new ArrayList<>();
+    private final boolean showActions;
 
     public LoteTableModel(List<Lote> lotes) {
+        this(lotes, true);
+    }
+
+    public LoteTableModel(List<Lote> lotes, boolean showActions) {
+        this.showActions = showActions;
         setData(lotes);
     }
 
@@ -37,7 +43,7 @@ public final class LoteTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return COLUMNS.length;
+        return showActions ? COLUMNS.length : COLUMNS.length - 1;
     }
 
     @Override
