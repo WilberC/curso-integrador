@@ -9,7 +9,7 @@ import pe.plazavea.perecibles.model.Alerta;
 public final class AlertaTableModel extends AbstractTableModel {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final String[] COLUMNS = {"Tipo", "Lote", "Dias", "Generada", "Estado", "Accion"};
+    private static final String[] COLUMNS = {"Tipo", "Lote", "Dias", "Generada", "Estado", "Acciones"};
 
     private final List<Alerta> alertas = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public final class AlertaTableModel extends AbstractTableModel {
             case 2 -> alerta.getDiasParaVencer();
             case 3 -> DATE_FORMAT.format(alerta.getFechaGeneracion());
             case 4 -> alerta.getEstado();
-            case 5 -> "Atender / Ignorar";
+            case 5 -> alerta.getEstado();
             default -> "";
         };
     }

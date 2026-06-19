@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -42,16 +44,26 @@ public final class AlertasPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Theme.CANVAS);
         setBorder(BorderFactory.createEmptyBorder(Theme.SP_LG, Theme.SP_LG, Theme.SP_LG, Theme.SP_LG));
-        add(buildToolbar(), BorderLayout.NORTH);
+        add(buildHeader(), BorderLayout.NORTH);
         add(TableFactory.scrollPane(table), BorderLayout.CENTER);
+        installTableActions();
         registerShortcuts();
         refreshAlerts();
+    }
+
+    private JPanel buildHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Theme.CANVAS);
+        header.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_MD, 0));
+        header.add(buildToolbar(), BorderLayout.NORTH);
+        header.add(buildActionHelp(), BorderLayout.SOUTH);
+        return header;
     }
 
     private JPanel buildToolbar() {
         JPanel toolbar = new JPanel(new BorderLayout());
         toolbar.setBackground(Theme.CANVAS);
-        toolbar.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_MD, 0));
+        toolbar.setBorder(BorderFactory.createEmptyBorder(0, 0, Theme.SP_XS, 0));
 
         JLabel title = new JLabel("Alertas");
         title.setFont(Fonts.inter(Font.BOLD, 15f));
@@ -70,6 +82,19 @@ public final class AlertasPanel extends JPanel {
         toolbar.add(left, BorderLayout.WEST);
         toolbar.add(showAll, BorderLayout.EAST);
         return toolbar;
+    }
+
+    private JLabel buildActionHelp() {
+        JLabel help = new JLabel("""
+                <html><b>Atender</b>: usar cuando el lote ya fue revisado o gestionado. \
+                La alerta pasa a ATENDIDA y sale de pendientes. \
+                <b>Ignorar</b>: usar cuando la alerta no aplica o no requiere accion. \
+                La alerta pasa a IGNORADA y sale de pendientes.</html>
+                """);
+        help.setFont(Fonts.inter(Font.PLAIN, 12f));
+        help.setForeground(Theme.MUTED);
+        help.setBorder(BorderFactory.createEmptyBorder(0, Theme.SP_XS, 0, Theme.SP_XS));
+        return help;
     }
 
     public void refreshAlerts() {
@@ -141,23 +166,66 @@ public final class AlertasPanel extends JPanel {
     }
 
     public void atenderSeleccionada() {
-        updateSelected(true);
+        updateSelected(AlertaAction.ATENDER);
     }
 
     public void ignorarSeleccionada() {
-        updateSelected(false);
+        updateSelected(AlertaAction.IGNORAR);
     }
 
-    private void updateSelected(boolean atender) {
-        int selected = table.getSelectedRow();
-        if (selected < 0) {
+    private void installTableActions() {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                int row = table.rowAtPoint(event.getPoint());
+                int column = table.columnAtPoint(event.getPoint());
+                if (row < 0 || column != 5) {
+                    return;
+                }
+                table.setRowSelectionInterval(row, row);
+                Alerta alerta = model.getAlertaAt(table.convertRowIndexToModel(row));
+                updateAlerta(alerta, actionAt(event, row, column));
+            }
+        });
+    }
+
+    private AlertaAction actionAt(MouseEvent event, int row, int column) {
+        int x = event.getX() - table.getCellRect(row, column, true).x;
+        int segmentWidth = Math.max(1, table.getColumnModel().getColumn(column).getWidth() / 2);
+        return x < segmentWidth ? AlertaAction.ATENDER : AlertaAction.IGNORAR;
+    }
+
+    private void updateSelected(AlertaAction action) {
+        Alerta alerta = selectedAlerta();
+        if (alerta == null) {
             return;
         }
-        Alerta alerta = model.getAlertaAt(table.convertRowIndexToModel(selected));
+        updateAlerta(alerta, action);
+    }
+
+    private void updateAlerta(Alerta alerta, AlertaAction action) {
+        if (alerta.getEstado() != EstadoAlerta.PENDIENTE) {
+            Dialogs.showMessage(
+                    this,
+                    "Esta alerta ya fue procesada.",
+                    "Alerta sin acciones",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            return;
+        }
+        int result = Dialogs.showConfirm(
+                this,
+                confirmMessage(alerta, action),
+                "Confirmar " + action.label().toLowerCase(),
+                JOptionPane.OK_CANCEL_OPTION
+        );
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
-                if (atender) {
+                if (action == AlertaAction.ATENDER) {
                     alertaServicio.atenderAlerta(alerta.getIdAlerta(), SessionManager.getCurrentUser());
                 } else {
                     alertaServicio.ignorarAlerta(alerta.getIdAlerta());
@@ -182,6 +250,44 @@ public final class AlertasPanel extends JPanel {
         }.execute();
     }
 
+    private Alerta selectedAlerta() {
+        int selected = table.getSelectedRow();
+        if (selected < 0) {
+            Dialogs.showMessage(
+                    this,
+                    "Seleccione una alerta de la tabla.",
+                    "Alerta requerida",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+            return null;
+        }
+        return model.getAlertaAt(table.convertRowIndexToModel(selected));
+    }
+
+    private String confirmMessage(Alerta alerta, AlertaAction action) {
+        String message = """
+                %s
+
+                Cuando usarla:
+                %s
+
+                Que pasara:
+                %s
+
+                Lote: %s
+                Tipo: %s
+                Dias para vencer: %d
+                """;
+        return message.formatted(
+                action.label(),
+                action.whenToUse(),
+                action.resultText(),
+                alerta.getLoteNumero(),
+                alerta.getTipoAlerta(),
+                alerta.getDiasParaVencer()
+        );
+    }
+
     private void moveSelection(int delta) {
         if (table.getRowCount() == 0) {
             return;
@@ -195,5 +301,40 @@ public final class AlertasPanel extends JPanel {
     private boolean isTextEditing() {
         Component focused = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
         return focused instanceof JTextComponent;
+    }
+
+    private enum AlertaAction {
+        ATENDER(
+                "Atender",
+                "Use esta opcion cuando ya reviso el lote o tomo la accion operativa necesaria.",
+                "La alerta se marcara como ATENDIDA y dejara de aparecer como pendiente."
+        ),
+        IGNORAR(
+                "Ignorar",
+                "Use esta opcion cuando la alerta no aplica, es duplicada o no requiere accion.",
+                "La alerta se marcara como IGNORADA y dejara de aparecer como pendiente."
+        );
+
+        private final String label;
+        private final String whenToUse;
+        private final String resultText;
+
+        AlertaAction(String label, String whenToUse, String resultText) {
+            this.label = label;
+            this.whenToUse = whenToUse;
+            this.resultText = resultText;
+        }
+
+        private String label() {
+            return label;
+        }
+
+        private String whenToUse() {
+            return whenToUse;
+        }
+
+        private String resultText() {
+            return resultText;
+        }
     }
 }

@@ -15,6 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
+import pe.plazavea.perecibles.enums.EstadoAlerta;
 import pe.plazavea.perecibles.enums.EstadoLote;
 import pe.plazavea.perecibles.enums.TipoAlerta;
 import pe.plazavea.perecibles.theme.Fonts;
@@ -68,7 +69,7 @@ public final class TableFactory {
         table.setDefaultRenderer(Object.class, new DefaultLightCellRenderer());
         table.getColumnModel().getColumn(0).setCellRenderer(new AlertTypeCellRenderer());
         table.getColumnModel().getColumn(2).setCellRenderer(new AlertNumericCellRenderer());
-        table.getColumnModel().getColumn(5).setCellRenderer(new ActionCellRenderer("Atender / Ignorar"));
+        table.getColumnModel().getColumn(5).setCellRenderer(new AlertActionCellRenderer(model));
         return table;
     }
 
@@ -235,6 +236,29 @@ public final class TableFactory {
             label.setText(labelText);
             label.setHorizontalAlignment(SwingConstants.CENTER);
             label.setForeground(Theme.PRIMARY);
+            label.setFont(Fonts.inter(Font.BOLD, 13f));
+            return label;
+        }
+    }
+
+    private static final class AlertActionCellRenderer extends DefaultLightCellRenderer {
+        private final AlertaTableModel model;
+
+        private AlertActionCellRenderer(AlertaTableModel model) {
+            this.model = model;
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
+            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, selected, focus, row, column);
+            int modelRow = table.convertRowIndexToModel(row);
+            boolean pending = model.getAlertaAt(modelRow).getEstado() == EstadoAlerta.PENDIENTE;
+            label.setText(pending ? "Atender | Ignorar" : "Sin acciones");
+            label.setToolTipText(pending
+                    ? "Atender: ya fue revisada o gestionada. Ignorar: no aplica o no requiere accion."
+                    : "Esta alerta ya fue procesada.");
+            label.setHorizontalAlignment(SwingConstants.CENTER);
+            label.setForeground(selected ? Theme.INK : pending ? Theme.PRIMARY : Theme.MUTED_STRONG);
             label.setFont(Fonts.inter(Font.BOLD, 13f));
             return label;
         }

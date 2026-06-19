@@ -30,6 +30,7 @@ public final class SchemaMigration implements ApplicationListener<ContextRefresh
         migrated = true;
         addProductoActivoColumn();
         fixProductoCategoriaForeignKey();
+        fixAlertaTipoAlertaCheckConstraint();
     }
 
     private void addProductoActivoColumn() {
@@ -104,6 +105,47 @@ public final class SchemaMigration implements ApplicationListener<ContextRefresh
                     """);
         } catch (Exception exception) {
             throw new IllegalStateException("No se pudo actualizar la relacion de productos y categorias", exception);
+        }
+    }
+
+    private void fixAlertaTipoAlertaCheckConstraint() {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute("""
+                    do $$
+                    declare
+                        constraint_record record;
+                    begin
+                        if to_regclass('public.alerta') is not null then
+                            for constraint_record in
+                                select con.conname
+                                from pg_constraint con
+                                join pg_class rel on rel.oid = con.conrelid
+                                join pg_namespace nsp on nsp.oid = rel.relnamespace
+                                where nsp.nspname = 'public'
+                                  and rel.relname = 'alerta'
+                                  and con.contype = 'c'
+                                  and pg_get_constraintdef(con.oid) like '%tipo_alerta%'
+                            loop
+                                execute format(
+                                    'alter table alerta drop constraint if exists %I',
+                                    constraint_record.conname
+                                );
+                            end loop;
+
+                            alter table alerta
+                            add constraint alerta_tipo_alerta_check
+                            check (tipo_alerta in (
+                                'AVISO_ANTICIPADO',
+                                'CRITICA',
+                                'PROXIMO_VENCER',
+                                'VENCIDO'
+                            ));
+                        end if;
+                    end $$;
+                    """);
+        } catch (Exception exception) {
+            throw new IllegalStateException("No se pudo actualizar la restriccion de tipos de alerta", exception);
         }
     }
 }

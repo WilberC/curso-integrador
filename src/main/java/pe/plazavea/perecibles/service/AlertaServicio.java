@@ -50,6 +50,7 @@ public class AlertaServicio {
         ConfiguracionAlerta config = configRepository.findFirstByActivoTrue().orElseGet(this::configPorDefecto);
         List<Lote> lotes = loteRepository.findByEstadoNot(EstadoLote.RETIRADO);
 
+        cerrarAlertasDeLotesRetirados();
         for (Lote lote : lotes) {
             long dias = lote.getDiasParaVencer();
             if (dias < 0) {
@@ -64,16 +65,23 @@ public class AlertaServicio {
             } else if (dias <= config.getDiasAvisoAnticipado()) {
                 lote.setEstado(EstadoLote.DISPONIBLE);
                 upsertAlerta(lote, TipoAlerta.AVISO_ANTICIPADO, (int) dias);
+            } else {
+                lote.setEstado(EstadoLote.DISPONIBLE);
+                cerrarAlertaPendiente(lote);
             }
         }
     }
 
+    @Transactional
     public List<Alerta> obtenerPendientes() {
-        return alertaRepository.findByEstado(EstadoAlerta.PENDIENTE);
+        generarAlertas();
+        return alertaRepository.findByEstadoOrderByFechaGeneracionDesc(EstadoAlerta.PENDIENTE);
     }
 
+    @Transactional
     public List<Alerta> obtenerTodas() {
-        return alertaRepository.findAll();
+        generarAlertas();
+        return alertaRepository.findAllByOrderByFechaGeneracionDesc();
     }
 
     @Transactional
@@ -98,6 +106,9 @@ public class AlertaServicio {
                 lote.getIdLote(),
                 EstadoAlerta.PENDIENTE
         );
+        if (existing.isEmpty() && alertaYaProcesadaParaMismaSeveridad(lote, tipo)) {
+            return;
+        }
         Alerta alerta = existing.orElseGet(Alerta::new);
         alerta.setLote(lote);
         alerta.setTipoAlerta(tipo);
@@ -105,6 +116,31 @@ public class AlertaServicio {
         alerta.setFechaGeneracion(LocalDateTime.now());
         alerta.setEstado(EstadoAlerta.PENDIENTE);
         alertaRepository.save(alerta);
+    }
+
+    private boolean alertaYaProcesadaParaMismaSeveridad(Lote lote, TipoAlerta tipo) {
+        return alertaRepository.findFirstByLoteIdLoteOrderByFechaGeneracionDesc(lote.getIdLote())
+                .filter(alerta -> alerta.getEstado() != EstadoAlerta.PENDIENTE)
+                .filter(alerta -> alerta.getTipoAlerta() == tipo)
+                .isPresent();
+    }
+
+    private void cerrarAlertasDeLotesRetirados() {
+        alertaRepository.findByEstado(EstadoAlerta.PENDIENTE).stream()
+                .filter(alerta -> alerta.getLote() != null)
+                .filter(alerta -> alerta.getLote().getEstado() == EstadoLote.RETIRADO)
+                .forEach(alerta -> {
+                    alerta.setEstado(EstadoAlerta.ATENDIDA);
+                    alertaRepository.save(alerta);
+                });
+    }
+
+    private void cerrarAlertaPendiente(Lote lote) {
+        alertaRepository.findByLoteIdLoteAndEstado(lote.getIdLote(), EstadoAlerta.PENDIENTE)
+                .ifPresent(alerta -> {
+                    alerta.setEstado(EstadoAlerta.IGNORADA);
+                    alertaRepository.save(alerta);
+                });
     }
 
     private void generarAlertasSafely() {
