@@ -87,7 +87,7 @@ public final class AlertasPanel extends JPanel {
     private JLabel buildActionHelp() {
         JLabel help = new JLabel("""
                 <html><b>Atender</b>: usar cuando el lote ya fue revisado o gestionado. \
-                La alerta pasa a ATENDIDA y sale de pendientes. \
+                La alerta pasa a ATENDIDA y sale de pendientes.<br>
                 <b>Ignorar</b>: usar cuando la alerta no aplica o no requiere accion. \
                 La alerta pasa a IGNORADA y sale de pendientes.</html>
                 """);
