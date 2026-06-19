@@ -102,7 +102,7 @@ public class AlertaServicio {
     }
 
     private void upsertAlerta(Lote lote, TipoAlerta tipo, int dias) {
-        Optional<Alerta> existing = alertaRepository.findByLoteIdLoteAndEstado(
+        Optional<Alerta> existing = alertaRepository.findFirstByLoteIdLoteAndEstadoOrderByFechaGeneracionDesc(
                 lote.getIdLote(),
                 EstadoAlerta.PENDIENTE
         );
@@ -136,7 +136,7 @@ public class AlertaServicio {
     }
 
     private void cerrarAlertaPendiente(Lote lote) {
-        alertaRepository.findByLoteIdLoteAndEstado(lote.getIdLote(), EstadoAlerta.PENDIENTE)
+        alertaRepository.findFirstByLoteIdLoteAndEstadoOrderByFechaGeneracionDesc(lote.getIdLote(), EstadoAlerta.PENDIENTE)
                 .ifPresent(alerta -> {
                     alerta.setEstado(EstadoAlerta.IGNORADA);
                     alertaRepository.save(alerta);

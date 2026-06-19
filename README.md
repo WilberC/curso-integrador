@@ -83,6 +83,16 @@ Ejecutar tests cuando existan:
 mise exec -- ./gradlew test
 ```
 
+### Datos Demo
+
+Para resetear los datos operativos y conservar los usuarios existentes:
+
+```bash
+./scripts/reset-demo-data.sh
+```
+
+El script limpia categorias, productos, lotes, movimientos, mermas, alertas, reportes y configuracion. Luego crea datos realistas con fechas entre los ultimos 2 meses y los proximos 2 meses, incluyendo lotes disponibles, proximos a vencer, vencidos, retirados y alertas procesadas/pendientes.
+
 En sistemas donde Java 21 ya este disponible en el entorno, tambien se puede usar directamente:
 
 ```bash

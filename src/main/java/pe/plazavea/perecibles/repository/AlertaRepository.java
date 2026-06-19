@@ -15,7 +15,7 @@ public interface AlertaRepository extends JpaRepository<Alerta, Integer> {
 
     List<Alerta> findByLoteIdLote(Integer idLote);
 
-    Optional<Alerta> findByLoteIdLoteAndEstado(Integer idLote, EstadoAlerta estado);
+    Optional<Alerta> findFirstByLoteIdLoteAndEstadoOrderByFechaGeneracionDesc(Integer idLote, EstadoAlerta estado);
 
     Optional<Alerta> findFirstByLoteIdLoteOrderByFechaGeneracionDesc(Integer idLote);
 
