@@ -36,6 +36,12 @@ public final class DatePickerField extends JPanel {
         return Optional.ofNullable(selectedDate);
     }
 
+    public void setDate(LocalDate date) {
+        selectedDate = date;
+        updateText();
+        notifyChanged();
+    }
+
     public void clear() {
         selectedDate = null;
         updateText();
@@ -44,6 +50,12 @@ public final class DatePickerField extends JPanel {
 
     public void addChangeListener(Runnable listener) {
         changeListeners.add(listener);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        textField.setEnabled(enabled);
     }
 
     private void configureTextField() {
